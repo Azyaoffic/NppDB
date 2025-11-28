@@ -247,6 +247,8 @@ namespace NppDB
              SetCommand(4, "Open console", OpenConsole);
              SetCommand(5, "About", ShowAbout);
              SetCommand(6, "Generate AI prompt:", HandleCtrlF9ForAiPrompt, new ShortcutKey(true, false, false, Keys.F9));
+             SetCommand(7, "Show Prompt Library", ShowPromptLibrary, new ShortcutKey(true, false, false, Keys.F10));
+
              _cmdFrmDbExplorerIdx = 2; 
         }
 
@@ -1251,6 +1253,12 @@ namespace NppDB
             }
         }
         private static void ShowAbout() { var dlg = new frmAbout(); dlg.ShowDialog(); }
+
+        // TODO: Implement prompt library
+        private static void ShowPromptLibrary()
+        {
+            MessageBox.Show("Prompt Library is not yet implemented.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
 
         private void UpdateCurrentSqlResult()
          {
