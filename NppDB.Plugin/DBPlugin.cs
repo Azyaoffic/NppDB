@@ -1254,10 +1254,10 @@ namespace NppDB
         }
         private static void ShowAbout() { var dlg = new frmAbout(); dlg.ShowDialog(); }
 
-        // TODO: Implement prompt library
         private static void ShowPromptLibrary()
         {
-            MessageBox.Show("Prompt Library is not yet implemented.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var dlg = new FrmPromptLibrary();
+            dlg.ShowDialog();
         }
 
         private void UpdateCurrentSqlResult()
