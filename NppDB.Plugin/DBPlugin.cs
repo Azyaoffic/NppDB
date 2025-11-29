@@ -36,6 +36,8 @@ namespace NppDB
         private string _dbConnsPath;
         private string _languageConfigPath;
         private string _translationsConfigPath;
+        private string _promptLibraryPath;
+        private bool _isPromptLibraryDisabled = false;
         private FrmDatabaseExplore _frmDbExplorer;
         private int _cmdFrmDbExplorerIdx = -1;
         private readonly Bitmap _imgMan = Resources.DBPPManage16;
@@ -240,6 +242,58 @@ namespace NppDB
              {
                  MessageBox.Show(ex.Message); throw;
              }
+             
+             _promptLibraryPath = Path.Combine(_nppDbConfigDir, "promptLibrary.xml");
+             if (!File.Exists(_promptLibraryPath))
+             {
+                 // Ask user whether to recreate default prompt library
+                 DialogResult result = MessageBox.Show(
+                     "Prompt Library file not found. Do you want to create a default Prompt Library file?",
+                     PLUGIN_NAME,
+                     MessageBoxButtons.YesNo,
+                     MessageBoxIcon.Question);
+
+                 if (result == DialogResult.Yes)
+                 {
+
+                     try
+                     {
+                         using (var stream = Assembly.GetExecutingAssembly()
+                                    .GetManifestResourceStream("NppDB.Resources.PromptLibraryDefault.xml"))
+                         {
+                             if (stream == null)
+                                 throw new InvalidOperationException(
+                                     "Embedded resource `NppDB.Plugin.Resources.PromptLibraryDefault.xml` not found.");
+
+                             using (var file = File.Create(_promptLibraryPath))
+                             {
+                                 stream.CopyTo(file);
+                             }
+                         }
+
+                         MessageBox.Show(
+                             $"Prompt Library file not found. A default file has been created at:\n{_promptLibraryPath}");
+                     }
+                     catch (Exception ex)
+                     {
+                         MessageBox.Show(ex.Message);
+                     }
+                 }
+                 else
+                 {
+                     _isPromptLibraryDisabled = true;
+                     MessageBox.Show("Prompt Library file not found. Prompt Library features will be disabled.");
+                 }
+             }
+
+             if (!_isPromptLibraryDisabled)
+             {
+                 // TODO: Pass this data to the prompt library form when opening it
+                 var promptItems = ReadPromptLibraryFromFile(_promptLibraryPath);
+             }
+             
+
+             
              SetCommand(0, "Execute SQL", Execute, new ShortcutKey(false, false, false, Keys.F9));
              SetCommand(1, "Analyze SQL", Analyze, new ShortcutKey(false, false, true, Keys.F9));
              SetCommand(2, "Database Connect Manager", ToggleDbManager, new ShortcutKey(false, false, false, Keys.F10));
@@ -247,7 +301,11 @@ namespace NppDB
              SetCommand(4, "Open console", OpenConsole);
              SetCommand(5, "About", ShowAbout);
              SetCommand(6, "Generate AI prompt:", HandleCtrlF9ForAiPrompt, new ShortcutKey(true, false, false, Keys.F9));
-             SetCommand(7, "Show Prompt Library", ShowPromptLibrary, new ShortcutKey(true, false, false, Keys.F10));
+
+             if (!_isPromptLibraryDisabled)
+             {
+                 SetCommand(7, "Show Prompt Library", ShowPromptLibrary, new ShortcutKey(true, false, false, Keys.F10));
+             }
 
              _cmdFrmDbExplorerIdx = 2; 
         }
@@ -1258,6 +1316,97 @@ namespace NppDB
         {
             var dlg = new FrmPromptLibrary();
             dlg.ShowDialog();
+        }
+
+        private static List<PromptItem> ReadPromptLibraryFromFile(string filePath)
+        {
+            try
+            {
+                var xmlDoc = new XmlDocument();
+                var results = new List<PromptItem>();
+
+                try
+                {
+                    xmlDoc.Load(filePath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Failed to load XML from file:\n{ex.Message}", PLUGIN_NAME, MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                    return null;
+                }
+
+                var root = xmlDoc.DocumentElement;
+                if (root == null || !string.Equals(root.Name, "Prompts", StringComparison.OrdinalIgnoreCase))
+                {
+                    MessageBox.Show(
+                        $"Invalid prompt library format in `{filePath}`. Root element `<Prompts>` not found.",
+                        PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return results;
+                }
+                
+                var promptNodes = root.SelectNodes("Prompt");
+                if (promptNodes == null)
+                {
+                    return results;
+                }
+                
+                foreach (XmlNode promptNode in promptNodes)
+                {
+                    if (promptNode.NodeType != XmlNodeType.Element)
+                        continue;
+
+                    var typeAttr = (promptNode as XmlElement)?.GetAttribute("type") ?? string.Empty;
+
+                    var id = promptNode.SelectSingleNode("Id")?.InnerText.Trim() ?? string.Empty;
+                    var title = promptNode.SelectSingleNode("Title")?.InnerText.Trim() ?? string.Empty;
+                    var description = promptNode.SelectSingleNode("Description")?.InnerText.Trim() ?? string.Empty;
+                    var text = promptNode.SelectSingleNode("Text")?.InnerText ?? string.Empty;
+
+                    var placeholderList = new List<PromptPlaceholder>();
+                    var placeholdersNode = promptNode.SelectSingleNode("Placeholders");
+                    if (placeholdersNode != null)
+                    {
+                        foreach (XmlNode phNode in placeholdersNode.SelectNodes("Placeholder"))
+                        {
+                            if (phNode is XmlElement phElem)
+                            {
+                                var name = phElem.GetAttribute("name");
+                                var desc = phElem.GetAttribute("description");
+
+                                if (!string.IsNullOrWhiteSpace(name))
+                                {
+                                    placeholderList.Add(new PromptPlaceholder
+                                    {
+                                        Name = name,
+                                        Description = desc
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+                    var item = new PromptItem
+                    {
+                        Id = id,
+                        Title = title,
+                        Description = description,
+                        Type = typeAttr,
+                        Text = text,
+                        Placeholders = placeholderList.ToArray()
+                    };
+
+                    results.Add(item);
+                }
+                return results;
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error reading prompt library from file:\n{ex.Message}", PLUGIN_NAME, MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                return null;
+            }
         }
 
         private void UpdateCurrentSqlResult()
