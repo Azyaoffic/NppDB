@@ -1,81 +1,22 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Prompts>
-
-    <!-- Simple SQL template example -->
-    <Prompt type="SqlTemplate">
-        <Id>SelectAllFromTable</Id>
-        <Title>Select everything from table</Title>
-        <Description>Simple SELECT \* from a given table.</Description>
-        <Text>
-            SELECT *
-            FROM {{TableName}};
-        </Text>
-        <Placeholders>
-            <Placeholder name="TableName" description="Name of the table to query" />
-        </Placeholders>
-    </Prompt>
-
-    <!-- More complex SQL template example -->
-    <Prompt type="SqlTemplate">
-        <Id>SelectTopWithOrder</Id>
-        <Title>Select top N with order</Title>
-        <Description>SELECT TOP N rows ordered by a column.</Description>
-        <Text>
-            SELECT TOP {{TopN}} *
-            FROM {{TableName}}
-            ORDER BY {{OrderByColumn}} {{OrderDirection}};
-        </Text>
-        <Placeholders>
-            <Placeholder name="TopN" description="Number of rows to return (e.g. 10)" />
-            <Placeholder name="TableName" description="Name of the table to query" />
-            <Placeholder name="OrderByColumn" description="Column to order by" />
-            <Placeholder name="OrderDirection" description="ASC or DESC" />
-        </Placeholders>
-    </Prompt>
-
-    <!-- LLM prompts: instructions for complex transformations -->
-    <Prompt type="LlmPrompt">
-        <Id>Llm_SelectAllFromDescription</Id>
-        <Title>LLM: Generate SELECT * from description</Title>
-        <Description>
-            Ask an LLM to generate a SELECT * query based on a natural language description.
-        </Description>
-        <Text>
-            You are a senior SQL database engineer.
-            Generate a single SELECT * FROM ... statement based on the user's description of the data they want to query.
-            Only output a valid SQL statement with no explanation or commentary.
-            If table or column names are unclear, make reasonable generic assumptions (e.g., Customers, Orders, Id, CreatedAt).
-
-            User description:
-            {{UserInput}}
-        </Text>
-        <Placeholders>
-            <Placeholder name="UserInput" description="Description of what user wants to query" />
-        </Placeholders>
-        <Metadata>
-            <ProviderHint>generic</ProviderHint>
-            <Category>QueryGeneration</Category>
-        </Metadata>
-    </Prompt>
-
     <Prompt type="LlmPrompt">
         <Id>Llm_RefactorQuery</Id>
         <Title>LLM: Refactor SQL query</Title>
         <Description>Ask LLM to optimize or refactor a SQL query.</Description>
         <Text>
-            You are a senior SQL performance engineer.
-            Refactor and optimize the following SQL query for readability and performance.
-            Return only the optimized SQL, with no explanation.
+You are a senior SQL performance engineer.
+Refactor and optimize the following SQL query for readability and performance.
+Return only the optimized SQL, with no explanation.
 
-            Original query:
-            {{SqlInput}}
+Original query:
+{{selected_sql}}
         </Text>
         <Placeholders>
-            <Placeholder name="SqlInput" description="Existing SQL that should be refactored" />
+            <Placeholder name="selected_sql" />
         </Placeholders>
         <Metadata>
             <Category>Refactor</Category>
         </Metadata>
     </Prompt>
-
 </Prompts>

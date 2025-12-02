@@ -35,6 +35,8 @@ namespace NppDB.Core
             this.promptTextBox = new System.Windows.Forms.RichTextBox();
             this.promptPreviewLabel = new System.Windows.Forms.Label();
             this.noPromptsFoundLabel = new System.Windows.Forms.Label();
+            this.placeholderListView = new System.Windows.Forms.ListView();
+            this.disableTemplatingCheckbox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // promptsListView
@@ -53,7 +55,7 @@ namespace NppDB.Core
             this.promptTextBox.Location = new System.Drawing.Point(397, 66);
             this.promptTextBox.Name = "promptTextBox";
             this.promptTextBox.ReadOnly = true;
-            this.promptTextBox.Size = new System.Drawing.Size(403, 384);
+            this.promptTextBox.Size = new System.Drawing.Size(403, 246);
             this.promptTextBox.TabIndex = 1;
             this.promptTextBox.Text = "";
             // 
@@ -72,17 +74,38 @@ namespace NppDB.Core
             this.noPromptsFoundLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.noPromptsFoundLabel.Location = new System.Drawing.Point(12, 12);
             this.noPromptsFoundLabel.Name = "noPromptsFoundLabel";
-            this.noPromptsFoundLabel.Size = new System.Drawing.Size(367, 426);
+            this.noPromptsFoundLabel.Size = new System.Drawing.Size(367, 432);
             this.noPromptsFoundLabel.TabIndex = 3;
             this.noPromptsFoundLabel.Text = "No Prompts Found!";
             this.noPromptsFoundLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // placeholderListView
+            // 
+            this.placeholderListView.HideSelection = false;
+            this.placeholderListView.Location = new System.Drawing.Point(397, 318);
+            this.placeholderListView.Name = "placeholderListView";
+            this.placeholderListView.Size = new System.Drawing.Size(403, 120);
+            this.placeholderListView.TabIndex = 4;
+            this.placeholderListView.UseCompatibleStateImageBehavior = false;
+            // 
+            // disableTemplatingCheckbox
+            // 
+            this.disableTemplatingCheckbox.Location = new System.Drawing.Point(397, 444);
+            this.disableTemplatingCheckbox.Name = "disableTemplatingCheckbox";
+            this.disableTemplatingCheckbox.Size = new System.Drawing.Size(403, 25);
+            this.disableTemplatingCheckbox.TabIndex = 5;
+            this.disableTemplatingCheckbox.Text = "Show template names instead of contents";
+            this.disableTemplatingCheckbox.UseVisualStyleBackColor = true;
+            this.disableTemplatingCheckbox.CheckedChanged += new System.EventHandler(this.disableTemplatingCheckbox_CheckedChanged);
             // 
             // FrmPromptLibrary
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(800, 475);
+            this.Controls.Add(this.disableTemplatingCheckbox);
+            this.Controls.Add(this.placeholderListView);
             this.Controls.Add(this.noPromptsFoundLabel);
             this.Controls.Add(this.promptPreviewLabel);
             this.Controls.Add(this.promptTextBox);
@@ -92,6 +115,10 @@ namespace NppDB.Core
             this.ShowIcon = false;
             this.ResumeLayout(false);
         }
+
+        private System.Windows.Forms.CheckBox disableTemplatingCheckbox;
+
+        private System.Windows.Forms.ListView placeholderListView;
 
         private System.Windows.Forms.Label noPromptsFoundLabel;
 

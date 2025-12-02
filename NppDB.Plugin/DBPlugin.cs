@@ -43,6 +43,7 @@ namespace NppDB
         private readonly Bitmap _imgMan = Resources.DBPPManage16;
         private Icon _tbIcon;
         private readonly Func<IScintillaGateway> _getCurrentEditor = GetGatewayFactory();
+        private static readonly Func<IScintillaGateway> _getStaticCurrentEditor = GetGatewayFactory();
         private readonly List<string> _editorErrors = new List<string>();
         private readonly List<Tuple<string, ParserMessage>> _structuredErrorDetails = new List<Tuple<string, ParserMessage>>();
         private Dictionary<ParserMessageType, string> _warningMessages = new Dictionary<ParserMessageType, string>();
@@ -1314,8 +1315,24 @@ namespace NppDB
 
         private static void ShowPromptLibrary()
         {
-            var dlg = new FrmPromptLibrary();
+            var dlg = new FrmPromptLibrary(GetSelectedSql);
             dlg.ShowDialog();
+        }
+        
+        private static string GetSelectedSql()
+        {
+            var ed = _getStaticCurrentEditor();
+            
+            var placeholderValue = ed.GetSelectionLength() > 0 
+                ? ed.GetSelText()
+                : string.Empty;
+            
+            FrmPromptLibrary.Placeholders["selected_sql"] = placeholderValue;
+
+            return placeholderValue;
+
+            // fallback to whole document
+            // return ed.GetText(ed.GetTextLength());
         }
 
         private static List<PromptItem> ReadPromptLibraryFromFile(string filePath)
@@ -1372,14 +1389,12 @@ namespace NppDB
                             if (phNode is XmlElement phElem)
                             {
                                 var name = phElem.GetAttribute("name");
-                                var desc = phElem.GetAttribute("description");
 
                                 if (!string.IsNullOrWhiteSpace(name))
                                 {
                                     placeholderList.Add(new PromptPlaceholder
                                     {
-                                        Name = name,
-                                        Description = desc
+                                        Name = name
                                     });
                                 }
                             }
