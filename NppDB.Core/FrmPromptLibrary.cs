@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace NppDB.Core
@@ -22,18 +23,51 @@ namespace NppDB.Core
     
     public partial class FrmPromptLibrary : Form
     {
+        private static List<PromptItem> _prompts;
+        
         public FrmPromptLibrary()
         {
             InitializeComponent();
             
             promptsListView.View = View.Details;
             
+            if (_prompts.Count > 0)
+            {
+                noPromptsFoundLabel.Visible = false;
+            }
+            
             promptsListView.Columns.Clear();
             promptsListView.Columns.Add("Prompt Name", 200);
             promptsListView.Columns.Add("Description", 300);
             
+            foreach (var prompt in _prompts)
+            {
+                var item = new ListViewItem(prompt.Title);
+                item.SubItems.Add(prompt.Description);
+                item.Tag = prompt;
+                promptsListView.Items.Add(item);
+            }
+            
             
         }
 
+        public static void SetPrompts(List<PromptItem> promptItems)
+        {
+            _prompts = promptItems;
+        }
+
+        private void promptsListView_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (promptsListView.SelectedItems.Count > 0)
+            {
+                var selectedItem = promptsListView.SelectedItems[0];
+                var prompt = (PromptItem)selectedItem.Tag;
+                promptTextBox.Text = prompt.Text;
+            }
+            else
+            {
+                promptTextBox.Text = string.Empty;
+            }
+        }
     }
 }

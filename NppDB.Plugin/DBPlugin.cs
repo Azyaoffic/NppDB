@@ -287,9 +287,9 @@ namespace NppDB
              }
 
              if (!_isPromptLibraryDisabled)
-             {
-                 // TODO: Pass this data to the prompt library form when opening it
+             { 
                  var promptItems = ReadPromptLibraryFromFile(_promptLibraryPath);
+                 FrmPromptLibrary.SetPrompts(promptItems);
              }
              
 
