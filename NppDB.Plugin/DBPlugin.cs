@@ -37,6 +37,7 @@ namespace NppDB
         private string _languageConfigPath;
         private string _translationsConfigPath;
         private string _promptLibraryPath;
+        private static string _staticPromptLibraryPath;
         private bool _isPromptLibraryDisabled = false;
         private FrmDatabaseExplore _frmDbExplorer;
         private int _cmdFrmDbExplorerIdx = -1;
@@ -245,6 +246,8 @@ namespace NppDB
              }
              
              _promptLibraryPath = Path.Combine(_nppDbConfigDir, "promptLibrary.xml");
+             _staticPromptLibraryPath = _promptLibraryPath;
+             FrmPromptLibrary.PromptLibraryPath = _promptLibraryPath;
              if (!File.Exists(_promptLibraryPath))
              {
                  // Ask user whether to recreate default prompt library
@@ -286,13 +289,6 @@ namespace NppDB
                      MessageBox.Show("Prompt Library file not found. Prompt Library features will be disabled.");
                  }
              }
-
-             if (!_isPromptLibraryDisabled)
-             { 
-                 var promptItems = ReadPromptLibraryFromFile(_promptLibraryPath);
-                 FrmPromptLibrary.SetPrompts(promptItems);
-             }
-             
 
              
              SetCommand(0, "Execute SQL", Execute, new ShortcutKey(false, false, false, Keys.F9));
@@ -1315,6 +1311,7 @@ namespace NppDB
 
         private static void ShowPromptLibrary()
         {
+            LoadPromptLibrary();
             var dlg = new FrmPromptLibrary(GetSelectedSql);
             dlg.ShowDialog();
         }
@@ -1422,6 +1419,12 @@ namespace NppDB
                     MessageBoxIcon.Error);
                 return null;
             }
+        }
+
+        private static void LoadPromptLibrary()
+        {
+            var promptItems = ReadPromptLibraryFromFile(_staticPromptLibraryPath);
+            FrmPromptLibrary.SetPrompts(promptItems);
         }
 
         private void UpdateCurrentSqlResult()

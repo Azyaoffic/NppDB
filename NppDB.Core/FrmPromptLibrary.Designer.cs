@@ -37,6 +37,9 @@ namespace NppDB.Core
             this.noPromptsFoundLabel = new System.Windows.Forms.Label();
             this.placeholderListView = new System.Windows.Forms.ListView();
             this.disableTemplatingCheckbox = new System.Windows.Forms.CheckBox();
+            this.buttonEdit = new System.Windows.Forms.Button();
+            this.buttonAdd = new System.Windows.Forms.Button();
+            this.buttonDelete = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // promptsListView
@@ -44,7 +47,7 @@ namespace NppDB.Core
             this.promptsListView.HideSelection = false;
             this.promptsListView.Location = new System.Drawing.Point(12, 12);
             this.promptsListView.Name = "promptsListView";
-            this.promptsListView.Size = new System.Drawing.Size(367, 426);
+            this.promptsListView.Size = new System.Drawing.Size(367, 418);
             this.promptsListView.TabIndex = 0;
             this.promptsListView.UseCompatibleStateImageBehavior = false;
             this.promptsListView.SelectedIndexChanged += new System.EventHandler(this.promptsListView_SelectedIndexChanged);
@@ -55,16 +58,16 @@ namespace NppDB.Core
             this.promptTextBox.Location = new System.Drawing.Point(397, 66);
             this.promptTextBox.Name = "promptTextBox";
             this.promptTextBox.ReadOnly = true;
-            this.promptTextBox.Size = new System.Drawing.Size(403, 246);
+            this.promptTextBox.Size = new System.Drawing.Size(423, 246);
             this.promptTextBox.TabIndex = 1;
             this.promptTextBox.Text = "";
             // 
             // promptPreviewLabel
             // 
-            this.promptPreviewLabel.Font = new System.Drawing.Font("Times New Roman", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.promptPreviewLabel.Font = new System.Drawing.Font("Times New Roman", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.promptPreviewLabel.Location = new System.Drawing.Point(397, 8);
             this.promptPreviewLabel.Name = "promptPreviewLabel";
-            this.promptPreviewLabel.Size = new System.Drawing.Size(403, 55);
+            this.promptPreviewLabel.Size = new System.Drawing.Size(423, 55);
             this.promptPreviewLabel.TabIndex = 2;
             this.promptPreviewLabel.Text = "Prompt Preview";
             this.promptPreviewLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -84,37 +87,76 @@ namespace NppDB.Core
             this.placeholderListView.HideSelection = false;
             this.placeholderListView.Location = new System.Drawing.Point(397, 318);
             this.placeholderListView.Name = "placeholderListView";
-            this.placeholderListView.Size = new System.Drawing.Size(403, 120);
+            this.placeholderListView.Size = new System.Drawing.Size(423, 112);
             this.placeholderListView.TabIndex = 4;
             this.placeholderListView.UseCompatibleStateImageBehavior = false;
             // 
             // disableTemplatingCheckbox
             // 
-            this.disableTemplatingCheckbox.Location = new System.Drawing.Point(397, 444);
+            this.disableTemplatingCheckbox.Location = new System.Drawing.Point(397, 436);
             this.disableTemplatingCheckbox.Name = "disableTemplatingCheckbox";
-            this.disableTemplatingCheckbox.Size = new System.Drawing.Size(403, 25);
+            this.disableTemplatingCheckbox.Size = new System.Drawing.Size(403, 33);
             this.disableTemplatingCheckbox.TabIndex = 5;
             this.disableTemplatingCheckbox.Text = "Show template names instead of contents";
             this.disableTemplatingCheckbox.UseVisualStyleBackColor = true;
             this.disableTemplatingCheckbox.CheckedChanged += new System.EventHandler(this.disableTemplatingCheckbox_CheckedChanged);
+            // 
+            // buttonEdit
+            // 
+            this.buttonEdit.Location = new System.Drawing.Point(12, 436);
+            this.buttonEdit.Name = "buttonEdit";
+            this.buttonEdit.Size = new System.Drawing.Size(121, 34);
+            this.buttonEdit.TabIndex = 6;
+            this.buttonEdit.Text = "Edit";
+            this.buttonEdit.UseVisualStyleBackColor = true;
+            this.buttonEdit.Click += new System.EventHandler(this.buttonEdit_Click);
+            // 
+            // buttonAdd
+            // 
+            this.buttonAdd.Location = new System.Drawing.Point(139, 436);
+            this.buttonAdd.Name = "buttonAdd";
+            this.buttonAdd.Size = new System.Drawing.Size(113, 33);
+            this.buttonAdd.TabIndex = 7;
+            this.buttonAdd.Text = "Add New";
+            this.buttonAdd.UseVisualStyleBackColor = true;
+            this.buttonAdd.Click += new System.EventHandler(this.buttonAdd_Click);
+            // 
+            // buttonDelete
+            // 
+            this.buttonDelete.Location = new System.Drawing.Point(258, 435);
+            this.buttonDelete.Name = "buttonDelete";
+            this.buttonDelete.Size = new System.Drawing.Size(121, 33);
+            this.buttonDelete.TabIndex = 8;
+            this.buttonDelete.Text = "Delete";
+            this.buttonDelete.UseVisualStyleBackColor = true;
+            this.buttonDelete.Click += new System.EventHandler(this.buttonDelete_Click);
             // 
             // FrmPromptLibrary
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(800, 475);
+            this.ClientSize = new System.Drawing.Size(832, 475);
+            this.Controls.Add(this.buttonDelete);
+            this.Controls.Add(this.buttonAdd);
+            this.Controls.Add(this.buttonEdit);
             this.Controls.Add(this.disableTemplatingCheckbox);
             this.Controls.Add(this.placeholderListView);
-            this.Controls.Add(this.noPromptsFoundLabel);
             this.Controls.Add(this.promptPreviewLabel);
             this.Controls.Add(this.promptTextBox);
+            this.Controls.Add(this.noPromptsFoundLabel);
             this.Controls.Add(this.promptsListView);
             this.Location = new System.Drawing.Point(15, 15);
             this.Name = "FrmPromptLibrary";
             this.ShowIcon = false;
             this.ResumeLayout(false);
         }
+
+        private System.Windows.Forms.Button buttonDelete;
+
+        private System.Windows.Forms.Button buttonAdd;
+
+        private System.Windows.Forms.Button buttonEdit;
 
         private System.Windows.Forms.CheckBox disableTemplatingCheckbox;
 

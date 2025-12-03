@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows.Forms;
 
 namespace NppDB.Core
@@ -23,8 +24,16 @@ namespace NppDB.Core
     {
         private static List<PromptItem> _prompts;
         private readonly Func<string> _getSelectedSql;
+
+        public static string PromptLibraryPath { get; set; }
         
         public static readonly Dictionary<string, string> Placeholders = new Dictionary<string, string>();
+        
+        // TODO: Maybe there is a better way to manage supported placeholders?
+        public static readonly List<string> SupportedPlaceholders = new List<string>
+        {
+            "selected_sql"
+        };
 
         public FrmPromptLibrary(Func<string> getSelectedSql)
         {
@@ -113,6 +122,113 @@ namespace NppDB.Core
         private void disableTemplatingCheckbox_CheckedChanged(object sender, EventArgs e)
         {
             promptsListView_SelectedIndexChanged(this, EventArgs.Empty);
+        }
+
+        private void buttonEdit_Click(object sender, EventArgs e)
+        {
+            if (promptsListView.SelectedItems.Count > 0)
+            {
+                var selectedItem = promptsListView.SelectedItems[0];
+                var prompt = (PromptItem)selectedItem.Tag;
+
+                using (var promptEditor = new FrmPromptEditor())
+                {
+                    promptEditor.LoadPromptItem(prompt);
+                    promptEditor.LoadPlaceholders(SupportedPlaceholders);
+
+                    var result = promptEditor.ShowDialog();
+                    if (result == DialogResult.OK)
+                    {
+                        var updatedPrompt = promptEditor.SelectedPromptItem;
+                        // update the prompt in the list
+                        selectedItem.SubItems[0].Text = updatedPrompt.Title;
+                        selectedItem.SubItems[1].Text = updatedPrompt.Description;
+                        selectedItem.Tag = updatedPrompt;
+
+                        // refresh the display
+                        promptsListView_SelectedIndexChanged(this, EventArgs.Empty);
+                    }
+                }
+            }
+        }
+
+        private void buttonAdd_Click(object sender, EventArgs e)
+        {
+            using (var promptEditor = new FrmPromptEditor())
+            {
+                promptEditor.LoadPlaceholders(SupportedPlaceholders);
+
+                var result = promptEditor.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    var newPrompt = promptEditor.SelectedPromptItem;
+                    _prompts.Add(newPrompt);
+
+                    var item = new ListViewItem(newPrompt.Title);
+                    item.SubItems.Add(newPrompt.Description);
+                    item.Tag = newPrompt;
+                    promptsListView.Items.Add(item);
+
+                    noPromptsFoundLabel.Visible = false;
+                }
+            }
+        }
+
+        private void buttonDelete_Click(object sender, EventArgs e)
+        {
+            if (promptsListView.SelectedItems.Count > 0)
+            {
+                var selectedItem = promptsListView.SelectedItems[0];
+                var prompt = (PromptItem)selectedItem.Tag;
+
+                var confirmResult = MessageBox.Show(
+                    $"Are you sure you want to delete the prompt '{prompt.Title}'?",
+                    "Confirm Delete",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                if (confirmResult == DialogResult.Yes)
+                {
+                    // remove from the in-memory list
+                    _prompts.RemoveAll(p => p.Title == prompt.Title);
+
+                    // remove from the ListView
+                    promptsListView.Items.Remove(selectedItem);
+
+                    // remove from the file
+                    ErasePromptFromFile(prompt);
+
+                    // Clear the preview and placeholders
+                    promptTextBox.Text = string.Empty;
+                    placeholderListView.Items.Clear();
+
+                    if (_prompts.Count == 0)
+                    {
+                        noPromptsFoundLabel.Visible = true;
+                    }
+                }
+            }
+        }
+        
+        private void ErasePromptFromFile(PromptItem promptItem)
+        {
+            string promptLibraryPath = PromptLibraryPath;
+            if (!File.Exists(promptLibraryPath))
+            {
+                throw new FileNotFoundException("Prompt library file not found.", promptLibraryPath);
+            }
+            
+            var doc = System.Xml.Linq.XDocument.Load(promptLibraryPath);
+            var root = doc.Element("Prompts");
+            if (root == null) return;
+            
+            var promptElement = System.Linq.Enumerable.FirstOrDefault(root.Elements("Prompt"), e => 
+                (string)e.Element("Title") == promptItem.Title);
+            if (promptElement != null)
+            {
+                promptElement.Remove();
+                doc.Save(promptLibraryPath);
+            }
         }
     }
 }

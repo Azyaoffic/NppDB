@@ -83,6 +83,12 @@
     <Compile Include="frmOption.Designer.cs">
       <DependentUpon>frmOption.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmPromptEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPromptEditor.Designer.cs">
+      <DependentUpon>FrmPromptEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmPromptLibrary.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -122,6 +128,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmOption.resx">
       <DependentUpon>frmOption.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmPromptEditor.resx">
+      <DependentUpon>FrmPromptEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmPromptLibrary.resx">
       <DependentUpon>FrmPromptLibrary.cs</DependentUpon>
