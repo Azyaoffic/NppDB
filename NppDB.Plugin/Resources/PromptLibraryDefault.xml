@@ -1,15 +1,17 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Prompts>
-    <Prompt type="LlmPrompt">
-        <Id>Llm_RefactorQuery</Id>
-        <Title>LLM: Refactor SQL query</Title>
-        <Description>Ask LLM to optimize or refactor a SQL query.</Description>
-        <Text>
-You are a senior SQL performance engineer.
-Refactor and optimize the following SQL query for readability and performance.
-Return only the optimized SQL, with no explanation.
 
-Original query:
+    <Prompt type="LlmPrompt">
+        <Title>Explain Selected Query</Title>
+        <Description>Explains complex logic. Breaks down the query execution flow.</Description>
+        <Text>
+Act as an expert SQL instructor.
+Analyze the following SQL query and explain how it works step-by-step.
+Break down the logic (joins, filters, aggregations).
+Explain the business intent (what question is this query answering?).
+Use simple, non-technical language where possible.
+
+Query:
 {{selected_sql}}
         </Text>
         <Placeholders>
@@ -19,4 +21,181 @@ Original query:
             <Category>Refactor</Category>
         </Metadata>
     </Prompt>
+
+    <Prompt type="LlmPrompt">
+        <Title>Optimize and Analyze Performance</Title>
+        <Description>Detailed performance suggestions</Description>
+        <Text>
+You are a Senior Database Performance Engineer.
+Analyze the selected SQL query for potential performance bottlenecks.
+Identify any inefficient operations (e.g., full table scans, N+1 problems, misuse of functions in WHERE clauses).
+Suggest specific indices that would improve performance.
+Provide a refactored version of the query that is more efficient.
+
+Query:
+{{selected_sql}}
+        </Text>
+        <Placeholders>
+            <Placeholder name="selected_sql" />
+        </Placeholders>
+        <Metadata>
+            <Category>Refactor</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="LlmPrompt">
+        <Title>Fix syntax or logic error</Title>
+        <Description>Diagnoses errors based on user input and selected SQL</Description>
+        <Text>
+You are a Senior Database Administrator.
+Analyze the provided SQL query and the associated error message to diagnose the root cause.
+Provide the corrected SQL query that resolves the specific error described.
+Query:
+{{selected_sql}}
+Error Message:
+{{user_input}}
+        </Text>
+        <Placeholders>
+            <Placeholder name="selected_sql" />
+            <Placeholder name="user_input" />
+        </Placeholders>
+        <Metadata>
+            <Category>Refactor</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="LlmPrompt">
+        <Title>Convert SQL dialect</Title>
+        <Description>Migrates code between systems (e.g. Access to PostgreSQL)</Description>
+        <Text>
+You are a SQL Migration Specialist.
+Convert the following SQL query from {{source_dialect}} to {{target_dialect}}.
+Ensure that function names, quote escaping, and specific clauses (like LIMIT vs TOP) are adapted correctly for the target environment.
+Original SQL:
+{{selected_sql}}
+        </Text>
+        <Placeholders>
+            <Placeholder name="selected_sql" />
+            <Placeholder name="source_dialect" />
+            <Placeholder name="target_dialect" />
+        </Placeholders>
+        <Metadata>
+            <Category>Refactor</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="LlmPrompt">
+        <Title>Generate documentation</Title>
+        <Description>Creates technical docs</Description>
+        <Text>
+You are a Technical Writer specializing in databases.
+Generate technical documentation for the selected SQL query in {{format}} format.
+Include a title, a description of the logic, a list of input parameters, and a summary of the tables involved.
+Query:
+{{selected_sql}}
+        </Text>
+        <Placeholders>
+            <Placeholder name="format" />
+            <Placeholder name="selected_sql" />
+        </Placeholders>
+        <Metadata>
+            <Category>Generate</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="LlmPrompt">
+        <Title>Generate CRUD</Title>
+        <Description>Creates standard Insert, Select, Update, Delete statements for a table</Description>
+        <Text>
+You are a Backend Developer.
+Generate standard CRUD (Create, Read, Update, Delete) SQL statements based on the table {{table_name}}.
+Use the provided column list to ensure all fields are handled in the INSERT and SELECT statements.
+Columns:
+{{columns_with_types}}
+        </Text>
+        <Placeholders>
+            <Placeholder name="table_name" />
+            <Placeholder name="columns_with_types" />
+        </Placeholders>
+        <Metadata>
+            <Category>Generate</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="LlmPrompt">
+        <Title>Generate Python Data Class</Title>
+        <Description>Maps SQL table to a Python @dataclass for application code</Description>
+        <Text>
+You are a Senior Python Developer.
+Create a Python dataclass that represents the data model for table {{table_name}}.
+Map the provided SQL column types to the appropriate Python types (e.g., VARCHAR to str) and include the @dataclass decorator.
+Columns:
+{{columns_with_types}}
+        </Text>
+        <Placeholders>
+            <Placeholder name="table_name" />
+            <Placeholder name="columns_with_types" />
+        </Placeholders>
+        <Metadata>
+            <Category>Generate</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="LlmPrompt">
+        <Title>Explain table to stakeholder</Title>
+        <Description>Describes table purpose in plain English</Description>
+        <Text>
+You are a Business Analyst.
+Explain the purpose and content of the database table {{table_name}} in plain, non-technical English.
+Describe what kind of business data is stored here based on the provided column names.
+Columns:
+{{columns_with_types}}
+        </Text>
+        <Placeholders>
+            <Placeholder name="table_name" />
+            <Placeholder name="columns_with_types" />
+        </Placeholders>
+        <Metadata>
+            <Category>Generate</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="LlmPrompt">
+        <Title>Generate Table from description</Title>
+        <Description>Writes CREATE TABLE SQL based on natural language requirements</Description>
+        <Text>
+You are a Database Architect.
+Write a valid SQL CREATE TABLE statement that fulfills the requirement described below.
+Ensure you include primary keys, appropriate data types, and constraints for the target dialect {{dialect}}.
+Requirement:
+{{user_input}}
+        </Text>
+        <Placeholders>
+            <Placeholder name="dialect" />
+            <Placeholder name="user_input" />
+        </Placeholders>
+        <Metadata>
+            <Category>Generate</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="LlmPrompt">
+        <Title>Suggest visualization queries</Title>
+        <Description>Proposes charts and writes aggregation queries for the table</Description>
+        <Text>
+You are a Data Analyst.
+Suggest 3 interesting business questions that can be answered by visualizing the data in table {{table_name}}.
+For the best suggestion, write the SQL query that aggregates the data (using GROUP BY) to prepare it for a chart.
+Columns:
+{{columns_with_types}}
+        </Text>
+        <Placeholders>
+            <Placeholder name="table_name" />
+            <Placeholder name="columns_with_types" />
+        </Placeholders>
+        <Metadata>
+            <Category>Generate</Category>
+        </Metadata>
+    </Prompt>
+
 </Prompts>
