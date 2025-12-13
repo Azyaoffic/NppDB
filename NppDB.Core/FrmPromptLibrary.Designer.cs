@@ -40,6 +40,7 @@ namespace NppDB.Core
             this.buttonEdit = new System.Windows.Forms.Button();
             this.buttonAdd = new System.Windows.Forms.Button();
             this.buttonDelete = new System.Windows.Forms.Button();
+            this.buttonCopy = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // promptsListView
@@ -132,12 +133,23 @@ namespace NppDB.Core
             this.buttonDelete.UseVisualStyleBackColor = true;
             this.buttonDelete.Click += new System.EventHandler(this.buttonDelete_Click);
             // 
+            // buttonCopy
+            // 
+            this.buttonCopy.Location = new System.Drawing.Point(699, 437);
+            this.buttonCopy.Name = "buttonCopy";
+            this.buttonCopy.Size = new System.Drawing.Size(121, 33);
+            this.buttonCopy.TabIndex = 9;
+            this.buttonCopy.Text = "Copy Prompt";
+            this.buttonCopy.UseVisualStyleBackColor = true;
+            this.buttonCopy.Click += new System.EventHandler(this.buttonCopy_Click);
+            // 
             // FrmPromptLibrary
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(832, 475);
+            this.Controls.Add(this.buttonCopy);
             this.Controls.Add(this.buttonDelete);
             this.Controls.Add(this.buttonAdd);
             this.Controls.Add(this.buttonEdit);
@@ -152,6 +164,8 @@ namespace NppDB.Core
             this.ShowIcon = false;
             this.ResumeLayout(false);
         }
+
+        private System.Windows.Forms.Button buttonCopy;
 
         private System.Windows.Forms.Button buttonDelete;
 

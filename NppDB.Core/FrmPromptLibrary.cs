@@ -307,5 +307,21 @@ namespace NppDB.Core
 
             }
         }
+
+        private void buttonCopy_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(promptTextBox.Text))
+            {
+                Clipboard.SetText(promptTextBox.Text);
+                buttonCopy.BackColor = Color.LightGreen;
+                var timer = new Timer { Interval = 500 };
+                timer.Tick += (s, args) =>
+                {
+                    buttonCopy.BackColor = SystemColors.Control;
+                    timer.Stop();
+                };
+                timer.Start();
+            }
+        }
     }
 }
