@@ -1322,14 +1322,11 @@ namespace NppDB
             
             var placeholderValue = ed.GetSelectionLength() > 0 
                 ? ed.GetSelText()
-                : string.Empty;
+                : ed.GetText(ed.GetTextLength());
             
             FrmPromptLibrary.Placeholders["selected_sql"] = placeholderValue;
 
             return placeholderValue;
-
-            // fallback to whole document
-            // return ed.GetText(ed.GetTextLength());
         }
 
         private static List<PromptItem> ReadPromptLibraryFromFile(string filePath)
@@ -1386,12 +1383,20 @@ namespace NppDB
                             if (phNode is XmlElement phElem)
                             {
                                 var name = phElem.GetAttribute("name");
+                                
+                                var isEditableRaw = phElem.GetAttribute("editable");
+                                var isEditable = !string.IsNullOrEmpty(isEditableRaw);
+                                
+                                var isRichRaw = phElem.GetAttribute("rich");
+                                var isRich = !string.IsNullOrEmpty(isRichRaw);
 
                                 if (!string.IsNullOrWhiteSpace(name))
                                 {
                                     placeholderList.Add(new PromptPlaceholder
                                     {
-                                        Name = name
+                                        Name = name,
+                                        IsEditable = isEditable,
+                                        IsRichText = isRich
                                     });
                                 }
                             }

@@ -90,6 +90,7 @@ namespace NppDB.Core
             this.placeholderListView.Size = new System.Drawing.Size(423, 112);
             this.placeholderListView.TabIndex = 4;
             this.placeholderListView.UseCompatibleStateImageBehavior = false;
+            this.placeholderListView.DoubleClick += new System.EventHandler(this.placeholderListView_DoubleClick);
             // 
             // disableTemplatingCheckbox
             // 

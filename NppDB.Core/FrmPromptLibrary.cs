@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
@@ -8,6 +9,8 @@ namespace NppDB.Core
     public struct PromptPlaceholder
     {
         public string Name;
+        public bool IsEditable;
+        public bool IsRichText;
     }
 
     public struct PromptItem
@@ -26,9 +29,9 @@ namespace NppDB.Core
         private readonly Func<string> _getSelectedSql;
 
         public static string PromptLibraryPath { get; set; }
-        
+
         public static readonly Dictionary<string, string> Placeholders = new Dictionary<string, string>();
-        
+
         // TODO: Maybe there is a better way to manage supported placeholders?
         public static readonly List<string> SupportedPlaceholders = new List<string>
         {
@@ -91,14 +94,31 @@ namespace NppDB.Core
                 placeholderListView.Items.Clear();
                 foreach (var placeholder in prompt.Placeholders)
                 {
-                    var item = new ListViewItem(placeholder.Name);
+                    var item = new ListViewItem(placeholder.Name)
+                    {
+                        Tag = placeholder
+                    };
                     try
                     {
                         item.SubItems.Add(Placeholders[placeholder.Name]);
-                    } catch (KeyNotFoundException)
-                    {
-                        item.SubItems.Add("<this placeholder is invalid>");
+                        if (!placeholder.IsEditable)
+                        {
+                            item.BackColor = Color.Gray;
+                        }
                     }
+                    catch (KeyNotFoundException)
+                    {
+                        if (placeholder.IsEditable)
+                        {
+                            item.SubItems.Add(string.Empty);
+                        }
+                        else
+                        {
+                            item.SubItems.Add("<no value can be assigned>");
+                            item.BackColor = Color.Gray;
+                        }
+                    }
+
                     placeholderListView.Items.Add(item);
                 }
             }
@@ -111,11 +131,21 @@ namespace NppDB.Core
         private string SubstitutePlaceholders(string text)
         {
             /*
-             * Supported placeholders:
+             * Supported default placeholders:
              * * {selected_sql} - the currently selected SQL in the editor
              */
             var selectedSql = _getSelectedSql();
             text = text.Replace("{{selected_sql}}", selectedSql);
+            
+            // Custom placeholders
+            foreach (var placeholder in Placeholders)
+            {
+                if (!string.IsNullOrEmpty(placeholder.Value))
+                {
+                    text = text.Replace("{{" + placeholder.Key + "}}", placeholder.Value);
+                }
+            }
+            
             return text;
         }
 
@@ -209,7 +239,7 @@ namespace NppDB.Core
                 }
             }
         }
-        
+
         private void ErasePromptFromFile(PromptItem promptItem)
         {
             string promptLibraryPath = PromptLibraryPath;
@@ -217,17 +247,64 @@ namespace NppDB.Core
             {
                 throw new FileNotFoundException("Prompt library file not found.", promptLibraryPath);
             }
-            
+
             var doc = System.Xml.Linq.XDocument.Load(promptLibraryPath);
             var root = doc.Element("Prompts");
             if (root == null) return;
-            
-            var promptElement = System.Linq.Enumerable.FirstOrDefault(root.Elements("Prompt"), e => 
+
+            var promptElement = System.Linq.Enumerable.FirstOrDefault(root.Elements("Prompt"), e =>
                 (string)e.Element("Title") == promptItem.Title);
             if (promptElement != null)
             {
                 promptElement.Remove();
                 doc.Save(promptLibraryPath);
+            }
+        }
+
+        private void placeholderListView_DoubleClick(object sender, EventArgs e)
+        {
+            if (placeholderListView.SelectedItems.Count > 0)
+            {
+                var item = placeholderListView.SelectedItems[0];
+
+                if (item.BackColor == Color.Gray) return;
+                
+                var placeholderName = item.Text;
+                var currentValue = item.SubItems.Count > 1 ? item.SubItems[1].Text : string.Empty;
+                
+                var placeholder = (PromptPlaceholder)item.Tag;
+                var isRichText = placeholder.IsRichText;
+
+
+                using (var inputDialog = new FrmPromptTemplateInput(
+                           "Edit Placeholder",
+                           $"Enter value for {{{{{placeholderName}}}}}:",
+                           currentValue,
+                           isRichText))
+                {
+                    if (inputDialog.ShowDialog(this) == DialogResult.OK)
+                    {
+                        var newValue = inputDialog.InputText;
+
+                        // Update ListView displayed value
+                        if (item.SubItems.Count > 1)
+                            item.SubItems[1].Text = newValue;
+                        else
+                            item.SubItems.Add(newValue);
+
+                        Placeholders[placeholderName] = newValue;
+
+                        // Refresh prompt preview
+                        if (promptsListView.SelectedItems.Count > 0)
+                        {
+                            var selectedPrompt = (PromptItem)promptsListView.SelectedItems[0].Tag;
+                            promptTextBox.Text = disableTemplatingCheckbox.Checked
+                                ? selectedPrompt.Text
+                                : SubstitutePlaceholders(selectedPrompt.Text);
+                        }
+                    }
+                }
+
             }
         }
     }

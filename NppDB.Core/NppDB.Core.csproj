@@ -95,6 +95,12 @@
     <Compile Include="FrmPromptLibrary.Designer.cs">
       <DependentUpon>FrmPromptLibrary.cs</DependentUpon>
     </Compile>
+    <Compile Include="FrmPromptTemplateInput.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPromptTemplateInput.Designer.cs">
+      <DependentUpon>FrmPromptTemplateInput.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmSelectDbType.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -134,6 +140,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FrmPromptLibrary.resx">
       <DependentUpon>FrmPromptLibrary.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmPromptTemplateInput.resx">
+      <DependentUpon>FrmPromptTemplateInput.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmSelectDbType.resx">
       <DependentUpon>frmSelectDbType.cs</DependentUpon>

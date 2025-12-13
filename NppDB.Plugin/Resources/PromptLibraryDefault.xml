@@ -53,11 +53,11 @@ Provide the corrected SQL query that resolves the specific error described.
 Query:
 {{selected_sql}}
 Error Message:
-{{user_input}}
+{{error_message}}
         </Text>
         <Placeholders>
             <Placeholder name="selected_sql" />
-            <Placeholder name="user_input" />
+            <Placeholder name="error_message" editable="true" rich="true"/>
         </Placeholders>
         <Metadata>
             <Category>Refactor</Category>
@@ -76,8 +76,8 @@ Original SQL:
         </Text>
         <Placeholders>
             <Placeholder name="selected_sql" />
-            <Placeholder name="source_dialect" />
-            <Placeholder name="target_dialect" />
+            <Placeholder name="source_dialect" editable="true"/>
+            <Placeholder name="target_dialect" editable="true"/>
         </Placeholders>
         <Metadata>
             <Category>Refactor</Category>
@@ -95,8 +95,8 @@ Query:
 {{selected_sql}}
         </Text>
         <Placeholders>
-            <Placeholder name="format" />
             <Placeholder name="selected_sql" />
+            <Placeholder name="format" editable="true"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -114,8 +114,8 @@ Columns:
 {{columns_with_types}}
         </Text>
         <Placeholders>
-            <Placeholder name="table_name" />
-            <Placeholder name="columns_with_types" />
+            <Placeholder name="table_name" editable="true"/>
+            <Placeholder name="columns_with_types" editable="true" rich="true"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -133,8 +133,8 @@ Columns:
 {{columns_with_types}}
         </Text>
         <Placeholders>
-            <Placeholder name="table_name" />
-            <Placeholder name="columns_with_types" />
+            <Placeholder name="table_name" editable="true"/>
+            <Placeholder name="columns_with_types" editable="true"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -152,8 +152,8 @@ Columns:
 {{columns_with_types}}
         </Text>
         <Placeholders>
-            <Placeholder name="table_name" />
-            <Placeholder name="columns_with_types" />
+            <Placeholder name="table_name" editable="true"/>
+            <Placeholder name="columns_with_types" editable="true" rich="true"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -171,8 +171,8 @@ Requirement:
 {{user_input}}
         </Text>
         <Placeholders>
-            <Placeholder name="dialect" />
-            <Placeholder name="user_input" />
+            <Placeholder name="dialect" editable="true"/>
+            <Placeholder name="user_input" editable="true" rich="true"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -190,8 +190,8 @@ Columns:
 {{columns_with_types}}
         </Text>
         <Placeholders>
-            <Placeholder name="table_name" />
-            <Placeholder name="columns_with_types" />
+            <Placeholder name="table_name" editable="true"/>
+            <Placeholder name="columns_with_types" editable="true" rich="true"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
