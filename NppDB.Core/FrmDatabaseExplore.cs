@@ -10,6 +10,11 @@ using NppDB.PostgreSQL;
 
 namespace NppDB.Core
 {
+    public class DbTemplateContext
+    {
+        public string TableName { get; set; }
+        public string Dialect { get; set; }
+    }
 
     public partial class FrmDatabaseExplore : Form
     {
@@ -390,6 +395,60 @@ namespace NppDB.Core
             }
 
             _commandHostInstance.Execute(NppDbCommandType.OPEN_FILE_IN_NPP, new object[] { templateFilePath });
+        }
+    
+    
+        public DbTemplateContext GetCurrentTemplateContext()
+        {
+            var node = trvDBList.SelectedNode;
+            if (node == null)
+                return null;
+        
+            var context = new DbTemplateContext();
+        
+            // database connection (root node)
+            var root = node;
+            while (root.Parent != null)
+                root = root.Parent;
+
+            if (root is IDbConnect dbConn)
+            {
+                try
+                {
+                    var dialectRaw = dbConn.Dialect;
+                    switch (dialectRaw)
+                    {
+                        case SqlDialect.NONE:
+                            context.Dialect = "None";
+                            break;
+                        case SqlDialect.POSTGRE_SQL:
+                            context.Dialect = "PostgreSQL";
+                            break;
+                        case SqlDialect.MS_ACCESS:
+                            context.Dialect = "MSAccess";
+                            break;
+                        default:
+                            context.Dialect = $"Dialect_{dialectRaw}";
+                            break;
+                    }
+                }
+                catch
+                {
+                    context.Dialect = string.Empty;
+                }
+            }
+        
+            // table or function node
+            if (node is PostgreSqlTable tableNode)
+            {
+                var tableName = tableNode.Text;
+        
+                context.TableName = tableName;
+            }
+            
+            
+        
+            return context;
         }
     }
 }

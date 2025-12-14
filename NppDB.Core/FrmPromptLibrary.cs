@@ -26,11 +26,10 @@ namespace NppDB.Core
     public partial class FrmPromptLibrary : Form
     {
         private static List<PromptItem> _prompts;
-        private readonly Func<string> _getSelectedSql;
 
         public static string PromptLibraryPath { get; set; }
 
-        public static readonly Dictionary<string, string> Placeholders = new Dictionary<string, string>();
+        public static Dictionary<string, string> Placeholders;
 
         // TODO: Maybe there is a better way to manage supported placeholders?
         public static readonly List<string> SupportedPlaceholders = new List<string>
@@ -38,9 +37,9 @@ namespace NppDB.Core
             "selected_sql"
         };
 
-        public FrmPromptLibrary(Func<string> getSelectedSql)
+        public FrmPromptLibrary(Dictionary<string, string> placeholders)
         {
-            _getSelectedSql = getSelectedSql;
+            Placeholders = new Dictionary<string, string>(placeholders);
 
             InitializeComponent();
 
@@ -134,7 +133,10 @@ namespace NppDB.Core
              * Supported default placeholders:
              * * {selected_sql} - the currently selected SQL in the editor
              */
-            var selectedSql = _getSelectedSql();
+            var selectedSql = Placeholders.TryGetValue("selected_sql", out var plh)
+                ? plh
+                : string.Empty;
+
             text = text.Replace("{{selected_sql}}", selectedSql);
             
             // Custom placeholders

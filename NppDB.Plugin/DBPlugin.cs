@@ -40,6 +40,7 @@ namespace NppDB
         private static string _staticPromptLibraryPath;
         private bool _isPromptLibraryDisabled = false;
         private FrmDatabaseExplore _frmDbExplorer;
+        private static FrmDatabaseExplore _staticFrmDbExplorer;
         private int _cmdFrmDbExplorerIdx = -1;
         private readonly Bitmap _imgMan = Resources.DBPPManage16;
         private Icon _tbIcon;
@@ -1247,6 +1248,7 @@ namespace NppDB
                 if (_frmDbExplorer == null || _frmDbExplorer.IsDisposed)
                 {
                     _frmDbExplorer = new FrmDatabaseExplore(this);
+                    _staticFrmDbExplorer = _frmDbExplorer;
 
                     _frmDbExplorer.AddNotifyHandler((ref Message msg) =>
                     {
@@ -1312,8 +1314,23 @@ namespace NppDB
         private static void ShowPromptLibrary()
         {
             LoadPromptLibrary();
-            var dlg = new FrmPromptLibrary(GetSelectedSql);
+            var placeholders = new Dictionary<string, string>();
+            SetPlaceholders(placeholders);
+            
+            var dlg = new FrmPromptLibrary(placeholders);
             dlg.ShowDialog();
+        }
+
+        private static void SetPlaceholders(Dictionary<string, string> placeholders)
+        {
+            placeholders["selected_sql"] = GetSelectedSql();
+
+            var dbContext = _staticFrmDbExplorer?.GetCurrentTemplateContext();
+            if (dbContext != null)
+            {
+                placeholders["table_name"] = dbContext.TableName;
+                placeholders["dialect"] = dbContext.Dialect;
+            }
         }
         
         private static string GetSelectedSql()
@@ -1323,8 +1340,6 @@ namespace NppDB
             var placeholderValue = ed.GetSelectionLength() > 0 
                 ? ed.GetSelText()
                 : ed.GetText(ed.GetTextLength());
-            
-            FrmPromptLibrary.Placeholders["selected_sql"] = placeholderValue;
 
             return placeholderValue;
         }
