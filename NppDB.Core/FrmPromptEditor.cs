@@ -133,7 +133,8 @@ namespace NppDB.Core
                     new List<XElement>(
                         Array.ConvertAll(promptItem.Placeholders, p =>
                             new XElement("Placeholder",
-                                new XAttribute("name", p.Name)
+                                // TODO: Make those that were already existing and non-editable non-editable again
+                                new XAttribute("name", p.Name), new XAttribute("editable", "true")
                             )
                         )
                     )
