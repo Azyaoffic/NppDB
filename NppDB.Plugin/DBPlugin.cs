@@ -11,11 +11,13 @@ using System.Windows.Forms;
 using System.Xml;
 using Kbg.NppPluginNET.PluginInfrastructure;
 using Microsoft.Win32.SafeHandles;
+using Newtonsoft.Json;
 using NppDB.Comm;
 using NppDB.Core;
 using NppDB.MSAccess;
 using NppDB.PostgreSQL;
 using NppDB.Properties;
+using Formatting = Newtonsoft.Json.Formatting;
 
 namespace NppDB
 {
@@ -38,6 +40,8 @@ namespace NppDB
         private string _translationsConfigPath;
         private string _promptLibraryPath;
         private static string _staticPromptLibraryPath;
+        private static string _staticLanguageCodesPath;
+        private static string _staticPromptPreferencesPath;
         private bool _isPromptLibraryDisabled = false;
         private FrmDatabaseExplore _frmDbExplorer;
         private static FrmDatabaseExplore _staticFrmDbExplorer;
@@ -246,6 +250,31 @@ namespace NppDB
                  MessageBox.Show(ex.Message); throw;
              }
              
+             _staticLanguageCodesPath = Path.Combine(_nppDbConfigDir, "LanguageCodes.csv");
+             LoadLanguageDoc();
+             
+             _staticPromptPreferencesPath = Path.Combine(_nppDbConfigDir, "prompt_preferences.json");
+             FrmPromptPreferences.PreferencesFilePath = _staticPromptPreferencesPath;
+             if (!File.Exists(_staticPromptPreferencesPath))
+             {
+                 try
+                 {
+                     var defaultPreferences = new PromptPreferences
+                     {
+                         ResponseLanguage = "English",
+                         CustomInstructions = ""
+                     };
+                     
+                    var jsonData = JsonConvert.SerializeObject(defaultPreferences, Formatting.None);
+                     
+                     File.WriteAllText(_staticPromptPreferencesPath, jsonData);
+                 }
+                 catch (Exception ex)
+                 {
+                     MessageBox.Show("Error creating default prompt preferences file: " + ex.Message);
+                 }
+             }
+             
              _promptLibraryPath = Path.Combine(_nppDbConfigDir, "promptLibrary.xml");
              _staticPromptLibraryPath = _promptLibraryPath;
              FrmPromptLibrary.PromptLibraryPath = _promptLibraryPath;
@@ -304,6 +333,7 @@ namespace NppDB
              {
                  SetCommand(7, "Show Prompt Library", ShowPromptLibrary, new ShortcutKey(true, false, false, Keys.F10));
              }
+             SetCommand(8, "Show LLM Response Preferences", ShowPromptPreferences);
 
              _cmdFrmDbExplorerIdx = 2; 
         }
@@ -1320,6 +1350,13 @@ namespace NppDB
             var dlg = new FrmPromptLibrary(placeholders);
             dlg.ShowDialog();
         }
+        
+        private static void ShowPromptPreferences()
+        {
+            LoadLanguageDoc();
+            var dlg = new FrmPromptPreferences(_staticPromptPreferencesPath);
+            dlg.ShowDialog();
+        }
 
         private static void SetPlaceholders(Dictionary<string, string> placeholders)
         {
@@ -1438,6 +1475,51 @@ namespace NppDB
                 MessageBox.Show($"Error reading prompt library from file:\n{ex.Message}", PLUGIN_NAME, MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
                 return null;
+            }
+        }
+
+        private static void LoadLanguageDoc()
+        {
+            var langFilePath = _staticLanguageCodesPath;
+            var langDict = new Dictionary<string, string>();
+            try
+            {
+                if (!File.Exists(langFilePath))
+                {
+                    using (var stream = Assembly.GetExecutingAssembly()
+                               .GetManifestResourceStream("NppDB.Resources.LanguageCodes.csv"))
+                    {
+                        if (stream == null)
+                            throw new InvalidOperationException(
+                                "Embedded resource `NppDB.Plugin.Resources.LanguageCodes.csv` not found.");
+
+                        using (var file = File.Create(langFilePath))
+                        {
+                            stream.CopyTo(file);
+                        }
+                    }
+                }
+
+                var lines = File.ReadAllLines(langFilePath);
+                foreach (var line in lines)
+                {
+                    var parts = line.Split(new[] { ',' }, 2);
+                    if (parts.Length == 2)
+                    {
+                        var code = parts[0].Trim();
+                        var name = parts[1].Trim();
+                        if (!langDict.ContainsKey(code))
+                        {
+                            langDict[code] = name;
+                        }
+                    }
+                }
+
+                FrmPromptPreferences.LanguageCodeDict = langDict;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading language codes from file:\n{ex.Message}", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

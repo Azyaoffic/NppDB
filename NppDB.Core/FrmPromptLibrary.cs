@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Text;
 using System.Windows.Forms;
 
 namespace NppDB.Core
@@ -82,11 +83,11 @@ namespace NppDB.Core
                 var prompt = (PromptItem)selectedItem.Tag;
                 if (disableTemplatingCheckbox.Checked)
                 {
-                    promptTextBox.Text = prompt.Text;
+                    promptTextBox.Text = ConstructPromptPreview(prompt.Text);
                 }
                 else
                 {
-                    promptTextBox.Text = SubstitutePlaceholders(prompt.Text);
+                    promptTextBox.Text = ConstructPromptPreview(SubstitutePlaceholders(prompt.Text));
                 }
 
                 // placeholders
@@ -149,6 +150,21 @@ namespace NppDB.Core
             }
             
             return text;
+        }
+        
+        private string ConstructPromptPreview(string promptBase)
+        {
+            var PromptStringBuilder = new StringBuilder();
+            PromptStringBuilder.Append(promptBase);
+            PromptStringBuilder.Append(LoadUserPromptPreferences());
+            return PromptStringBuilder.ToString();
+        }
+
+        private string LoadUserPromptPreferences()
+        {
+            var preferences = FrmPromptPreferences.ReadUserPreferences();
+            return $"\nRespond in the following language: {preferences.ResponseLanguage}." +
+                   $"\nAlso follow user's custom instructions: {preferences.CustomInstructions}.";
         }
 
         private void disableTemplatingCheckbox_CheckedChanged(object sender, EventArgs e)
