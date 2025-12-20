@@ -2,6 +2,7 @@
 <Prompts>
 
     <Prompt type="LlmPrompt">
+        <Id>DefaultPrompt1</Id>
         <Title>Explain Selected Query</Title>
         <Description>Explains complex logic. Breaks down the query execution flow.</Description>
         <Text>
@@ -23,6 +24,7 @@ Query:
     </Prompt>
 
     <Prompt type="LlmPrompt">
+        <Id>DefaultPrompt2</Id>
         <Title>Optimize and Analyze Performance</Title>
         <Description>Detailed performance suggestions</Description>
         <Text>
@@ -44,6 +46,7 @@ Query:
     </Prompt>
 
     <Prompt type="LlmPrompt">
+        <Id>DefaultPrompt3</Id>
         <Title>Fix syntax or logic error</Title>
         <Description>Diagnoses errors based on user input and selected SQL</Description>
         <Text>
@@ -65,6 +68,7 @@ Error Message:
     </Prompt>
 
     <Prompt type="LlmPrompt">
+        <Id>DefaultPrompt4</Id>
         <Title>Convert SQL dialect</Title>
         <Description>Migrates code between systems (e.g. Access to PostgreSQL)</Description>
         <Text>
@@ -85,6 +89,7 @@ Original SQL:
     </Prompt>
 
     <Prompt type="LlmPrompt">
+        <Id>DefaultPrompt5</Id>
         <Title>Generate documentation</Title>
         <Description>Creates technical docs</Description>
         <Text>
@@ -104,6 +109,7 @@ Query:
     </Prompt>
 
     <Prompt type="LlmPrompt">
+        <Id>DefaultPrompt6</Id>
         <Title>Generate CRUD</Title>
         <Description>Creates standard Insert, Select, Update, Delete statements for a table</Description>
         <Text>
@@ -123,6 +129,7 @@ Columns:
     </Prompt>
 
     <Prompt type="LlmPrompt">
+        <Id>DefaultPrompt7</Id>
         <Title>Generate Python Data Class</Title>
         <Description>Maps SQL table to a Python @dataclass for application code</Description>
         <Text>
@@ -142,6 +149,7 @@ Columns:
     </Prompt>
 
     <Prompt type="LlmPrompt">
+        <Id>DefaultPrompt8</Id>
         <Title>Explain table to stakeholder</Title>
         <Description>Describes table purpose in plain English</Description>
         <Text>
@@ -161,6 +169,7 @@ Columns:
     </Prompt>
 
     <Prompt type="LlmPrompt">
+        <Id>DefaultPrompt9</Id>
         <Title>Generate Table from description</Title>
         <Description>Writes CREATE TABLE SQL based on natural language requirements</Description>
         <Text>
@@ -180,6 +189,7 @@ Requirement:
     </Prompt>
 
     <Prompt type="LlmPrompt">
+        <Id>DefaultPrompt10</Id>
         <Title>Suggest visualization queries</Title>
         <Description>Proposes charts and writes aggregation queries for the table</Description>
         <Text>
