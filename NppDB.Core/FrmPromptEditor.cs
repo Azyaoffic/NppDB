@@ -129,20 +129,41 @@ namespace NppDB.Core
                 prompt.SetElementValue("Text", promptItem.Text);
                 prompt.SetElementValue("Type", promptItem.Type);
                 
-                XElement placeholdersElement = new XElement("Placeholders",
-                    new List<XElement>(
-                        Array.ConvertAll(promptItem.Placeholders, p =>
-                            new XElement("Placeholder",
-                                new XAttribute("name", p.Name)
-                            )
-                        )
-                    )
-                );
                 var existingPlaceholders = prompt.Element("Placeholders");
-                if (existingPlaceholders != null)
-                    existingPlaceholders.ReplaceWith(placeholdersElement);
-                else
-                    prompt.Add(placeholdersElement);
+                // check whether existing placeholders are editable
+                Dictionary<string, bool> existingPlaceholderDict = new Dictionary<string, bool>();
+                
+                foreach (XElement placeholder in existingPlaceholders.Elements("Placeholder"))
+                {
+                    var name = placeholder.Attribute("name")?.Value;
+                    var isEditable = placeholder.Attribute("editable")?.Value == "true";
+                    if (!isEditable)
+                    {
+                        // if not editable, keep it
+                        existingPlaceholderDict[name] = false;
+                    }
+                }
+                
+                // create new placeholders element
+                List<XElement> placeholderElements = new List<XElement>();
+                foreach (var p in promptItem.Placeholders)
+                {
+                    if (existingPlaceholderDict.ContainsKey(p.Name) && !existingPlaceholderDict[p.Name])
+                    {
+                        // keep non-editable placeholder
+                        placeholderElements.Add(new XElement("Placeholder", new XAttribute("name", p.Name)));
+                    }
+                    else
+                    {
+                        // add new editable placeholder
+                        placeholderElements.Add(new XElement("Placeholder", new XAttribute("name", p.Name), new XAttribute("editable", "true")));
+                    }
+                }
+                
+                XElement placeholdersElement = new XElement("Placeholders", placeholderElements);
+                
+                // add new placeholders
+                prompt.Element("Placeholders")?.ReplaceWith(placeholdersElement);
 
                 doc.Save(promptLibraryPath);
             }
@@ -157,7 +178,7 @@ namespace NppDB.Core
                     new XElement("Placeholders",
                         new List<XElement>(
                             Array.ConvertAll(promptItem.Placeholders, p =>
-                                new XElement("Placeholder", new XAttribute("name", p.Name))
+                                new XElement("Placeholder", new XAttribute("name", p.Name), new XAttribute("editable", "true"))
                             )
                         )
                     )
