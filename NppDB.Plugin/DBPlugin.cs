@@ -42,6 +42,7 @@ namespace NppDB
         private static string _staticPromptLibraryPath;
         private static string _staticLanguageCodesPath;
         private static string _staticPromptPreferencesPath;
+        private static string _staticBehaviorSettingsPath;
         private bool _isPromptLibraryDisabled = false;
         private FrmDatabaseExplore _frmDbExplorer;
         private static FrmDatabaseExplore _staticFrmDbExplorer;
@@ -275,6 +276,25 @@ namespace NppDB
                  }
              }
              
+             _staticBehaviorSettingsPath = Path.Combine(_nppDbConfigDir, "behavior_settings.json");
+             if (!File.Exists(_staticBehaviorSettingsPath))
+             {
+                 try
+                 {
+                     var defaultSettings = new BehaviorSettings
+                     {
+                         EnableDestructiveSelectInto = false
+                     };
+                     
+                    var jsonData = JsonConvert.SerializeObject(defaultSettings, Formatting.None);
+                    
+                    File.WriteAllText(_staticBehaviorSettingsPath, jsonData);
+                 } catch (Exception ex)
+                 {
+                     MessageBox.Show("Error creating default behaviors file: " + ex.Message);
+                 }
+             }
+             
              _promptLibraryPath = Path.Combine(_nppDbConfigDir, "promptLibrary.xml");
              _staticPromptLibraryPath = _promptLibraryPath;
              FrmPromptLibrary.PromptLibraryPath = _promptLibraryPath;
@@ -334,6 +354,7 @@ namespace NppDB
                  SetCommand(7, "Show Prompt Library", ShowPromptLibrary, new ShortcutKey(true, false, false, Keys.F10));
              }
              SetCommand(8, "Show LLM Response Preferences", ShowPromptPreferences);
+             SetCommand(9, "Show Behavior Settings", ShowBehaviorSettings);
 
              _cmdFrmDbExplorerIdx = 2; 
         }
@@ -1355,6 +1376,12 @@ namespace NppDB
         {
             LoadLanguageDoc();
             var dlg = new FrmPromptPreferences(_staticPromptPreferencesPath);
+            dlg.ShowDialog();
+        }
+        
+        private static void ShowBehaviorSettings()
+        {
+            var dlg = new FrmBehaviorSettings(_staticBehaviorSettingsPath);
             dlg.ShowDialog();
         }
 
