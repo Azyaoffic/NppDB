@@ -671,7 +671,7 @@ namespace NppDB
                                 chosenExecutorForAnalysisOnly = new PostgreSqlExecutor(null);
                                 break;
                             case SqlDialect.MS_ACCESS:
-                                chosenExecutorForAnalysisOnly = new MsAccessExecutor(null);
+                                chosenExecutorForAnalysisOnly = new MsAccessExecutor(null, null);
                                 break;
                             case SqlDialect.NONE:
                             default:
@@ -1114,6 +1114,8 @@ namespace NppDB
                         return true;
                     case NppDbCommandType.GET_PLUGIN_DIRECTORY:
                         return _nppDbPluginDir;
+                    case NppDbCommandType.GET_PLUGIN_CONFIG_DIRECTORY:
+                        return _nppDbConfigDir;
                     default:
                         return null;
                 }

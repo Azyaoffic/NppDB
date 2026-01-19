@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 
 namespace NppDB.Core
 {
+    // also needs to be updated in MSAccessTable.cs
     public class BehaviorSettings
     {
         public bool EnableDestructiveSelectInto { get; set; }
