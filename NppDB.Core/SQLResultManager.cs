@@ -10,10 +10,18 @@ namespace NppDB.Core
         private Dictionary<IntPtr, SqlResult> _bind = new Dictionary<IntPtr, SqlResult>();
         public SqlResult CreateSQLResult(IntPtr id, IDbConnect connect, ISqlExecutor sqlExecutor)
         {
-            if (_bind.ContainsKey(id)) 
-                throw new ApplicationException("A database connection is already attached to the current document.");
-            var ret = _bind[id] = new SqlResult(connect, sqlExecutor) { Visible = false };//Visible = false to prevent Flicker
-            return ret;
+            if (_bind.TryGetValue(id, out var existing))
+            {
+                if (existing != null && !existing.IsDisposed)
+                {
+                    return existing;
+                }
+                _bind.Remove(id);
+            }
+
+            var created = new SqlResult(connect, sqlExecutor) { Visible = false }; // Visible=false prevents flicker
+            _bind[id] = created;
+            return created;
         }
 
         public int Count => _bind.Count;

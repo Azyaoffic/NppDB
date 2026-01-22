@@ -1093,8 +1093,15 @@ namespace NppDB
                         NewFile();
                         break;
                     case NppDbCommandType.CREATE_RESULT_VIEW:
-                        if (parameters != null && parameters.Length >= 3 && parameters[0] is IntPtr p0 && parameters[1] is IDbConnect p1 && parameters[2] is ISqlExecutor p2)
-                             return AddSqlResult(p0, p1, p2);
+                        if (parameters != null && parameters.Length >= 3 && parameters[0] is IntPtr p0 &&
+                            parameters[1] is IDbConnect p1 && parameters[2] is ISqlExecutor p2)
+                        {
+                            var ctr = AddSqlResult(p0, p1, p2);
+
+                            if (p0 == GetCurrentBufferId()) UpdateCurrentSqlResult();
+
+                            return ctr;
+                        }
                         return null;
                     case NppDbCommandType.DESTROY_RESULT_VIEW:
                         CloseCurrentSqlResult();
@@ -1564,6 +1571,15 @@ namespace NppDB
 
             var bufId = GetCurrentBufferId();
             SqlResult targetResult = null;
+            
+            if (bufId == IntPtr.Zero)
+            {
+                if (_currentCtr != null && _currentCtr.IsHandleCreated && !_currentCtr.IsDisposed && _currentCtr.Visible)
+                {
+                    SetResultPos(_currentCtr);
+                }
+                return;
+            }
 
             if (bufId != IntPtr.Zero)
             {
