@@ -104,45 +104,6 @@ Query:
     </Prompt>
 
     <Prompt type="LlmPrompt">
-        <Id>DefaultPrompt6</Id>
-        <Title>Generate CRUD</Title>
-        <Description>Creates standard Insert, Select, Update, Delete statements for a table</Description>
-<Text>
-You are a Backend Developer.
-Generate standard CRUD (Create, Read, Update, Delete) SQL statements based on the table {{table_name}}.
-Use the provided column list to ensure all fields are handled in the INSERT and SELECT statements.
-Columns:
-{{columns_with_types}}
-</Text>
-        <Placeholders>
-            <Placeholder name="table_name" editable="true"/>
-            <Placeholder name="columns_with_types" editable="true" rich="true"/>
-        </Placeholders>
-        <Metadata>
-            <Category>Generate</Category>
-        </Metadata>
-    </Prompt>
-
-    <Prompt type="LlmPrompt">
-        <Id>DefaultPrompt7</Id>
-        <Title>Generate Python Data Class</Title>
-        <Description>Maps SQL table to a Python @dataclass for application code</Description>
-<Text>You are a Senior Python Developer.
-Create a Python dataclass that represents the data model for table {{table_name}}.
-Map the provided SQL column types to the appropriate Python types (e.g., VARCHAR to str) and include the @dataclass decorator.
-Columns:
-{{columns_with_types}}
-</Text>
-        <Placeholders>
-            <Placeholder name="table_name" editable="true"/>
-            <Placeholder name="columns_with_types" editable="true"/>
-        </Placeholders>
-        <Metadata>
-            <Category>Generate</Category>
-        </Metadata>
-    </Prompt>
-
-    <Prompt type="LlmPrompt">
         <Id>DefaultPrompt9</Id>
         <Title>Generate Table from description</Title>
         <Description>Writes CREATE TABLE SQL based on natural language requirements</Description>
@@ -155,25 +116,6 @@ Requirement:
         <Placeholders>
             <Placeholder name="dialect" editable="true"/>
             <Placeholder name="user_input" editable="true" rich="true"/>
-        </Placeholders>
-        <Metadata>
-            <Category>Generate</Category>
-        </Metadata>
-    </Prompt>
-
-    <Prompt type="LlmPrompt">
-        <Id>DefaultPrompt10</Id>
-        <Title>Suggest visualization queries</Title>
-        <Description>Proposes charts and writes aggregation queries for the table</Description>
-<Text>You are a Data Analyst.
-Suggest 3 interesting business questions that can be answered by visualizing the data in table {{table_name}}.
-For the best suggestion, write the SQL query that aggregates the data (using GROUP BY) to prepare it for a chart.
-Columns:
-{{columns_with_types}}
-</Text>
-        <Placeholders>
-            <Placeholder name="table_name" editable="true"/>
-            <Placeholder name="columns_with_types" editable="true" rich="true"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
