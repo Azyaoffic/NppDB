@@ -143,25 +143,6 @@ Columns:
     </Prompt>
 
     <Prompt type="LlmPrompt">
-        <Id>DefaultPrompt8</Id>
-        <Title>Explain table to stakeholder</Title>
-        <Description>Describes table purpose in plain English</Description>
-<Text>You are a Business Analyst.
-Explain the purpose and content of the database table {{table_name}} in plain, non-technical English.
-Describe what kind of business data is stored here based on the provided column names.
-Columns:
-{{columns_with_types}}
-</Text>
-        <Placeholders>
-            <Placeholder name="table_name" editable="true"/>
-            <Placeholder name="columns_with_types" editable="true" rich="true"/>
-        </Placeholders>
-        <Metadata>
-            <Category>Generate</Category>
-        </Metadata>
-    </Prompt>
-
-    <Prompt type="LlmPrompt">
         <Id>DefaultPrompt9</Id>
         <Title>Generate Table from description</Title>
         <Description>Writes CREATE TABLE SQL based on natural language requirements</Description>
