@@ -642,7 +642,7 @@ namespace NppDB
 
                     currentDialect = attachedResult.LinkedDbConnect.Dialect;
 
-                    var caretPosition = GetCaretPosition();
+                    var caretPosition = GetCaretPosition(editor);
                     analysisResult = attachedResult.Parse(textToParse, caretPosition);
                     ShowSqlResult(attachedResult);
                 }
@@ -681,7 +681,7 @@ namespace NppDB
                     }
 
 
-                    var caretPosition = GetCaretPosition();
+                    var caretPosition = GetCaretPosition(editor);
                     analysisResult = chosenExecutorForAnalysisOnly.Parse(textToParse, caretPosition);
                 }
 
@@ -779,15 +779,61 @@ namespace NppDB
             }
         }
 
-        private static CaretPosition GetCaretPosition()
+        private static CaretPosition GetCaretPosition(IScintillaGateway editor)
         {
+            if (editor == null)
+            {
+                return new CaretPosition { Line = 1, Column = 0, Offset = 0 };
+            }
+
+            var offset = editor.GetCurrentPos();
+            var length = editor.GetLength();
+            if (length <= 0)
+            {
+                offset = 0;
+            }
+            else
+            {
+                var atSemicolon = false;
+                var semicolonPos = -1;
+
+                if (offset >= 0 && offset < length && editor.GetCharAt(offset) == ';')
+                {
+                    atSemicolon = true;
+                    semicolonPos = offset;
+                }
+                else if (offset > 0 && editor.GetCharAt(offset - 1) == ';')
+                {
+                    atSemicolon = true;
+                    semicolonPos = offset - 1;
+                }
+
+                if (atSemicolon)
+                {
+                    var i = semicolonPos - 1;
+                    while (i >= 0)
+                    {
+                        var c = (char)editor.GetCharAt(i);
+                        if (c == ';' || char.IsWhiteSpace(c))
+                        {
+                            i--;
+                            continue;
+                        }
+                        break;
+                    }
+
+                    offset = i >= 0 ? i : 0;
+                }
+            }
+
             return new CaretPosition
             {
-                Line = Win32.SendMessage(nppData._nppHandle, (uint)NppMsg.NPPM_GETCURRENTLINE, 0, 0).ToInt32() + 1,
-                Column = Win32.SendMessage(nppData._nppHandle, (uint)NppMsg.NPPM_GETCURRENTCOLUMN, 0, 0).ToInt32(),
-                Offset = Win32.SendMessage(nppData._scintillaMainHandle, (uint)SciMsg.SCI_GETCURRENTPOS, 0, 0).ToInt32(),
+                Line = editor.LineFromPosition(offset) + 1,
+                Column = editor.GetColumn(offset),
+                Offset = offset,
             };
         }
+
 
         private static unsafe string GetScintillaText(IntPtr scintillaHnd, bool selectionOnly)
         {
