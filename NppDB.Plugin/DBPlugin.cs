@@ -1138,10 +1138,25 @@ namespace NppDB
                     case NppDbCommandType.NEW_FILE:
                         NewFile();
                         break;
+                    
+                    case NppDbCommandType.SET_SQL_LANGUAGE:
+                        if (parameters != null && parameters.Length >= 1)
+                        {
+                            if (parameters[0] is IntPtr pLang0) SetSqlLang(pLang0);
+                            else if (parameters[0] is int pLang1) SetSqlLang(new IntPtr(pLang1));
+                            else SetSqlLang(GetCurrentBufferId());
+                        }
+                        else
+                        {
+                            SetSqlLang(GetCurrentBufferId());
+                        }
+                        break;
+
                     case NppDbCommandType.CREATE_RESULT_VIEW:
                         if (parameters != null && parameters.Length >= 3 && parameters[0] is IntPtr p0 &&
                             parameters[1] is IDbConnect p1 && parameters[2] is ISqlExecutor p2)
                         {
+                            SetSqlLang(p0);
                             var ctr = AddSqlResult(p0, p1, p2);
 
                             if (p0 == GetCurrentBufferId()) UpdateCurrentSqlResult();
@@ -1717,6 +1732,19 @@ namespace NppDB
         {
             return Win32.SendMessage(nppData._nppHandle, (uint)NppMsg.NPPM_GETCURRENTBUFFERID, 0, 0);
         }
+        
+
+        private static void SetSqlLang(IntPtr bufferId)
+        {
+            if (bufferId == IntPtr.Zero) return;
+            if (nppData._nppHandle == IntPtr.Zero) return;
+
+            var currentLang = Win32.SendMessage(nppData._nppHandle, (uint)NppMsg.NPPM_GETBUFFERLANGTYPE, bufferId, 0).ToInt32();
+            if (currentLang == (int)LangType.L_SQL) return;
+
+            Win32.SendMessage(nppData._nppHandle, (uint)NppMsg.NPPM_SETBUFFERLANGTYPE, bufferId, (int)LangType.L_SQL);
+        }
+
         private static void AppendToScintillaText(IntPtr scintillaHnd, string text)
         {
             if (scintillaHnd == IntPtr.Zero || string.IsNullOrEmpty(text))

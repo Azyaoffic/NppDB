@@ -13,5 +13,6 @@
         OPEN_FILE_IN_NPP,
         GET_PLUGIN_DIRECTORY,
         GET_PLUGIN_CONFIG_DIRECTORY,
+        SET_SQL_LANGUAGE
     }
 }
