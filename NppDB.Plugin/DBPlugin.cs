@@ -604,6 +604,8 @@ namespace NppDB
                     return;
                 }
 
+                SetSqlLang(bufId);
+
                 var currentScintilla = GetCurrentScintilla();
                 var textToParse = GetScintillaText(currentScintilla, true);
                 if (string.IsNullOrWhiteSpace(textToParse))
