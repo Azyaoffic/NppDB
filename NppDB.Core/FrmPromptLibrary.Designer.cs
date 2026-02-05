@@ -45,6 +45,7 @@ namespace NppDB.Core
             this.buttonDelete = new System.Windows.Forms.Button();
             this.grpPreview = new System.Windows.Forms.GroupBox();
             this.promptTextBox = new System.Windows.Forms.RichTextBox();
+            this.splitterPreview = new System.Windows.Forms.Splitter();
             this.panelPreviewBottom = new System.Windows.Forms.Panel();
             this.flowLayoutPanelPlaceholders = new System.Windows.Forms.FlowLayoutPanel();
             this.lblPlaceholders = new System.Windows.Forms.Label();
@@ -184,6 +185,7 @@ namespace NppDB.Core
             // grpPreview
             // 
             this.grpPreview.Controls.Add(this.promptTextBox);
+            this.grpPreview.Controls.Add(this.splitterPreview);
             this.grpPreview.Controls.Add(this.panelPreviewBottom);
             this.grpPreview.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grpPreview.Location = new System.Drawing.Point(5, 0);
@@ -202,9 +204,18 @@ namespace NppDB.Core
             this.promptTextBox.Location = new System.Drawing.Point(3, 18);
             this.promptTextBox.Name = "promptTextBox";
             this.promptTextBox.ReadOnly = true;
-            this.promptTextBox.Size = new System.Drawing.Size(565, 301);
+            this.promptTextBox.Size = new System.Drawing.Size(565, 295);
             this.promptTextBox.TabIndex = 0;
             this.promptTextBox.Text = "";
+            // 
+            // splitterPreview
+            // 
+            this.splitterPreview.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.splitterPreview.MinExtra = 120;
+            this.splitterPreview.MinSize = 80;
+            this.splitterPreview.Name = "splitterPreview";
+            this.splitterPreview.Size = new System.Drawing.Size(565, 6);
+            this.splitterPreview.TabStop = false;
             // 
             // panelPreviewBottom
             // 
@@ -314,6 +325,7 @@ namespace NppDB.Core
 
         private System.Windows.Forms.GroupBox grpPreview;
         private System.Windows.Forms.RichTextBox promptTextBox;
+        private System.Windows.Forms.Splitter splitterPreview;
         private System.Windows.Forms.Panel panelPreviewBottom;
         private System.Windows.Forms.Label lblPlaceholders;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelPlaceholders;

@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -30,6 +30,9 @@ namespace NppDB.Core
         private static List<PromptItem> _prompts;
         private List<PromptItem> _filteredPrompts;
 
+        private const int MinPlaceholdersHeight = 80;
+        private const int MinPreviewTextHeight = 120;
+
         public static string PromptLibraryPath { get; set; }
 
         public static Dictionary<string, string> Placeholders;
@@ -54,6 +57,60 @@ namespace NppDB.Core
 
             _filteredPrompts = new List<PromptItem>(_prompts);
             PopulatePromptList();
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            RestoreLayoutFromSettings();
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            SaveLayoutToSettings();
+            base.OnFormClosing(e);
+        }
+
+        private void RestoreLayoutFromSettings()
+        {
+            var rawSize = Properties.Settings.Default["PromptLibrary_Size"];
+            var savedSize = rawSize is Size s ? s : Size.Empty;
+            if (savedSize.Width > 0 && savedSize.Height > 0)
+            {
+                Size = savedSize;
+            }
+
+            var rawLocation = Properties.Settings.Default["PromptLibrary_Location"];
+            var savedLocation = rawLocation is Point p ? p : Point.Empty;
+            if (!savedLocation.IsEmpty)
+            {
+                StartPosition = FormStartPosition.Manual;
+                Location = savedLocation;
+            }
+
+            var rawHeight = Properties.Settings.Default["PromptLibrary_PlaceholdersHeight"];
+            var savedPlaceholdersHeight = rawHeight is int h && h > 0 ? h : 138;
+
+            var maxBottom = Math.Max(MinPlaceholdersHeight, grpPreview.ClientSize.Height - MinPreviewTextHeight);
+            panelPreviewBottom.Height = Math.Max(MinPlaceholdersHeight, Math.Min(savedPlaceholdersHeight, maxBottom));
+        }
+
+
+        private void SaveLayoutToSettings()
+        {
+            if (WindowState == FormWindowState.Normal)
+            {
+                Properties.Settings.Default.PromptLibrary_Size = Size;
+                Properties.Settings.Default.PromptLibrary_Location = Location;
+            }
+            else
+            {
+                Properties.Settings.Default.PromptLibrary_Size = RestoreBounds.Size;
+                Properties.Settings.Default.PromptLibrary_Location = RestoreBounds.Location;
+            }
+
+            Properties.Settings.Default.PromptLibrary_PlaceholdersHeight = panelPreviewBottom.Height;
+            Properties.Settings.Default.Save();
         }
 
         public static void SetPrompts(List<PromptItem> promptItems)
