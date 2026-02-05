@@ -47,11 +47,6 @@ namespace NppDB.Core
             promptsListView.View = View.Details;
             placeholderListView.View = View.Details;
 
-            if (_prompts.Count > 0)
-            {
-                noPromptsFoundLabel.Visible = false;
-            }
-
             promptsListView.Columns.Clear();
             promptsListView.Columns.Add("Prompt Name", 200);
             promptsListView.Columns.Add("Description", 300);
@@ -216,8 +211,6 @@ namespace NppDB.Core
                     item.SubItems.Add(newPrompt.Description);
                     item.Tag = newPrompt;
                     promptsListView.Items.Add(item);
-
-                    noPromptsFoundLabel.Visible = false;
                 }
             }
         }
@@ -249,11 +242,6 @@ namespace NppDB.Core
                     // Clear the preview and placeholders
                     promptTextBox.Text = string.Empty;
                     placeholderListView.Items.Clear();
-
-                    if (_prompts.Count == 0)
-                    {
-                        noPromptsFoundLabel.Visible = true;
-                    }
                 }
             }
         }

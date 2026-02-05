@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Windows.Forms;
 
 namespace NppDB.Core
 {
@@ -31,113 +32,233 @@ namespace NppDB.Core
         /// </summary>
         private void InitializeComponent()
         {
+            this.splitContainerMain = new System.Windows.Forms.SplitContainer();
             this.promptsListView = new System.Windows.Forms.ListView();
-            this.promptTextBox = new System.Windows.Forms.RichTextBox();
-            this.promptPreviewLabel = new System.Windows.Forms.Label();
-            this.noPromptsFoundLabel = new System.Windows.Forms.Label();
-            this.placeholderListView = new System.Windows.Forms.ListView();
-            this.disableTemplatingCheckbox = new System.Windows.Forms.CheckBox();
+            this.colName = new System.Windows.Forms.ColumnHeader();
+            this.colDesc = new System.Windows.Forms.ColumnHeader();
+            this.panelLeftActions = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonEdit = new System.Windows.Forms.Button();
             this.buttonAdd = new System.Windows.Forms.Button();
             this.buttonDelete = new System.Windows.Forms.Button();
+            this.grpPreview = new System.Windows.Forms.GroupBox();
+            this.promptTextBox = new System.Windows.Forms.RichTextBox();
+            this.panelPreviewBottom = new System.Windows.Forms.Panel();
+            this.lblPlaceholderHelp = new System.Windows.Forms.Label();
+            this.lblPlaceholders = new System.Windows.Forms.Label();
+            this.placeholderListView = new System.Windows.Forms.ListView();
+            this.colPlaceholderName = new System.Windows.Forms.ColumnHeader();
+            this.panelRightActions = new System.Windows.Forms.Panel();
+            this.disableTemplatingCheckbox = new System.Windows.Forms.CheckBox();
             this.buttonCopy = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).BeginInit();
+            this.splitContainerMain.Panel1.SuspendLayout();
+            this.splitContainerMain.Panel2.SuspendLayout();
+            this.splitContainerMain.SuspendLayout();
+            this.panelLeftActions.SuspendLayout();
+            this.grpPreview.SuspendLayout();
+            this.panelPreviewBottom.SuspendLayout();
+            this.panelRightActions.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // splitContainerMain
+            // 
+            this.splitContainerMain.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainerMain.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+            this.splitContainerMain.Location = new System.Drawing.Point(10, 10);
+            this.splitContainerMain.Name = "splitContainerMain";
+            // 
+            // splitContainerMain.Panel1
+            // 
+            this.splitContainerMain.Panel1.Controls.Add(this.promptsListView);
+            this.splitContainerMain.Panel1.Controls.Add(this.panelLeftActions);
+            this.splitContainerMain.Panel1MinSize = 250;
+            // 
+            // splitContainerMain.Panel2
+            // 
+            this.splitContainerMain.Panel2.Controls.Add(this.grpPreview);
+            this.splitContainerMain.Panel2.Controls.Add(this.panelRightActions);
+            this.splitContainerMain.Panel2.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
+            this.splitContainerMain.Size = new System.Drawing.Size(900, 500);
+            this.splitContainerMain.SplitterDistance = 320;
+            this.splitContainerMain.TabIndex = 0;
             // 
             // promptsListView
             // 
+            this.promptsListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] { this.colName, this.colDesc });
+            this.promptsListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.promptsListView.FullRowSelect = true;
+            this.promptsListView.GridLines = true;
             this.promptsListView.HideSelection = false;
-            this.promptsListView.Location = new System.Drawing.Point(12, 12);
+            this.promptsListView.Location = new System.Drawing.Point(0, 0);
+            this.promptsListView.MultiSelect = false;
             this.promptsListView.Name = "promptsListView";
-            this.promptsListView.Size = new System.Drawing.Size(367, 418);
+            this.promptsListView.Size = new System.Drawing.Size(320, 460);
             this.promptsListView.TabIndex = 0;
             this.promptsListView.UseCompatibleStateImageBehavior = false;
+            this.promptsListView.View = System.Windows.Forms.View.Details;
             this.promptsListView.SelectedIndexChanged += new System.EventHandler(this.promptsListView_SelectedIndexChanged);
             // 
-            // promptTextBox
+            // colName
             // 
-            this.promptTextBox.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.promptTextBox.Location = new System.Drawing.Point(397, 66);
-            this.promptTextBox.Name = "promptTextBox";
-            this.promptTextBox.ReadOnly = true;
-            this.promptTextBox.Size = new System.Drawing.Size(423, 246);
-            this.promptTextBox.TabIndex = 1;
-            this.promptTextBox.Text = "";
+            this.colName.Text = "Prompt Name";
+            this.colName.Width = 140;
             // 
-            // promptPreviewLabel
+            // colDesc
             // 
-            this.promptPreviewLabel.Font = new System.Drawing.Font("Times New Roman", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.promptPreviewLabel.Location = new System.Drawing.Point(397, 8);
-            this.promptPreviewLabel.Name = "promptPreviewLabel";
-            this.promptPreviewLabel.Size = new System.Drawing.Size(423, 55);
-            this.promptPreviewLabel.TabIndex = 2;
-            this.promptPreviewLabel.Text = "Prompt Preview";
-            this.promptPreviewLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.colDesc.Text = "Description";
+            this.colDesc.Width = 160;
             // 
-            // noPromptsFoundLabel
+            // panelLeftActions
             // 
-            this.noPromptsFoundLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.noPromptsFoundLabel.Location = new System.Drawing.Point(12, 12);
-            this.noPromptsFoundLabel.Name = "noPromptsFoundLabel";
-            this.noPromptsFoundLabel.Size = new System.Drawing.Size(367, 432);
-            this.noPromptsFoundLabel.TabIndex = 3;
-            this.noPromptsFoundLabel.Text = "No Prompts Found!";
-            this.noPromptsFoundLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // placeholderListView
-            // 
-            this.placeholderListView.HideSelection = false;
-            this.placeholderListView.Location = new System.Drawing.Point(397, 318);
-            this.placeholderListView.Name = "placeholderListView";
-            this.placeholderListView.Size = new System.Drawing.Size(423, 112);
-            this.placeholderListView.TabIndex = 4;
-            this.placeholderListView.UseCompatibleStateImageBehavior = false;
-            this.placeholderListView.DoubleClick += new System.EventHandler(this.placeholderListView_DoubleClick);
-            // 
-            // disableTemplatingCheckbox
-            // 
-            this.disableTemplatingCheckbox.Location = new System.Drawing.Point(397, 436);
-            this.disableTemplatingCheckbox.Name = "disableTemplatingCheckbox";
-            this.disableTemplatingCheckbox.Size = new System.Drawing.Size(403, 33);
-            this.disableTemplatingCheckbox.TabIndex = 5;
-            this.disableTemplatingCheckbox.Text = "Show template names instead of contents";
-            this.disableTemplatingCheckbox.UseVisualStyleBackColor = true;
-            this.disableTemplatingCheckbox.CheckedChanged += new System.EventHandler(this.disableTemplatingCheckbox_CheckedChanged);
+            this.panelLeftActions.Controls.Add(this.buttonEdit);
+            this.panelLeftActions.Controls.Add(this.buttonAdd);
+            this.panelLeftActions.Controls.Add(this.buttonDelete);
+            this.panelLeftActions.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panelLeftActions.Location = new System.Drawing.Point(0, 460);
+            this.panelLeftActions.Name = "panelLeftActions";
+            this.panelLeftActions.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
+            this.panelLeftActions.Size = new System.Drawing.Size(320, 40);
+            this.panelLeftActions.TabIndex = 1;
             // 
             // buttonEdit
             // 
-            this.buttonEdit.Location = new System.Drawing.Point(12, 436);
+            this.buttonEdit.Location = new System.Drawing.Point(3, 8);
             this.buttonEdit.Name = "buttonEdit";
-            this.buttonEdit.Size = new System.Drawing.Size(121, 34);
-            this.buttonEdit.TabIndex = 6;
+            this.buttonEdit.Size = new System.Drawing.Size(75, 28);
+            this.buttonEdit.TabIndex = 0;
             this.buttonEdit.Text = "Edit";
             this.buttonEdit.UseVisualStyleBackColor = true;
             this.buttonEdit.Click += new System.EventHandler(this.buttonEdit_Click);
             // 
             // buttonAdd
             // 
-            this.buttonAdd.Location = new System.Drawing.Point(139, 436);
+            this.buttonAdd.Location = new System.Drawing.Point(84, 8);
             this.buttonAdd.Name = "buttonAdd";
-            this.buttonAdd.Size = new System.Drawing.Size(113, 33);
-            this.buttonAdd.TabIndex = 7;
+            this.buttonAdd.Size = new System.Drawing.Size(75, 28);
+            this.buttonAdd.TabIndex = 1;
             this.buttonAdd.Text = "Add New";
             this.buttonAdd.UseVisualStyleBackColor = true;
             this.buttonAdd.Click += new System.EventHandler(this.buttonAdd_Click);
             // 
             // buttonDelete
             // 
-            this.buttonDelete.Location = new System.Drawing.Point(258, 435);
+            this.buttonDelete.Location = new System.Drawing.Point(165, 8);
             this.buttonDelete.Name = "buttonDelete";
-            this.buttonDelete.Size = new System.Drawing.Size(121, 33);
-            this.buttonDelete.TabIndex = 8;
+            this.buttonDelete.Size = new System.Drawing.Size(75, 28);
+            this.buttonDelete.TabIndex = 2;
             this.buttonDelete.Text = "Delete";
             this.buttonDelete.UseVisualStyleBackColor = true;
             this.buttonDelete.Click += new System.EventHandler(this.buttonDelete_Click);
             // 
+            // grpPreview
+            // 
+            this.grpPreview.Controls.Add(this.promptTextBox);
+            this.grpPreview.Controls.Add(this.panelPreviewBottom);
+            this.grpPreview.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.grpPreview.Location = new System.Drawing.Point(5, 0);
+            this.grpPreview.Name = "grpPreview";
+            this.grpPreview.Size = new System.Drawing.Size(571, 460);
+            this.grpPreview.TabIndex = 0;
+            this.grpPreview.TabStop = false;
+            this.grpPreview.Text = "Prompt Preview";
+            // 
+            // promptTextBox
+            // 
+            this.promptTextBox.BackColor = System.Drawing.SystemColors.Window;
+            this.promptTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.promptTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.promptTextBox.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.promptTextBox.Location = new System.Drawing.Point(3, 18);
+            this.promptTextBox.Name = "promptTextBox";
+            this.promptTextBox.ReadOnly = true;
+            this.promptTextBox.Size = new System.Drawing.Size(565, 347);
+            this.promptTextBox.TabIndex = 0;
+            this.promptTextBox.Text = "";
+            // 
+            // panelPreviewBottom
+            // 
+            this.panelPreviewBottom.Controls.Add(this.lblPlaceholderHelp);
+            this.panelPreviewBottom.Controls.Add(this.lblPlaceholders);
+            this.panelPreviewBottom.Controls.Add(this.placeholderListView);
+            this.panelPreviewBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panelPreviewBottom.Location = new System.Drawing.Point(3, 365);
+            this.panelPreviewBottom.Name = "panelPreviewBottom";
+            this.panelPreviewBottom.Size = new System.Drawing.Size(565, 92);
+            this.panelPreviewBottom.TabIndex = 1;
+            // 
+            // lblPlaceholderHelp
+            // 
+            this.lblPlaceholderHelp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblPlaceholderHelp.AutoSize = true;
+            this.lblPlaceholderHelp.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblPlaceholderHelp.ForeColor = System.Drawing.Color.RoyalBlue;
+            this.lblPlaceholderHelp.Location = new System.Drawing.Point(365, 3);
+            this.lblPlaceholderHelp.Name = "lblPlaceholderHelp";
+            this.lblPlaceholderHelp.Size = new System.Drawing.Size(193, 13);
+            this.lblPlaceholderHelp.TabIndex = 6;
+            this.lblPlaceholderHelp.Text = "Double-click a value below to edit it";
+            this.lblPlaceholderHelp.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // lblPlaceholders
+            // 
+            this.lblPlaceholders.AutoSize = true;
+            this.lblPlaceholders.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.lblPlaceholders.Location = new System.Drawing.Point(3, 3);
+            this.lblPlaceholders.Name = "lblPlaceholders";
+            this.lblPlaceholders.Size = new System.Drawing.Size(75, 13);
+            this.lblPlaceholders.TabIndex = 5;
+            this.lblPlaceholders.Text = "Placeholders:";
+            // 
+            // placeholderListView
+            // 
+            this.placeholderListView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.placeholderListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] { this.colPlaceholderName });
+            this.placeholderListView.FullRowSelect = true;
+            this.placeholderListView.GridLines = true;
+            this.placeholderListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
+            this.placeholderListView.HideSelection = false;
+            this.placeholderListView.Location = new System.Drawing.Point(3, 22);
+            this.placeholderListView.MultiSelect = false;
+            this.placeholderListView.Name = "placeholderListView";
+            this.placeholderListView.Size = new System.Drawing.Size(559, 67);
+            this.placeholderListView.TabIndex = 4;
+            this.placeholderListView.UseCompatibleStateImageBehavior = false;
+            this.placeholderListView.View = System.Windows.Forms.View.Details;
+            this.placeholderListView.DoubleClick += new System.EventHandler(this.placeholderListView_DoubleClick);
+            // 
+            // colPlaceholderName
+            // 
+            this.colPlaceholderName.Text = "Name";
+            this.colPlaceholderName.Width = 500;
+            // 
+            // panelRightActions
+            // 
+            this.panelRightActions.Controls.Add(this.disableTemplatingCheckbox);
+            this.panelRightActions.Controls.Add(this.buttonCopy);
+            this.panelRightActions.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panelRightActions.Location = new System.Drawing.Point(5, 460);
+            this.panelRightActions.Name = "panelRightActions";
+            this.panelRightActions.Size = new System.Drawing.Size(571, 40);
+            this.panelRightActions.TabIndex = 1;
+            // 
+            // disableTemplatingCheckbox
+            // 
+            this.disableTemplatingCheckbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.disableTemplatingCheckbox.AutoSize = true;
+            this.disableTemplatingCheckbox.Location = new System.Drawing.Point(6, 11);
+            this.disableTemplatingCheckbox.Name = "disableTemplatingCheckbox";
+            this.disableTemplatingCheckbox.Size = new System.Drawing.Size(242, 17);
+            this.disableTemplatingCheckbox.TabIndex = 5;
+            this.disableTemplatingCheckbox.Text = "Show template names instead of contents";
+            this.disableTemplatingCheckbox.UseVisualStyleBackColor = true;
+            this.disableTemplatingCheckbox.CheckedChanged += new System.EventHandler(this.disableTemplatingCheckbox_CheckedChanged);
+            // 
             // buttonCopy
             // 
-            this.buttonCopy.Location = new System.Drawing.Point(699, 437);
+            this.buttonCopy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonCopy.Location = new System.Drawing.Point(448, 6);
             this.buttonCopy.Name = "buttonCopy";
-            this.buttonCopy.Size = new System.Drawing.Size(121, 33);
+            this.buttonCopy.Size = new System.Drawing.Size(120, 28);
             this.buttonCopy.TabIndex = 9;
             this.buttonCopy.Text = "Copy Prompt";
             this.buttonCopy.UseVisualStyleBackColor = true;
@@ -148,42 +269,49 @@ namespace NppDB.Core
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(832, 475);
-            this.Controls.Add(this.buttonCopy);
-            this.Controls.Add(this.buttonDelete);
-            this.Controls.Add(this.buttonAdd);
-            this.Controls.Add(this.buttonEdit);
-            this.Controls.Add(this.disableTemplatingCheckbox);
-            this.Controls.Add(this.placeholderListView);
-            this.Controls.Add(this.promptPreviewLabel);
-            this.Controls.Add(this.promptTextBox);
-            this.Controls.Add(this.noPromptsFoundLabel);
-            this.Controls.Add(this.promptsListView);
-            this.Location = new System.Drawing.Point(15, 15);
+            this.ClientSize = new System.Drawing.Size(920, 520);
+            this.Controls.Add(this.splitContainerMain);
+            this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.MinimumSize = new System.Drawing.Size(600, 400);
             this.Name = "FrmPromptLibrary";
+            this.Padding = new System.Windows.Forms.Padding(10);
             this.ShowIcon = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "Prompt Manager";
+            this.splitContainerMain.Panel1.ResumeLayout(false);
+            this.splitContainerMain.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).EndInit();
+            this.splitContainerMain.ResumeLayout(false);
+            this.panelLeftActions.ResumeLayout(false);
+            this.grpPreview.ResumeLayout(false);
+            this.panelPreviewBottom.ResumeLayout(false);
+            this.panelPreviewBottom.PerformLayout();
+            this.panelRightActions.ResumeLayout(false);
+            this.panelRightActions.PerformLayout();
             this.ResumeLayout(false);
         }
 
-        private System.Windows.Forms.Button buttonCopy;
-
-        private System.Windows.Forms.Button buttonDelete;
-
-        private System.Windows.Forms.Button buttonAdd;
-
-        private System.Windows.Forms.Button buttonEdit;
-
-        private System.Windows.Forms.CheckBox disableTemplatingCheckbox;
-
-        private System.Windows.Forms.ListView placeholderListView;
-
-        private System.Windows.Forms.Label noPromptsFoundLabel;
-
-        private System.Windows.Forms.RichTextBox promptTextBox;
-        private System.Windows.Forms.Label promptPreviewLabel;
-
-        private System.Windows.Forms.ListView promptsListView;
-
         #endregion
+
+        private System.Windows.Forms.SplitContainer splitContainerMain;
+        private System.Windows.Forms.ListView promptsListView;
+        private System.Windows.Forms.ColumnHeader colName;
+        private System.Windows.Forms.ColumnHeader colDesc;
+        private System.Windows.Forms.FlowLayoutPanel panelLeftActions;
+        private System.Windows.Forms.Button buttonEdit;
+        private System.Windows.Forms.Button buttonAdd;
+        private System.Windows.Forms.Button buttonDelete;
+        
+        private System.Windows.Forms.GroupBox grpPreview;
+        private System.Windows.Forms.RichTextBox promptTextBox;
+        private System.Windows.Forms.Panel panelPreviewBottom;
+        private System.Windows.Forms.Label lblPlaceholders;
+        private System.Windows.Forms.Label lblPlaceholderHelp; 
+        private System.Windows.Forms.ListView placeholderListView;
+        private System.Windows.Forms.ColumnHeader colPlaceholderName;
+
+        private System.Windows.Forms.Panel panelRightActions;
+        private System.Windows.Forms.CheckBox disableTemplatingCheckbox;
+        private System.Windows.Forms.Button buttonCopy;
     }
 }
