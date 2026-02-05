@@ -26,16 +26,16 @@ namespace NppDB.Core
 
         public PromptItem CreatePromptItem()
         {
-            var name = richTextBoxName.Text.Trim();
+            var name = txtName.Text.Trim();
             if (string.IsNullOrEmpty(name))
             {
                 MessageBox.Show("Prompt name cannot be empty.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return default;
             }
 
-            var id = labelPromptId.Text.Trim();
-            var description = richTextBoxDescription.Text.Trim();
-            var promptText = richTextBoxPrompt.Text.Trim();
+            var id = lblIdValue.Text.Trim();
+            var description = txtDescription.Text.Trim();
+            var promptText = txtPrompt.Text.Trim();
 
             if (string.IsNullOrEmpty(promptText))
             {
@@ -58,7 +58,7 @@ namespace NppDB.Core
 
             return new PromptItem
             {
-                Id = id == "" ? Guid.NewGuid().ToString() : id,
+                Id = string.IsNullOrEmpty(id) ? Guid.NewGuid().ToString() : id,
                 Title = name,
                 Description = description,
                 Type = "LlmPrompt",
@@ -69,30 +69,34 @@ namespace NppDB.Core
         
         public void LoadPromptItem(PromptItem promptItem)
         {
-            labelPromptId.Text = promptItem.Id;
-            richTextBoxName.Text = promptItem.Title;
-            richTextBoxDescription.Text = promptItem.Description;
-            richTextBoxPrompt.Text = promptItem.Text;
+            lblIdValue.Text = promptItem.Id;
+            txtName.Text = promptItem.Title;
+            txtDescription.Text = promptItem.Description;
+            txtPrompt.Text = promptItem.Text;
         }
 
         public void LoadPlaceholders(List<string> placeholders)
         {
-            // update label
-            StringBuilder placeholderText = new StringBuilder("Placeholders: ");
-            foreach (var placeholder in placeholders)
+            if (placeholders == null || placeholders.Count == 0)
             {
-                placeholderText.Append($"{{{{{placeholder}}}}}");
+                lblPlaceholders.Text = "No system placeholders available.";
+                return;
             }
-            labelPlaceholders.Text = placeholderText.ToString();
+
+            StringBuilder sb = new StringBuilder("System Placeholders: ");
+            sb.Append(string.Join(", ", placeholders.Select(p => $"{{{{{p}}}}}")));
+            lblPlaceholders.Text = sb.ToString();
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
             var promptItem = CreatePromptItem();
-                SelectedPromptItem = promptItem;
-                SaveNewPromptToFile(promptItem);
-                DialogResult = DialogResult.OK;
-                Close();
+            if (string.IsNullOrEmpty(promptItem.Title)) return;
+
+            SelectedPromptItem = promptItem;
+            SaveNewPromptToFile(promptItem);
+            DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void SaveNewPromptToFile(PromptItem promptItem)
@@ -128,19 +132,23 @@ namespace NppDB.Core
                 prompt.SetElementValue("Description", promptItem.Description);
                 prompt.SetElementValue("Text", promptItem.Text);
                 prompt.SetElementValue("Type", promptItem.Type);
+                prompt.SetElementValue("Title", promptItem.Title);
                 
                 var existingPlaceholders = prompt.Element("Placeholders");
                 // check whether existing placeholders are editable
                 Dictionary<string, bool> existingPlaceholderDict = new Dictionary<string, bool>();
                 
-                foreach (XElement placeholder in existingPlaceholders.Elements("Placeholder"))
+                if (existingPlaceholders != null)
                 {
-                    var name = placeholder.Attribute("name")?.Value;
-                    var isEditable = placeholder.Attribute("editable")?.Value == "true";
-                    if (!isEditable)
+                    foreach (XElement placeholder in existingPlaceholders.Elements("Placeholder"))
                     {
-                        // if not editable, keep it
-                        existingPlaceholderDict[name] = false;
+                        var name = placeholder.Attribute("name")?.Value;
+                        var isEditable = placeholder.Attribute("editable")?.Value == "true";
+                        if (!string.IsNullOrEmpty(name) && !isEditable)
+                        {
+                            // if not editable, keep it
+                            existingPlaceholderDict[name] = false;
+                        }
                     }
                 }
                 

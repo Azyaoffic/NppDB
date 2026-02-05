@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Windows.Forms;
 
 namespace NppDB.Core
 {
@@ -31,135 +32,195 @@ namespace NppDB.Core
         /// </summary>
         private void InitializeComponent()
         {
-            this.buttonSave = new System.Windows.Forms.Button();
+            this.panelBottom = new System.Windows.Forms.Panel();
             this.buttonDiscard = new System.Windows.Forms.Button();
-            this.richTextBoxName = new System.Windows.Forms.RichTextBox();
-            this.labelName = new System.Windows.Forms.Label();
-            this.richTextBoxDescription = new System.Windows.Forms.RichTextBox();
-            this.labelDescription = new System.Windows.Forms.Label();
-            this.richTextBoxPrompt = new System.Windows.Forms.RichTextBox();
-            this.labelPromptId = new System.Windows.Forms.Label();
-            this.labelPlaceholders = new System.Windows.Forms.Label();
+            this.buttonSave = new System.Windows.Forms.Button();
+            this.lblId = new System.Windows.Forms.Label();
+            this.lblIdValue = new System.Windows.Forms.Label();
+            this.lblName = new System.Windows.Forms.Label();
+            this.txtName = new System.Windows.Forms.TextBox();
+            this.lblDescription = new System.Windows.Forms.Label();
+            this.txtDescription = new System.Windows.Forms.TextBox();
+            this.lblPrompt = new System.Windows.Forms.Label();
+            this.txtPrompt = new System.Windows.Forms.RichTextBox();
+            this.lblPlaceholders = new System.Windows.Forms.Label();
+            this.panelBottom.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // panelBottom
+            // 
+            this.panelBottom.BackColor = System.Drawing.SystemColors.Control;
+            this.panelBottom.Controls.Add(this.lblIdValue);
+            this.panelBottom.Controls.Add(this.lblId);
+            this.panelBottom.Controls.Add(this.buttonDiscard);
+            this.panelBottom.Controls.Add(this.buttonSave);
+            this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panelBottom.Location = new System.Drawing.Point(0, 500);
+            this.panelBottom.Name = "panelBottom";
+            this.panelBottom.Size = new System.Drawing.Size(684, 45);
+            this.panelBottom.TabIndex = 4;
+            // 
+            // buttonDiscard
+            // 
+            this.buttonDiscard.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonDiscard.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.buttonDiscard.Location = new System.Drawing.Point(597, 8);
+            this.buttonDiscard.Name = "buttonDiscard";
+            this.buttonDiscard.Size = new System.Drawing.Size(75, 27);
+            this.buttonDiscard.TabIndex = 1;
+            this.buttonDiscard.Text = "Cancel";
+            this.buttonDiscard.UseVisualStyleBackColor = true;
+            this.buttonDiscard.Click += new System.EventHandler(this.buttonDiscard_Click);
             // 
             // buttonSave
             // 
-            this.buttonSave.Location = new System.Drawing.Point(12, 701);
+            this.buttonSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonSave.Location = new System.Drawing.Point(516, 8);
             this.buttonSave.Name = "buttonSave";
-            this.buttonSave.Size = new System.Drawing.Size(79, 44);
+            this.buttonSave.Size = new System.Drawing.Size(75, 27);
             this.buttonSave.TabIndex = 0;
             this.buttonSave.Text = "Save";
             this.buttonSave.UseVisualStyleBackColor = true;
             this.buttonSave.Click += new System.EventHandler(this.buttonSave_Click);
             // 
-            // buttonDiscard
+            // lblId
             // 
-            this.buttonDiscard.Location = new System.Drawing.Point(709, 701);
-            this.buttonDiscard.Name = "buttonDiscard";
-            this.buttonDiscard.Size = new System.Drawing.Size(79, 44);
-            this.buttonDiscard.TabIndex = 1;
-            this.buttonDiscard.Text = "Discard";
-            this.buttonDiscard.UseVisualStyleBackColor = true;
-            this.buttonDiscard.Click += new System.EventHandler(this.buttonDiscard_Click);
+            this.lblId.AutoSize = true;
+            this.lblId.ForeColor = System.Drawing.Color.Gray;
+            this.lblId.Location = new System.Drawing.Point(12, 15);
+            this.lblId.Name = "lblId";
+            this.lblId.Size = new System.Drawing.Size(21, 15);
+            this.lblId.TabIndex = 2;
+            this.lblId.Text = "ID:";
             // 
-            // richTextBoxName
+            // lblIdValue
             // 
-            this.richTextBoxName.Location = new System.Drawing.Point(87, 12);
-            this.richTextBoxName.Name = "richTextBoxName";
-            this.richTextBoxName.Size = new System.Drawing.Size(701, 43);
-            this.richTextBoxName.TabIndex = 2;
-            this.richTextBoxName.Text = "";
+            this.lblIdValue.AutoSize = true;
+            this.lblIdValue.ForeColor = System.Drawing.Color.Gray;
+            this.lblIdValue.Location = new System.Drawing.Point(39, 15);
+            this.lblIdValue.Name = "lblIdValue";
+            this.lblIdValue.Size = new System.Drawing.Size(0, 15);
+            this.lblIdValue.TabIndex = 3;
             // 
-            // labelName
+            // lblName
             // 
-            this.labelName.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelName.Location = new System.Drawing.Point(12, 13);
-            this.labelName.Name = "labelName";
-            this.labelName.Size = new System.Drawing.Size(64, 41);
-            this.labelName.TabIndex = 3;
-            this.labelName.Text = "Name:";
-            this.labelName.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblName.AutoSize = true;
+            this.lblName.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblName.Location = new System.Drawing.Point(12, 15);
+            this.lblName.Name = "lblName";
+            this.lblName.Size = new System.Drawing.Size(43, 15);
+            this.lblName.TabIndex = 0;
+            this.lblName.Text = "Name:";
             // 
-            // richTextBoxDescription
+            // txtName
             // 
-            this.richTextBoxDescription.Location = new System.Drawing.Point(113, 84);
-            this.richTextBoxDescription.Name = "richTextBoxDescription";
-            this.richTextBoxDescription.Size = new System.Drawing.Size(675, 70);
-            this.richTextBoxDescription.TabIndex = 4;
-            this.richTextBoxDescription.Text = "";
+            this.txtName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtName.Location = new System.Drawing.Point(15, 33);
+            this.txtName.Name = "txtName";
+            this.txtName.Size = new System.Drawing.Size(657, 23);
+            this.txtName.TabIndex = 0;
             // 
-            // labelDescription
+            // lblDescription
             // 
-            this.labelDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelDescription.Location = new System.Drawing.Point(12, 100);
-            this.labelDescription.Name = "labelDescription";
-            this.labelDescription.Size = new System.Drawing.Size(100, 41);
-            this.labelDescription.TabIndex = 5;
-            this.labelDescription.Text = "Description:";
-            this.labelDescription.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblDescription.AutoSize = true;
+            this.lblDescription.Location = new System.Drawing.Point(12, 65);
+            this.lblDescription.Name = "lblDescription";
+            this.lblDescription.Size = new System.Drawing.Size(70, 15);
+            this.lblDescription.TabIndex = 2;
+            this.lblDescription.Text = "Description:";
             // 
-            // richTextBoxPrompt
+            // txtDescription
             // 
-            this.richTextBoxPrompt.Font = new System.Drawing.Font("Courier New", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.richTextBoxPrompt.Location = new System.Drawing.Point(11, 216);
-            this.richTextBoxPrompt.Name = "richTextBoxPrompt";
-            this.richTextBoxPrompt.Size = new System.Drawing.Size(775, 479);
-            this.richTextBoxPrompt.TabIndex = 6;
-            this.richTextBoxPrompt.Text = "";
+            this.txtDescription.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtDescription.Location = new System.Drawing.Point(15, 83);
+            this.txtDescription.Multiline = true;
+            this.txtDescription.Name = "txtDescription";
+            this.txtDescription.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtDescription.Size = new System.Drawing.Size(657, 50);
+            this.txtDescription.TabIndex = 1;
             // 
-            // labelPromptId
+            // lblPrompt
             // 
-            this.labelPromptId.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelPromptId.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.labelPromptId.Location = new System.Drawing.Point(12, 172);
-            this.labelPromptId.Name = "labelPromptId";
-            this.labelPromptId.Size = new System.Drawing.Size(238, 41);
-            this.labelPromptId.TabIndex = 7;
-            this.labelPromptId.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblPrompt.AutoSize = true;
+            this.lblPrompt.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblPrompt.Location = new System.Drawing.Point(12, 145);
+            this.lblPrompt.Name = "lblPrompt";
+            this.lblPrompt.Size = new System.Drawing.Size(50, 15);
+            this.lblPrompt.TabIndex = 4;
+            this.lblPrompt.Text = "Prompt:";
             // 
-            // labelPlaceholders
+            // txtPrompt
             // 
-            this.labelPlaceholders.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelPlaceholders.Location = new System.Drawing.Point(332, 172);
-            this.labelPlaceholders.Name = "labelPlaceholders";
-            this.labelPlaceholders.Size = new System.Drawing.Size(455, 41);
-            this.labelPlaceholders.TabIndex = 8;
-            this.labelPlaceholders.Text = "No placeholders available";
-            this.labelPlaceholders.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.txtPrompt.AcceptsTab = true;
+            this.txtPrompt.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtPrompt.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtPrompt.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtPrompt.Location = new System.Drawing.Point(15, 163);
+            this.txtPrompt.Name = "txtPrompt";
+            this.txtPrompt.Size = new System.Drawing.Size(657, 313);
+            this.txtPrompt.TabIndex = 2;
+            this.txtPrompt.Text = "";
+            // 
+            // lblPlaceholders
+            // 
+            this.lblPlaceholders.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblPlaceholders.AutoSize = true;
+            this.lblPlaceholders.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.lblPlaceholders.Location = new System.Drawing.Point(15, 482);
+            this.lblPlaceholders.Name = "lblPlaceholders";
+            this.lblPlaceholders.Size = new System.Drawing.Size(0, 15);
+            this.lblPlaceholders.TabIndex = 6;
             // 
             // FrmPromptEditor
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AcceptButton = this.buttonSave;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 757);
-            this.Controls.Add(this.labelPlaceholders);
-            this.Controls.Add(this.labelPromptId);
-            this.Controls.Add(this.richTextBoxPrompt);
-            this.Controls.Add(this.labelDescription);
-            this.Controls.Add(this.richTextBoxDescription);
-            this.Controls.Add(this.labelName);
-            this.Controls.Add(this.richTextBoxName);
-            this.Controls.Add(this.buttonDiscard);
-            this.Controls.Add(this.buttonSave);
+            this.CancelButton = this.buttonDiscard;
+            this.ClientSize = new System.Drawing.Size(684, 545);
+            this.Controls.Add(this.lblPlaceholders);
+            this.Controls.Add(this.txtPrompt);
+            this.Controls.Add(this.lblPrompt);
+            this.Controls.Add(this.txtDescription);
+            this.Controls.Add(this.lblDescription);
+            this.Controls.Add(this.txtName);
+            this.Controls.Add(this.lblName);
+            this.Controls.Add(this.panelBottom);
+            this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(500, 400);
             this.Name = "FrmPromptEditor";
             this.ShowIcon = false;
-            this.Text = "Prompt Editor";
+            this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "Edit Prompt";
+            this.panelBottom.ResumeLayout(false);
+            this.panelBottom.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
+
         }
 
-        private System.Windows.Forms.Label labelPlaceholders;
-
-        private System.Windows.Forms.RichTextBox richTextBoxDescription;
-        private System.Windows.Forms.Label labelDescription;
-        private System.Windows.Forms.RichTextBox richTextBoxPrompt;
-        private System.Windows.Forms.Label labelPromptId;
-
-        private System.Windows.Forms.Label labelName;
-
-        private System.Windows.Forms.RichTextBox richTextBoxName;
-
-        private System.Windows.Forms.Button buttonSave;
+        private System.Windows.Forms.Panel panelBottom;
         private System.Windows.Forms.Button buttonDiscard;
+        private System.Windows.Forms.Button buttonSave;
+        private System.Windows.Forms.Label lblId;
+        private System.Windows.Forms.Label lblIdValue;
+        
+        private System.Windows.Forms.Label lblName;
+        private System.Windows.Forms.TextBox txtName;
+        
+        private System.Windows.Forms.Label lblDescription;
+        private System.Windows.Forms.TextBox txtDescription;
+        
+        private System.Windows.Forms.Label lblPrompt;
+        private System.Windows.Forms.RichTextBox txtPrompt;
+        
+        private System.Windows.Forms.Label lblPlaceholders;
 
         #endregion
     }
