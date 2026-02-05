@@ -36,6 +36,9 @@ namespace NppDB.Core
             this.promptsListView = new System.Windows.Forms.ListView();
             this.colName = new System.Windows.Forms.ColumnHeader();
             this.colDesc = new System.Windows.Forms.ColumnHeader();
+            this.panelSearch = new System.Windows.Forms.Panel();
+            this.txtSearch = new System.Windows.Forms.TextBox();
+            this.lblSearch = new System.Windows.Forms.Label();
             this.panelLeftActions = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonEdit = new System.Windows.Forms.Button();
             this.buttonAdd = new System.Windows.Forms.Button();
@@ -43,10 +46,8 @@ namespace NppDB.Core
             this.grpPreview = new System.Windows.Forms.GroupBox();
             this.promptTextBox = new System.Windows.Forms.RichTextBox();
             this.panelPreviewBottom = new System.Windows.Forms.Panel();
-            this.lblPlaceholderHelp = new System.Windows.Forms.Label();
+            this.flowLayoutPanelPlaceholders = new System.Windows.Forms.FlowLayoutPanel();
             this.lblPlaceholders = new System.Windows.Forms.Label();
-            this.placeholderListView = new System.Windows.Forms.ListView();
-            this.colPlaceholderName = new System.Windows.Forms.ColumnHeader();
             this.panelRightActions = new System.Windows.Forms.Panel();
             this.disableTemplatingCheckbox = new System.Windows.Forms.CheckBox();
             this.buttonCopy = new System.Windows.Forms.Button();
@@ -54,6 +55,7 @@ namespace NppDB.Core
             this.splitContainerMain.Panel1.SuspendLayout();
             this.splitContainerMain.Panel2.SuspendLayout();
             this.splitContainerMain.SuspendLayout();
+            this.panelSearch.SuspendLayout();
             this.panelLeftActions.SuspendLayout();
             this.grpPreview.SuspendLayout();
             this.panelPreviewBottom.SuspendLayout();
@@ -70,6 +72,7 @@ namespace NppDB.Core
             // splitContainerMain.Panel1
             // 
             this.splitContainerMain.Panel1.Controls.Add(this.promptsListView);
+            this.splitContainerMain.Panel1.Controls.Add(this.panelSearch);
             this.splitContainerMain.Panel1.Controls.Add(this.panelLeftActions);
             this.splitContainerMain.Panel1MinSize = 250;
             // 
@@ -89,11 +92,11 @@ namespace NppDB.Core
             this.promptsListView.FullRowSelect = true;
             this.promptsListView.GridLines = true;
             this.promptsListView.HideSelection = false;
-            this.promptsListView.Location = new System.Drawing.Point(0, 0);
+            this.promptsListView.Location = new System.Drawing.Point(0, 35);
             this.promptsListView.MultiSelect = false;
             this.promptsListView.Name = "promptsListView";
-            this.promptsListView.Size = new System.Drawing.Size(320, 460);
-            this.promptsListView.TabIndex = 0;
+            this.promptsListView.Size = new System.Drawing.Size(320, 425);
+            this.promptsListView.TabIndex = 1;
             this.promptsListView.UseCompatibleStateImageBehavior = false;
             this.promptsListView.View = System.Windows.Forms.View.Details;
             this.promptsListView.SelectedIndexChanged += new System.EventHandler(this.promptsListView_SelectedIndexChanged);
@@ -108,6 +111,34 @@ namespace NppDB.Core
             this.colDesc.Text = "Description";
             this.colDesc.Width = 160;
             // 
+            // panelSearch
+            // 
+            this.panelSearch.Controls.Add(this.txtSearch);
+            this.panelSearch.Controls.Add(this.lblSearch);
+            this.panelSearch.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelSearch.Location = new System.Drawing.Point(0, 0);
+            this.panelSearch.Name = "panelSearch";
+            this.panelSearch.Size = new System.Drawing.Size(320, 35);
+            this.panelSearch.TabIndex = 0;
+            // 
+            // txtSearch
+            // 
+            this.txtSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtSearch.Location = new System.Drawing.Point(55, 7);
+            this.txtSearch.Name = "txtSearch";
+            this.txtSearch.Size = new System.Drawing.Size(262, 22);
+            this.txtSearch.TabIndex = 1;
+            this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
+            // 
+            // lblSearch
+            // 
+            this.lblSearch.AutoSize = true;
+            this.lblSearch.Location = new System.Drawing.Point(4, 10);
+            this.lblSearch.Name = "lblSearch";
+            this.lblSearch.Size = new System.Drawing.Size(44, 13);
+            this.lblSearch.TabIndex = 0;
+            this.lblSearch.Text = "Search:";
+            // 
             // panelLeftActions
             // 
             this.panelLeftActions.Controls.Add(this.buttonEdit);
@@ -118,7 +149,7 @@ namespace NppDB.Core
             this.panelLeftActions.Name = "panelLeftActions";
             this.panelLeftActions.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
             this.panelLeftActions.Size = new System.Drawing.Size(320, 40);
-            this.panelLeftActions.TabIndex = 1;
+            this.panelLeftActions.TabIndex = 2;
             // 
             // buttonEdit
             // 
@@ -171,33 +202,30 @@ namespace NppDB.Core
             this.promptTextBox.Location = new System.Drawing.Point(3, 18);
             this.promptTextBox.Name = "promptTextBox";
             this.promptTextBox.ReadOnly = true;
-            this.promptTextBox.Size = new System.Drawing.Size(565, 347);
+            this.promptTextBox.Size = new System.Drawing.Size(565, 301);
             this.promptTextBox.TabIndex = 0;
             this.promptTextBox.Text = "";
             // 
             // panelPreviewBottom
             // 
-            this.panelPreviewBottom.Controls.Add(this.lblPlaceholderHelp);
+            this.panelPreviewBottom.Controls.Add(this.flowLayoutPanelPlaceholders);
             this.panelPreviewBottom.Controls.Add(this.lblPlaceholders);
-            this.panelPreviewBottom.Controls.Add(this.placeholderListView);
             this.panelPreviewBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelPreviewBottom.Location = new System.Drawing.Point(3, 365);
+            this.panelPreviewBottom.Location = new System.Drawing.Point(3, 319);
             this.panelPreviewBottom.Name = "panelPreviewBottom";
-            this.panelPreviewBottom.Size = new System.Drawing.Size(565, 92);
+            this.panelPreviewBottom.Size = new System.Drawing.Size(565, 138);
             this.panelPreviewBottom.TabIndex = 1;
             // 
-            // lblPlaceholderHelp
+            // flowLayoutPanelPlaceholders
             // 
-            this.lblPlaceholderHelp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblPlaceholderHelp.AutoSize = true;
-            this.lblPlaceholderHelp.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblPlaceholderHelp.ForeColor = System.Drawing.Color.RoyalBlue;
-            this.lblPlaceholderHelp.Location = new System.Drawing.Point(365, 3);
-            this.lblPlaceholderHelp.Name = "lblPlaceholderHelp";
-            this.lblPlaceholderHelp.Size = new System.Drawing.Size(193, 13);
-            this.lblPlaceholderHelp.TabIndex = 6;
-            this.lblPlaceholderHelp.Text = "Double-click a value below to edit it";
-            this.lblPlaceholderHelp.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this.flowLayoutPanelPlaceholders.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.flowLayoutPanelPlaceholders.AutoScroll = true;
+            this.flowLayoutPanelPlaceholders.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
+            this.flowLayoutPanelPlaceholders.Location = new System.Drawing.Point(3, 22);
+            this.flowLayoutPanelPlaceholders.Name = "flowLayoutPanelPlaceholders";
+            this.flowLayoutPanelPlaceholders.Size = new System.Drawing.Size(559, 113);
+            this.flowLayoutPanelPlaceholders.TabIndex = 6;
+            this.flowLayoutPanelPlaceholders.WrapContents = false;
             // 
             // lblPlaceholders
             // 
@@ -205,31 +233,9 @@ namespace NppDB.Core
             this.lblPlaceholders.ForeColor = System.Drawing.SystemColors.GrayText;
             this.lblPlaceholders.Location = new System.Drawing.Point(3, 3);
             this.lblPlaceholders.Name = "lblPlaceholders";
-            this.lblPlaceholders.Size = new System.Drawing.Size(75, 13);
+            this.lblPlaceholders.Size = new System.Drawing.Size(93, 13);
             this.lblPlaceholders.TabIndex = 5;
-            this.lblPlaceholders.Text = "Placeholders:";
-            // 
-            // placeholderListView
-            // 
-            this.placeholderListView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
-            this.placeholderListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] { this.colPlaceholderName });
-            this.placeholderListView.FullRowSelect = true;
-            this.placeholderListView.GridLines = true;
-            this.placeholderListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.placeholderListView.HideSelection = false;
-            this.placeholderListView.Location = new System.Drawing.Point(3, 22);
-            this.placeholderListView.MultiSelect = false;
-            this.placeholderListView.Name = "placeholderListView";
-            this.placeholderListView.Size = new System.Drawing.Size(559, 67);
-            this.placeholderListView.TabIndex = 4;
-            this.placeholderListView.UseCompatibleStateImageBehavior = false;
-            this.placeholderListView.View = System.Windows.Forms.View.Details;
-            this.placeholderListView.DoubleClick += new System.EventHandler(this.placeholderListView_DoubleClick);
-            // 
-            // colPlaceholderName
-            // 
-            this.colPlaceholderName.Text = "Name";
-            this.colPlaceholderName.Width = 500;
+            this.lblPlaceholders.Text = "Fill Placeholders:";
             // 
             // panelRightActions
             // 
@@ -256,12 +262,14 @@ namespace NppDB.Core
             // buttonCopy
             // 
             this.buttonCopy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCopy.Location = new System.Drawing.Point(448, 6);
+            this.buttonCopy.BackColor = System.Drawing.SystemColors.Highlight;
+            this.buttonCopy.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.buttonCopy.Location = new System.Drawing.Point(275, 6);
             this.buttonCopy.Name = "buttonCopy";
-            this.buttonCopy.Size = new System.Drawing.Size(120, 28);
+            this.buttonCopy.Size = new System.Drawing.Size(293, 28);
             this.buttonCopy.TabIndex = 9;
             this.buttonCopy.Text = "Copy Prompt";
-            this.buttonCopy.UseVisualStyleBackColor = true;
+            this.buttonCopy.UseVisualStyleBackColor = false;
             this.buttonCopy.Click += new System.EventHandler(this.buttonCopy_Click);
             // 
             // FrmPromptLibrary
@@ -282,6 +290,8 @@ namespace NppDB.Core
             this.splitContainerMain.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).EndInit();
             this.splitContainerMain.ResumeLayout(false);
+            this.panelSearch.ResumeLayout(false);
+            this.panelSearch.PerformLayout();
             this.panelLeftActions.ResumeLayout(false);
             this.grpPreview.ResumeLayout(false);
             this.panelPreviewBottom.ResumeLayout(false);
@@ -301,17 +311,19 @@ namespace NppDB.Core
         private System.Windows.Forms.Button buttonEdit;
         private System.Windows.Forms.Button buttonAdd;
         private System.Windows.Forms.Button buttonDelete;
-        
+
         private System.Windows.Forms.GroupBox grpPreview;
         private System.Windows.Forms.RichTextBox promptTextBox;
         private System.Windows.Forms.Panel panelPreviewBottom;
         private System.Windows.Forms.Label lblPlaceholders;
-        private System.Windows.Forms.Label lblPlaceholderHelp; 
-        private System.Windows.Forms.ListView placeholderListView;
-        private System.Windows.Forms.ColumnHeader colPlaceholderName;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelPlaceholders;
 
         private System.Windows.Forms.Panel panelRightActions;
         private System.Windows.Forms.CheckBox disableTemplatingCheckbox;
         private System.Windows.Forms.Button buttonCopy;
+
+        private System.Windows.Forms.Panel panelSearch;
+        private System.Windows.Forms.TextBox txtSearch;
+        private System.Windows.Forms.Label lblSearch;
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
@@ -27,6 +28,7 @@ namespace NppDB.Core
     public partial class FrmPromptLibrary : Form
     {
         private static List<PromptItem> _prompts;
+        private List<PromptItem> _filteredPrompts;
 
         public static string PromptLibraryPath { get; set; }
 
@@ -45,23 +47,13 @@ namespace NppDB.Core
             InitializeComponent();
 
             promptsListView.View = View.Details;
-            placeholderListView.View = View.Details;
 
             promptsListView.Columns.Clear();
             promptsListView.Columns.Add("Prompt Name", 200);
             promptsListView.Columns.Add("Description", 300);
 
-            placeholderListView.Columns.Clear();
-            placeholderListView.Columns.Add("Placeholder", 150);
-            placeholderListView.Columns.Add("Value", 300);
-
-            foreach (var prompt in _prompts)
-            {
-                var item = new ListViewItem(prompt.Title);
-                item.SubItems.Add(prompt.Description);
-                item.Tag = prompt;
-                promptsListView.Items.Add(item);
-            }
+            _filteredPrompts = new List<PromptItem>(_prompts);
+            PopulatePromptList();
         }
 
         public static void SetPrompts(List<PromptItem> promptItems)
@@ -69,73 +61,244 @@ namespace NppDB.Core
             _prompts = promptItems;
         }
 
+        private void PopulatePromptList()
+        {
+            promptsListView.Items.Clear();
+            foreach (var prompt in _filteredPrompts)
+            {
+                var item = new ListViewItem(prompt.Title);
+                item.SubItems.Add(prompt.Description);
+                item.Tag = prompt;
+                promptsListView.Items.Add(item);
+            }
+            
+            if (promptsListView.Items.Count == 0)
+            {
+                promptTextBox.Text = string.Empty;
+                flowLayoutPanelPlaceholders.Controls.Clear();
+                UpdateCopyButtonState(false);
+            }
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            var searchText = txtSearch.Text.ToLower().Trim();
+
+            if (string.IsNullOrEmpty(searchText))
+            {
+                _filteredPrompts = new List<PromptItem>(_prompts);
+            }
+            else
+            {
+                _filteredPrompts = _prompts.Where(p => 
+                    (p.Title != null && p.Title.ToLower().Contains(searchText)) || 
+                    (p.Description != null && p.Description.ToLower().Contains(searchText))
+                ).ToList();
+            }
+
+            PopulatePromptList();
+        }
+
         private void promptsListView_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (promptsListView.SelectedItems.Count > 0)
             {
-                // main selection
                 var selectedItem = promptsListView.SelectedItems[0];
                 var prompt = (PromptItem)selectedItem.Tag;
-                if (disableTemplatingCheckbox.Checked)
-                {
-                    promptTextBox.Text = ConstructPromptPreview(prompt.Text);
-                }
-                else
-                {
-                    promptTextBox.Text = ConstructPromptPreview(SubstitutePlaceholders(prompt.Text));
-                }
 
-                // placeholders
-                placeholderListView.Items.Clear();
-                foreach (var placeholder in prompt.Placeholders)
-                {
-                    var item = new ListViewItem(placeholder.Name)
-                    {
-                        Tag = placeholder
-                    };
-                    try
-                    {
-                        item.SubItems.Add(Placeholders[placeholder.Name]);
-                        if (!placeholder.IsEditable)
-                        {
-                            item.BackColor = Color.Gray;
-                        }
-                    }
-                    catch (KeyNotFoundException)
-                    {
-                        if (placeholder.IsEditable)
-                        {
-                            item.SubItems.Add(string.Empty);
-                        }
-                        else
-                        {
-                            item.SubItems.Add("<no value can be assigned>");
-                            item.BackColor = Color.Gray;
-                        }
-                    }
-
-                    placeholderListView.Items.Add(item);
-                }
+                GeneratePlaceholderControls(prompt);
+                UpdatePreviewText(prompt);
             }
             else
             {
                 promptTextBox.Text = string.Empty;
+                flowLayoutPanelPlaceholders.Controls.Clear();
+                UpdateCopyButtonState(false);
+            }
+        }
+
+        private void GeneratePlaceholderControls(PromptItem prompt)
+        {
+            flowLayoutPanelPlaceholders.Controls.Clear();
+            flowLayoutPanelPlaceholders.SuspendLayout();
+
+            if (prompt.Placeholders != null)
+            {
+                foreach (var placeholder in prompt.Placeholders)
+                {
+                    var container = new FlowLayoutPanel
+                    {
+                        FlowDirection = FlowDirection.TopDown,
+                        AutoSize = true,
+                        Width = flowLayoutPanelPlaceholders.Width - 25,
+                        Margin = new Padding(0, 0, 0, 10)
+                    };
+
+                    var label = new Label
+                    {
+                        AutoSize = true,
+                        Margin = new Padding(0, 0, 0, 2)
+                    };
+
+                    if (placeholder.IsEditable)
+                    {
+                        label.Text = $"{placeholder.Name} *";
+                        label.Font = new Font(label.Font, FontStyle.Bold);
+                        label.ForeColor = Color.Black; 
+                        
+                        var tip = new ToolTip();
+                        tip.SetToolTip(label, "This field is required.");
+                    }
+                    else
+                    {
+                        label.Text = $"{placeholder.Name} (Auto-filled)";
+                        label.ForeColor = Color.DimGray;
+                    }
+
+                    container.Controls.Add(label);
+
+                    // input control
+                    var initialValue = "";
+                    if (Placeholders.ContainsKey(placeholder.Name))
+                    {
+                        initialValue = Placeholders[placeholder.Name];
+                    }
+
+                    if (placeholder.IsEditable)
+                    {
+                        Control inputControl;
+                        if (placeholder.IsRichText)
+                        {
+                            var rtBox = new RichTextBox
+                            {
+                                Height = 60,
+                                Width = container.Width,
+                                Text = initialValue,
+                                Tag = placeholder.Name,
+                                BorderStyle = BorderStyle.FixedSingle
+                            };
+                            rtBox.TextChanged += InputControl_TextChanged;
+                            inputControl = rtBox;
+                        }
+                        else
+                        {
+                            var txtBox = new TextBox
+                            {
+                                Width = container.Width,
+                                Text = initialValue,
+                                Tag = placeholder.Name
+                            };
+                            txtBox.TextChanged += InputControl_TextChanged;
+                            inputControl = txtBox;
+                        }
+                        container.Controls.Add(inputControl);
+                    }
+                    else
+                    {
+                        // read-only placeholders
+                        var lblValue = new TextBox
+                        {
+                            Width = container.Width,
+                            Text = string.IsNullOrEmpty(initialValue) ? "<No context available>" : initialValue,
+                            ReadOnly = true,
+                            BackColor = SystemColors.Control,
+                            ForeColor = SystemColors.WindowText
+                        };
+                        container.Controls.Add(lblValue);
+                    }
+
+                    flowLayoutPanelPlaceholders.Controls.Add(container);
+                }
+            }
+
+            flowLayoutPanelPlaceholders.ResumeLayout();
+            
+            ValidateInputs();
+        }
+
+        private void InputControl_TextChanged(object sender, EventArgs e)
+        {
+            var control = (Control)sender;
+            var key = (string)control.Tag;
+            var value = control.Text;
+
+            Placeholders[key] = value;
+
+            if (promptsListView.SelectedItems.Count > 0)
+            {
+                var prompt = (PromptItem)promptsListView.SelectedItems[0].Tag;
+                UpdatePreviewText(prompt);
+            }
+
+            ValidateInputs();
+        }
+
+        private void UpdatePreviewText(PromptItem prompt)
+        {
+            if (disableTemplatingCheckbox.Checked)
+            {
+                promptTextBox.Text = ConstructPromptPreview(prompt.Text);
+            }
+            else
+            {
+                promptTextBox.Text = ConstructPromptPreview(SubstitutePlaceholders(prompt.Text));
+            }
+        }
+
+        private void ValidateInputs()
+        {
+            if (promptsListView.SelectedItems.Count == 0)
+            {
+                UpdateCopyButtonState(false);
+                return;
+            }
+
+            var prompt = (PromptItem)promptsListView.SelectedItems[0].Tag;
+            var isValid = true;
+
+            if (prompt.Placeholders != null)
+            {
+                foreach (var ph in prompt.Placeholders)
+                {
+                    if (ph.IsEditable)
+                    {
+                        if (!Placeholders.TryGetValue(ph.Name, out var val) || string.IsNullOrWhiteSpace(val))
+                        {
+                            isValid = false;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            UpdateCopyButtonState(isValid);
+        }
+
+        private void UpdateCopyButtonState(bool enabled)
+        {
+            buttonCopy.Enabled = enabled;
+            if (enabled)
+            {
+                buttonCopy.Text = "Copy Prompt";
+                buttonCopy.BackColor = SystemColors.Highlight;
+                buttonCopy.ForeColor = SystemColors.HighlightText;
+            }
+            else
+            {
+                buttonCopy.Text = "Fill required fields (*) to Copy";
+                buttonCopy.BackColor = Color.LightGray;
+                buttonCopy.ForeColor = Color.DimGray;
             }
         }
 
         private string SubstitutePlaceholders(string text)
         {
-            /*
-             * Supported default placeholders:
-             * * {selected_sql} - the currently selected SQL in the editor
-             */
             var selectedSql = Placeholders.TryGetValue("selected_sql", out var plh)
                 ? plh
                 : string.Empty;
 
             text = text.Replace("{{selected_sql}}", selectedSql);
             
-            // Custom placeholders
             foreach (var placeholder in Placeholders)
             {
                 if (!string.IsNullOrEmpty(placeholder.Value))
@@ -164,7 +327,11 @@ namespace NppDB.Core
 
         private void disableTemplatingCheckbox_CheckedChanged(object sender, EventArgs e)
         {
-            promptsListView_SelectedIndexChanged(this, EventArgs.Empty);
+            if (promptsListView.SelectedItems.Count > 0)
+            {
+                var prompt = (PromptItem)promptsListView.SelectedItems[0].Tag;
+                UpdatePreviewText(prompt);
+            }
         }
 
         private void buttonEdit_Click(object sender, EventArgs e)
@@ -184,11 +351,14 @@ namespace NppDB.Core
                     {
                         var updatedPrompt = promptEditor.SelectedPromptItem;
                         // update the prompt in the list
-                        selectedItem.SubItems[0].Text = updatedPrompt.Title;
+                        selectedItem.Text = updatedPrompt.Title;
                         selectedItem.SubItems[1].Text = updatedPrompt.Description;
                         selectedItem.Tag = updatedPrompt;
 
-                        // refresh the display
+                        var index = _prompts.FindIndex(p => p.Title == prompt.Title);
+                        if (index >= 0) _prompts[index] = updatedPrompt;
+
+                        // refresh
                         promptsListView_SelectedIndexChanged(this, EventArgs.Empty);
                     }
                 }
@@ -206,11 +376,9 @@ namespace NppDB.Core
                 {
                     var newPrompt = promptEditor.SelectedPromptItem;
                     _prompts.Add(newPrompt);
-
-                    var item = new ListViewItem(newPrompt.Title);
-                    item.SubItems.Add(newPrompt.Description);
-                    item.Tag = newPrompt;
-                    promptsListView.Items.Add(item);
+                    
+                    // refresh search results to possibly include the new prompt
+                    txtSearch_TextChanged(this, EventArgs.Empty);
                 }
             }
         }
@@ -230,18 +398,16 @@ namespace NppDB.Core
 
                 if (confirmResult == DialogResult.Yes)
                 {
-                    // remove from the in-memory list
                     _prompts.RemoveAll(p => p.Title == prompt.Title);
+                    
+                    // Update UI via search logic
+                    txtSearch_TextChanged(this, EventArgs.Empty);
 
-                    // remove from the ListView
-                    promptsListView.Items.Remove(selectedItem);
-
-                    // remove from the file
                     ErasePromptFromFile(prompt);
 
-                    // Clear the preview and placeholders
                     promptTextBox.Text = string.Empty;
-                    placeholderListView.Items.Clear();
+                    flowLayoutPanelPlaceholders.Controls.Clear();
+                    UpdateCopyButtonState(false);
                 }
             }
         }
@@ -267,63 +433,19 @@ namespace NppDB.Core
             }
         }
 
-        private void placeholderListView_DoubleClick(object sender, EventArgs e)
-        {
-            if (placeholderListView.SelectedItems.Count > 0)
-            {
-                var item = placeholderListView.SelectedItems[0];
-
-                if (item.BackColor == Color.Gray) return;
-                
-                var placeholderName = item.Text;
-                var currentValue = item.SubItems.Count > 1 ? item.SubItems[1].Text : string.Empty;
-                
-                var placeholder = (PromptPlaceholder)item.Tag;
-                var isRichText = placeholder.IsRichText;
-
-
-                using (var inputDialog = new FrmPromptTemplateInput(
-                           "Edit Placeholder",
-                           $"Enter value for {{{{{placeholderName}}}}}:",
-                           currentValue,
-                           isRichText))
-                {
-                    if (inputDialog.ShowDialog(this) == DialogResult.OK)
-                    {
-                        var newValue = inputDialog.InputText;
-
-                        // Update ListView displayed value
-                        if (item.SubItems.Count > 1)
-                            item.SubItems[1].Text = newValue;
-                        else
-                            item.SubItems.Add(newValue);
-
-                        Placeholders[placeholderName] = newValue;
-
-                        // Refresh prompt preview
-                        if (promptsListView.SelectedItems.Count > 0)
-                        {
-                            var selectedPrompt = (PromptItem)promptsListView.SelectedItems[0].Tag;
-                            promptTextBox.Text = disableTemplatingCheckbox.Checked
-                                ? selectedPrompt.Text
-                                : SubstitutePlaceholders(selectedPrompt.Text);
-                        }
-                    }
-                }
-
-            }
-        }
-
         private void buttonCopy_Click(object sender, EventArgs e)
         {
+            if (!buttonCopy.Enabled) return;
+
             if (!string.IsNullOrEmpty(promptTextBox.Text))
             {
                 Clipboard.SetText(promptTextBox.Text);
                 buttonCopy.BackColor = Color.LightGreen;
-                var timer = new Timer { Interval = 500 };
+                buttonCopy.Text = "Copied!";
+                var timer = new Timer { Interval = 1000 };
                 timer.Tick += (s, args) =>
                 {
-                    buttonCopy.BackColor = SystemColors.Control;
+                    ValidateInputs(); 
                     timer.Stop();
                 };
                 timer.Start();
