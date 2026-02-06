@@ -79,19 +79,33 @@ namespace NppDB.Core
 
         public static PromptPreferences ReadUserPreferences()
         {
-            if (File.Exists(PreferencesFilePath))
+            try
             {
-                var readData = File.ReadAllText(PreferencesFilePath);
-                if (!string.IsNullOrEmpty(readData))
+                if (File.Exists(PreferencesFilePath))
                 {
-                    return JsonConvert.DeserializeObject<PromptPreferences>(readData);
+                    var readData = File.ReadAllText(PreferencesFilePath);
+                    if (!string.IsNullOrEmpty(readData))
+                    {
+                        return JsonConvert.DeserializeObject<PromptPreferences>(readData);
+                    }
                 }
+
+                return new PromptPreferences
+                {
+                    ResponseLanguage = "English",
+                    CustomInstructions = ""
+                };
             }
-            return new PromptPreferences
+            catch (Exception ex)
             {
-                ResponseLanguage = "English",
-                CustomInstructions = ""
-            };
+                MessageBox.Show($"Error reading preferences: {ex.Message}", "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                return new PromptPreferences
+                {
+                    ResponseLanguage = "English",
+                    CustomInstructions = ""
+                };
+            }
         }
     }
 }
