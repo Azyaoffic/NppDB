@@ -32,24 +32,35 @@ namespace NppDB.Core
         private void InitializeComponent()
         {
             this.destructiveSelectIntoCheckbox = new System.Windows.Forms.CheckBox();
+            this.newTabCheckbox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // destructiveSelectIntoCheckbox
             // 
             this.destructiveSelectIntoCheckbox.Location = new System.Drawing.Point(12, 12);
             this.destructiveSelectIntoCheckbox.Name = "destructiveSelectIntoCheckbox";
-            this.destructiveSelectIntoCheckbox.Size = new System.Drawing.Size(281, 47);
+            this.destructiveSelectIntoCheckbox.Size = new System.Drawing.Size(248, 47);
             this.destructiveSelectIntoCheckbox.TabIndex = 0;
             this.destructiveSelectIntoCheckbox.Text = "Enable destructive SELECT INTO (MSAccess)";
-            this.destructiveSelectIntoCheckbox.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.destructiveSelectIntoCheckbox.UseVisualStyleBackColor = true;
             this.destructiveSelectIntoCheckbox.CheckedChanged += new System.EventHandler(this.destructiveSelectIntoCheckbox_CheckedChanged);
+            // 
+            // newTabCheckbox
+            // 
+            this.newTabCheckbox.Location = new System.Drawing.Point(12, 65);
+            this.newTabCheckbox.Name = "newTabCheckbox";
+            this.newTabCheckbox.Size = new System.Drawing.Size(248, 47);
+            this.newTabCheckbox.TabIndex = 1;
+            this.newTabCheckbox.Text = "Create new tab every time for queries";
+            this.newTabCheckbox.UseVisualStyleBackColor = true;
+            this.newTabCheckbox.CheckedChanged += new System.EventHandler(this.newTabCheckbox_CheckedChanged);
             // 
             // FrmBehaviorSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(305, 72);
+            this.ClientSize = new System.Drawing.Size(272, 129);
+            this.Controls.Add(this.newTabCheckbox);
             this.Controls.Add(this.destructiveSelectIntoCheckbox);
             this.Name = "FrmBehaviorSettings";
             this.ShowIcon = false;
@@ -59,7 +70,7 @@ namespace NppDB.Core
 
         private System.Windows.Forms.CheckBox destructiveSelectIntoCheckbox;
 
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.CheckBox newTabCheckbox;
 
         #endregion
     }

@@ -10,6 +10,7 @@ namespace NppDB.Core
     public class BehaviorSettings
     {
         public bool EnableDestructiveSelectInto { get; set; }
+        public bool EnableNewTabCreation { get; set; }
     }
 
     public partial class FrmBehaviorSettings : Form
@@ -24,6 +25,7 @@ namespace NppDB.Core
             
             var existingSettings = loadExistingSettings();
             destructiveSelectIntoCheckbox.Checked = existingSettings.EnableDestructiveSelectInto;
+            newTabCheckbox.Checked = existingSettings.EnableNewTabCreation;
         }
 
         private void destructiveSelectIntoCheckbox_CheckedChanged(object sender, EventArgs e)
@@ -42,15 +44,40 @@ namespace NppDB.Core
         {
             if (File.Exists(_preferencesFilePath))
             {
-                var readData = File.ReadAllText(_preferencesFilePath);
-                if (!string.IsNullOrEmpty(readData))
+                try
                 {
-                    var value = JsonConvert.DeserializeObject<BehaviorSettings>(readData);
-                    return value;
+                    var readData = File.ReadAllText(_preferencesFilePath);
+                    if (!string.IsNullOrEmpty(readData))
+                    {
+                        var value = JsonConvert.DeserializeObject<BehaviorSettings>(readData);
+                        return value;
+                    }
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error loading settings: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return new BehaviorSettings
+                    {
+                            EnableDestructiveSelectInto = false,
+                            EnableNewTabCreation = false
+                    };
+                }
+
             }
 
             return new BehaviorSettings();
+        }
+
+        private void newTabCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            var settings = new BehaviorSettings
+            {
+                EnableNewTabCreation = newTabCheckbox.Checked
+            };
+
+            var json = JsonConvert.SerializeObject(settings, Formatting.Indented);
+
+            File.WriteAllText(_preferencesFilePath, json);
         }
     }
 }

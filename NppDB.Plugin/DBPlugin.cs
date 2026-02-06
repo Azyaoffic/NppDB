@@ -283,7 +283,8 @@ namespace NppDB
                  {
                      var defaultSettings = new BehaviorSettings
                      {
-                         EnableDestructiveSelectInto = false
+                         EnableDestructiveSelectInto = false,
+                         EnableNewTabCreation = false
                      };
                      
                     var jsonData = JsonConvert.SerializeObject(defaultSettings, Formatting.None);
@@ -1703,9 +1704,20 @@ namespace NppDB
                 control.SetError("This database connection is closed. Please connect again.");
             }
         }
+        
+        static bool NewTabCreateEnable(string staticBehaviorSettingsPath)
+        {
+            var json = File.ReadAllText(staticBehaviorSettingsPath);
+            if (string.IsNullOrWhiteSpace(json)) return false;
+
+            var value = JsonConvert.DeserializeObject<BehaviorSettings>(json);
+            return value.EnableNewTabCreation;
+        }
 
         private static void NewFile()
         {
+            if (!NewTabCreateEnable(_staticBehaviorSettingsPath)) return;
+            
             Win32.SendMessage(nppData._nppHandle, (uint)Win32.Wm.COMMAND, (int)NppMenuCmd.IDM_FILE_NEW, 0);
         }
         private static IntPtr? GetCurrentAttachedBufferId()
