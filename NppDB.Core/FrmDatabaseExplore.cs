@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -30,9 +31,7 @@ namespace NppDB.Core
         {
             try
             {
-
-                trvDBList.ImageList = new ImageList { ColorDepth = ColorDepth.Depth32Bit };
-                trvDBList.ImageList.Images.Add("Database", Resources.Database);
+                InitTreeIcons();
 
                 if (DbServerManager.Instance == null)
                 {
@@ -77,6 +76,45 @@ namespace NppDB.Core
                 MessageBox.Show($"CRITICAL Error during FrmDatabaseExplore.Init():\nMessage: {ex.Message}\nStackTrace:\n{ex.StackTrace}",
                                 "FrmDatabaseExplore Init CRASH", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void InitTreeIcons()
+        {
+            trvDBList.ImageList = new ImageList { ColorDepth = ColorDepth.Depth32Bit };
+            trvDBList.ImageList.Images.Add("Database", Resources.Database);
+            
+            AddTreeIcon("Database", Resources.Database);
+            AddTreeIcon("Schema", Resources.Folder);
+            AddTreeIcon("Group", Resources.Folder);
+            AddTreeIcon("Table", Resources.Table);
+
+            AddTreeIcon("View", Resources.page_file);
+            AddTreeIcon("MaterializedView", Resources.page_file);
+            AddTreeIcon("Function", Resources.bullet);
+            AddTreeIcon("ForeignTable", Resources.shortcuts6);
+
+            AddTreeIcon("Primary_Key", Resources.primaryKey);
+            AddTreeIcon("Foreign_Key", Resources.foreignKey);
+            AddTreeIcon("Index", Resources.index);
+            AddTreeIcon("Unique_Index", Resources.uniqueIndex);
+            
+            for (var fk = 0; fk <= 1; fk++)
+            for (var pk = 0; pk <= 1; pk++)
+            for (var idx = 0; idx <= 1; idx++)
+            for (var nn = 0; nn <= 1; nn++)
+            {
+                var suffix = $"{fk}{pk}{idx}{nn}";
+                var bmp = Resources.ResourceManager.GetObject("column" + suffix) as Bitmap;
+                AddTreeIcon("Column_" + suffix, bmp);
+            }
+        }
+        
+        
+        private void AddTreeIcon(string key, Bitmap icon)
+        {
+            if (icon == null) throw new ArgumentNullException(nameof(icon), $"Icon for key '{key}' is null.");
+            if (!trvDBList.ImageList.Images.ContainsKey(key))
+                trvDBList.ImageList.Images.Add(key, icon);
         }
 
         private readonly List<NotifyHandler> _notifyHandlers = new List<NotifyHandler>();
