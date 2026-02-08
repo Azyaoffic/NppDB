@@ -1461,12 +1461,12 @@ namespace NppDB
         private static void SetPlaceholders(Dictionary<string, string> placeholders)
         {
             placeholders["selected_sql"] = GetSelectedSql();
+            placeholders["dialect"] = GetCurrentDialect();
 
             var dbContext = _staticFrmDbExplorer?.GetCurrentTemplateContext();
             if (dbContext != null)
             {
                 placeholders["table_name"] = dbContext.TableName;
-                placeholders["dialect"] = dbContext.Dialect;
             }
         }
         
@@ -1479,6 +1479,12 @@ namespace NppDB
                 : ed.GetText(ed.GetTextLength());
 
             return placeholderValue;
+        }
+
+        private static string GetCurrentDialect()
+        {
+            var dbContext = _staticFrmDbExplorer?.GetCurrentTemplateContext();
+            return dbContext?.Dialect ?? "standard sql";
         }
 
         private static List<PromptItem> ReadPromptLibraryFromFile(string filePath)

@@ -5,17 +5,33 @@
         <Id>DefaultPrompt1</Id>
         <Title>Explain Selected Query</Title>
         <Description>Explains complex logic. Breaks down the query execution flow.</Description>
-<Text>Act as an expert SQL instructor.
-Analyze the following SQL query and explain how it works step-by-step.
-Break down the logic (joins, filters, aggregations).
-Explain the business intent (what question is this query answering?).
-Use simple, non-technical language where possible.
+        <Text>**Role**
+You are an expert SQL instructor.
 
-Query:
+**Task**
+- Explain the SQL query step-by-step for dialect `{{dialect}}`.
+- Break down joins, filters, and aggregations.
+- Infer the business intent (what question the query answers).
+
+**Constraints**
+- Use simple, non-technical language where possible.
+- Do not invent schema details; if something is ambiguous, state assumptions.
+- Keep the explanation accurate to the query as written.
+
+**Response**
+- Provide, in order:
+1) One-paragraph plain-English summary
+2) Step-by-step explanation (bullets or numbered list)
+3) Business intent (1–2 sentences)
+4) Notes on joins/filters/aggregations
+
+**Query**
+```sql
 {{selected_sql}}
-</Text>
+```</Text>
         <Placeholders>
-            <Placeholder name="selected_sql" />
+            <Placeholder name="selected_sql"/>
+            <Placeholder name="dialect"/>
         </Placeholders>
         <Metadata>
             <Category>Refactor</Category>
@@ -26,17 +42,35 @@ Query:
         <Id>DefaultPrompt2</Id>
         <Title>Optimize and Analyze Performance</Title>
         <Description>Detailed performance suggestions</Description>
-<Text>You are a Senior Database Performance Engineer.
-Analyze the selected SQL query for potential performance bottlenecks.
-Identify any inefficient operations (e.g., full table scans, N+1 problems, misuse of functions in WHERE clauses).
-Suggest specific indices that would improve performance.
-Provide a refactored version of the query that is more efficient.
+        <Text>**Role**
+You are a Senior Database Performance Engineer.
 
-Query:
+**Task**
+- Analyze the SQL query for performance bottlenecks in dialect `{{dialect}}`.
+- Identify inefficient operations (e.g., full scans, non-sargable predicates, excessive sorting, correlated
+subqueries, N+1-like patterns in SQL).
+- Suggest specific indexes that could improve performance.
+- Provide a refactored query that is more efficient.
+
+**Constraints**
+- Preserve semantics: the refactored query must return the same results.
+- If schema/statistics are missing, clearly state assumptions and give conditional recommendations.
+- Prefer safe, broadly applicable optimizations for the given dialect.
+
+**Response**
+- Provide, in order:
+1) Bottlenecks found (bullets)
+2) Recommendations (bullets, tied to specific query parts)
+3) Refactored SQL
+4) Short explanation of why the refactor is faster
+
+**Query**
+```sql
 {{selected_sql}}
-</Text>
+```</Text>
         <Placeholders>
-            <Placeholder name="selected_sql" />
+            <Placeholder name="selected_sql"/>
+            <Placeholder name="dialect"/>
         </Placeholders>
         <Metadata>
             <Category>Refactor</Category>
@@ -45,18 +79,46 @@ Query:
 
     <Prompt type="LlmPrompt">
         <Id>DefaultPrompt3</Id>
-        <Title>Fix syntax or logic error</Title>
-        <Description>Diagnoses errors based on user input and selected SQL</Description>
-<Text>You are a Senior Database Administrator.
-Analyze the provided SQL query and the associated error message to diagnose the root cause.
-Provide the corrected SQL query that resolves the specific error described.
-Query:
+        <Title>Diagnose wrong / unexpected result</Title>
+        <Description>Finds logical issues when the query runs but returns unexpected results (based on user
+            description)
+        </Description>
+        <Text>**Role**
+You are a Senior Database Administrator focused on query correctness.
+
+**Task**
+- Read the SQL query (dialect `{{dialect}}`) and the user's plain-language description of what seems wrong.
+- Infer the most likely expected vs. actual behavior from the description.
+- Identify likely logical causes in the SQL (joins, filters, grouping, NULL handling, DISTINCT, date
+boundaries, aggregation levels, predicate placement, etc.).
+- Propose a corrected version of the query that matches the likely intent.
+
+**Constraints**
+- Do not invent schema details. If the logic depends on unknown columns/keys/relationships, state
+assumptions explicitly.
+- Prefer minimal changes that preserve intent.
+- If multiple interpretations are plausible, pick the best default and list 1–2 alternatives.
+- If critical information is missing (e.g., “expected result”), ask up to 3 short clarifying questions, but
+still provide the best-effort fix.
+
+**Response**
+- Provide, in order:
+1) Your understanding: expected vs. actual (based on the description)
+2) Likely cause(s) (bullets, tied to specific parts of the query)
+3) Recommended fix (bullets)
+4) Corrected SQL (single code block)
+5) How to validate (2–5 quick checks / test queries)
+
+**Query**
+```sql
 {{selected_sql}}
-Error Message:
+
+**Error Description**
 {{error_message}}
-</Text>
+```</Text>
         <Placeholders>
-            <Placeholder name="selected_sql" />
+            <Placeholder name="selected_sql"/>
+            <Placeholder name="dialect"/>
             <Placeholder name="error_message" editable="true" rich="true"/>
         </Placeholders>
         <Metadata>
@@ -68,14 +130,31 @@ Error Message:
         <Id>DefaultPrompt4</Id>
         <Title>Convert SQL dialect</Title>
         <Description>Migrates code between systems (e.g. Access to PostgreSQL)</Description>
-<Text>You are a SQL Migration Specialist.
-Convert the following SQL query from {{source_dialect}} to {{target_dialect}}.
-Ensure that function names, quote escaping, and specific clauses (like LIMIT vs TOP) are adapted correctly for the target environment.
-Original SQL:
+        <Text>**Role**
+You are a SQL Migration Specialist.
+
+**Task**
+- Convert the SQL query from `{{source_dialect}}` to `{{target_dialect}}`.
+- Adapt functions, quoting, date/time syntax, NULL handling, and dialect-specific clauses (e.g., LIMIT vs
+TOP).
+- Keep semantics equivalent.
+
+**Constraints**
+- The converted query must return the same results (as closely as the dialect allows).
+- Avoid non-standard extensions unless needed for `{{target_dialect}}`.
+- If something cannot be converted cleanly, explain the limitation and provide the closest workaround.
+
+**Response**
+- Provide, in order:
+1) Converted SQL (single code block)
+2) Key changes and compatibility notes (bullets)
+
+**Original SQL**
+```sql
 {{selected_sql}}
-</Text>
+```</Text>
         <Placeholders>
-            <Placeholder name="selected_sql" />
+            <Placeholder name="selected_sql"/>
             <Placeholder name="source_dialect" editable="true"/>
             <Placeholder name="target_dialect" editable="true"/>
         </Placeholders>
@@ -88,14 +167,30 @@ Original SQL:
         <Id>DefaultPrompt5</Id>
         <Title>Generate documentation</Title>
         <Description>Creates technical docs</Description>
-<Text>
+        <Text>**Role**
 You are a Technical Writer specializing in databases.
-Generate technical documentation for the selected SQL query in {{format}} format.
-Include a title, a description of the logic, a list of input parameters, and a summary of the tables involved.
-Query:
-{{selected_sql}}</Text>
+
+**Task**
+- Generate technical documentation for the SQL query in `{{format}}` format.
+- Assume SQL dialect `{{dialect}}`.
+
+**Constraints**
+- Include: a title, description of the logic, list of input parameters, and a summary of the tables
+involved.
+- Do not invent unknown schema details; if something is unclear, note assumptions.
+- Keep the documentation focused on what can be inferred from the query text.
+
+**Response**
+- Output strictly in `{{format}}` format (no extra commentary outside the requested format).
+- Include the required sections and keep them clearly labeled.
+
+**Query**
+```sql
+{{selected_sql}}
+```</Text>
         <Placeholders>
-            <Placeholder name="selected_sql" />
+            <Placeholder name="selected_sql"/>
+            <Placeholder name="dialect"/>
             <Placeholder name="format" editable="true"/>
         </Placeholders>
         <Metadata>
@@ -104,21 +199,128 @@ Query:
     </Prompt>
 
     <Prompt type="LlmPrompt">
-        <Id>DefaultPrompt9</Id>
+        <Id>DefaultPrompt6</Id>
         <Title>Generate Table from description</Title>
         <Description>Writes CREATE TABLE SQL based on natural language requirements</Description>
-<Text>You are a Database Architect.
-Write a valid SQL CREATE TABLE statement that fulfills the requirement described below.
-Ensure you include primary keys, appropriate data types, and constraints for the target dialect {{dialect}}.
-Requirement:
+        <Text>**Role**
+You are a Database Architect.
+
+**Task**
+- Write a valid `CREATE TABLE` statement that fulfills the requirement below.
+- Target SQL dialect: `{{target_dialect}}`.
+
+**Constraints**
+- Include a primary key.
+- Choose appropriate data types for the target dialect.
+- Include constraints where reasonable (NOT NULL, UNIQUE, CHECK, FK if specified).
+- If requirements are incomplete, make conservative defaults and list assumptions.
+
+**Response**
+- Provide, in order:
+1) `CREATE TABLE` SQL (single code block)
+2) Assumptions (bullets)
+3) Optional: follow-up questions if critical details are missing
+
+**Requirement**
+```text
 {{user_input}}
-</Text>
+```</Text>
         <Placeholders>
-            <Placeholder name="dialect" editable="true"/>
+            <Placeholder name="target_dialect" editable="true"/>
             <Placeholder name="user_input" editable="true" rich="true"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="LlmPrompt">
+        <Id>DefaultPrompt7</Id>
+        <Title>Generate SQL Query from description</Title>
+        <Description>Translates a natural-language requirement into a SQL query</Description>
+        <Text>**Role**
+You are a SQL Query Generator.
+
+**Task**
+- Translate the user’s requirement into a SQL query for dialect `{{dialect}}`.
+- Include appropriate SELECT list, FROM sources, JOINs, WHERE filters, GROUP BY / HAVING (if needed), ORDER
+BY, and LIMIT/TOP (if requested).
+- If the requirement implies parameters (date range, customer id, etc.), represent them as named parameters
+(e.g., `:start_date`) or clearly marked placeholders.
+
+**Constraints**
+- Infer schema minimally. Do not invent tables/columns unless the user provides them.
+- If the schema is missing, choose a reasonable generic schema *only* as an example, and clearly label it as
+an assumption.
+- Ask up to 5 clarifying questions *only if* the requirement is ambiguous in ways that materially change the
+query.
+- Prefer simple, correct SQL over clever/engine-specific tricks unless the dialect requires it.
+
+**Response**
+- Provide, in order:
+1) Generated SQL (single code block)
+2) Explanation of how the query satisfies the requirement (bullets)
+3) Assumptions (bullets)
+4) Clarifying questions (only if needed)
+
+**User Requirement**
+```text
+{{user_input}}
+```</Text>
+        <Placeholders>
+            <Placeholder name="dialect"/>
+            <Placeholder name="user_input" editable="true" rich="true"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Generate</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="LlmPrompt">
+        <Id>DefaultPrompt8</Id>
+        <Title>Compare two SQL queries</Title>
+        <Description>Compares logic, result equivalence, and performance characteristics</Description>
+        <Text>**Role**
+You are a SQL Comparator.
+
+**Task**
+- Compare Query A and Query B for dialect `{{target_dialect}}`.
+- Analyze differences in:
+- Logic (joins, filters, grouping, NULL handling, DISTINCT, window functions)
+- Result set shape (columns, row counts, duplicates)
+- Edge cases (NULLs, empty sets, date boundaries, join cardinality)
+- Performance characteristics (sargability, indexes, join order risks, sorts, scans)
+
+**Constraints**
+- Assume both queries target the same SQL dialect unless the text indicates otherwise; default dialect is
+`{{target_dialect}}`.
+- Do not assume schema details beyond what is implied in the queries; note uncertainties as assumptions.
+- If you cannot prove equivalence, state what would be required to prove it (keys, constraints, data
+distributions).
+
+**Response**
+- Provide, in order:
+1) Key differences (bullets)
+2) Equivalence assessment: “Equivalent”, “Not equivalent”, or “Cannot determine” + why
+3) Example scenarios where results diverge (if any)
+4) Performance/optimization notes (bullets)
+5) Suggested “best” version (optional) with rationale, if one is clearly preferable
+
+**Query A**
+```sql
+{{query_a}}
+
+**Query B**
+```sql
+{{query_b}}
+```</Text>
+        <Placeholders>
+            <Placeholder name="target_dialect" editable="true"/>
+            <Placeholder name="query_a" editable="true" rich="true"/>
+            <Placeholder name="query_b" editable="true" rich="true"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Analyze</Category>
         </Metadata>
     </Prompt>
 
