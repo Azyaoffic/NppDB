@@ -18,6 +18,7 @@ using NppDB.MSAccess;
 using NppDB.PostgreSQL;
 using NppDB.Properties;
 using Formatting = Newtonsoft.Json.Formatting;
+using PromptPreferences = NppDB.Core.PromptPreferences;
 
 namespace NppDB
 {

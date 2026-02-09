@@ -12,10 +12,13 @@ namespace NppDB.Core
     public partial class FrmPromptEditor : Form
     {
         public PromptItem SelectedPromptItem { get; private set; }
+        
+        private string _selectedTypePretty;
 
         public FrmPromptEditor()
         {
             InitializeComponent();
+            LoadPromptTypes();
         }
 
         private void buttonDiscard_Click(object sender, EventArgs e)
@@ -55,13 +58,28 @@ namespace NppDB.Core
                     placeholders.Add(new PromptPlaceholder { Name = placeholderName, IsEditable = true });
                 }
             }
+            
+            string type;
+
+            switch (_selectedTypePretty)
+            {
+                case "Prompt Library Prompt":
+                    type = "LlmPrompt";
+                    break;
+                case "Table Prompt":
+                    type = "TablePrompt";
+                    break;
+                default:
+                    MessageBox.Show("Please select a valid prompt type.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return default;
+            }
 
             return new PromptItem
             {
                 Id = string.IsNullOrEmpty(id) ? Guid.NewGuid().ToString() : id,
                 Title = name,
                 Description = description,
-                Type = "LlmPrompt",
+                Type = type,
                 Text = promptText,
                 Placeholders = placeholders.ToArray()
             };
@@ -86,6 +104,13 @@ namespace NppDB.Core
             StringBuilder sb = new StringBuilder("System Placeholders: ");
             sb.Append(string.Join(", ", placeholders.Select(p => $"{{{{{p}}}}}")));
             lblPlaceholders.Text = sb.ToString();
+        }
+        
+        private void LoadPromptTypes()
+        {
+            comboBoxType.Items.Clear();
+            comboBoxType.Items.Add("Prompt Library Prompt");
+            comboBoxType.Items.Add("Table Prompt");
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
@@ -131,8 +156,9 @@ namespace NppDB.Core
                 
                 prompt.SetElementValue("Description", promptItem.Description);
                 prompt.SetElementValue("Text", promptItem.Text);
-                prompt.SetElementValue("Type", promptItem.Type);
                 prompt.SetElementValue("Title", promptItem.Title);
+                
+                prompt.SetAttributeValue("type", promptItem.Type);
                 
                 var existingPlaceholders = prompt.Element("Placeholders");
                 // check whether existing placeholders are editable
@@ -194,6 +220,11 @@ namespace NppDB.Core
                 root.Add(promptElement);
                 doc.Save(promptLibraryPath);
             }
+        }
+
+        private void comboBoxType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _selectedTypePretty = comboBoxType.SelectedItem?.ToString();
         }
     }
 }

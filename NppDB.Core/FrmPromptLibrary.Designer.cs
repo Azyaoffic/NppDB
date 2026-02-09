@@ -37,6 +37,7 @@ namespace NppDB.Core
             this.colName = new System.Windows.Forms.ColumnHeader();
             this.colDesc = new System.Windows.Forms.ColumnHeader();
             this.panelSearch = new System.Windows.Forms.Panel();
+            this.showTablePromptsCheckbox = new System.Windows.Forms.CheckBox();
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.lblSearch = new System.Windows.Forms.Label();
             this.panelLeftActions = new System.Windows.Forms.FlowLayoutPanel();
@@ -93,10 +94,10 @@ namespace NppDB.Core
             this.promptsListView.FullRowSelect = true;
             this.promptsListView.GridLines = true;
             this.promptsListView.HideSelection = false;
-            this.promptsListView.Location = new System.Drawing.Point(0, 35);
+            this.promptsListView.Location = new System.Drawing.Point(0, 65);
             this.promptsListView.MultiSelect = false;
             this.promptsListView.Name = "promptsListView";
-            this.promptsListView.Size = new System.Drawing.Size(320, 425);
+            this.promptsListView.Size = new System.Drawing.Size(320, 395);
             this.promptsListView.TabIndex = 1;
             this.promptsListView.UseCompatibleStateImageBehavior = false;
             this.promptsListView.View = System.Windows.Forms.View.Details;
@@ -114,13 +115,24 @@ namespace NppDB.Core
             // 
             // panelSearch
             // 
+            this.panelSearch.Controls.Add(this.showTablePromptsCheckbox);
             this.panelSearch.Controls.Add(this.txtSearch);
             this.panelSearch.Controls.Add(this.lblSearch);
             this.panelSearch.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelSearch.Location = new System.Drawing.Point(0, 0);
             this.panelSearch.Name = "panelSearch";
-            this.panelSearch.Size = new System.Drawing.Size(320, 35);
+            this.panelSearch.Size = new System.Drawing.Size(320, 65);
             this.panelSearch.TabIndex = 0;
+            // 
+            // showTablePromptsCheckbox
+            // 
+            this.showTablePromptsCheckbox.Location = new System.Drawing.Point(4, 35);
+            this.showTablePromptsCheckbox.Name = "showTablePromptsCheckbox";
+            this.showTablePromptsCheckbox.Size = new System.Drawing.Size(313, 24);
+            this.showTablePromptsCheckbox.TabIndex = 2;
+            this.showTablePromptsCheckbox.Text = "Show Table-Based Prompts";
+            this.showTablePromptsCheckbox.UseVisualStyleBackColor = true;
+            this.showTablePromptsCheckbox.CheckedChanged += new System.EventHandler(this.ShowTablePromptCheckbox_CheckedChanged);
             // 
             // txtSearch
             // 
@@ -211,10 +223,12 @@ namespace NppDB.Core
             // splitterPreview
             // 
             this.splitterPreview.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.splitterPreview.Location = new System.Drawing.Point(3, 313);
             this.splitterPreview.MinExtra = 120;
             this.splitterPreview.MinSize = 80;
             this.splitterPreview.Name = "splitterPreview";
             this.splitterPreview.Size = new System.Drawing.Size(565, 6);
+            this.splitterPreview.TabIndex = 1;
             this.splitterPreview.TabStop = false;
             // 
             // panelPreviewBottom
@@ -311,6 +325,8 @@ namespace NppDB.Core
             this.panelRightActions.PerformLayout();
             this.ResumeLayout(false);
         }
+
+        private System.Windows.Forms.CheckBox showTablePromptsCheckbox;
 
         #endregion
 

@@ -8,7 +8,7 @@ using Formatting = Newtonsoft.Json.Formatting;
 namespace NppDB.Core
 {
 
-    public class PromptPreferences
+    public class PromptPreferences // also in PostgreSQLPromptReading.cs
     {
         public string ResponseLanguage {get; set;}
         public string CustomInstructions {get; set;}

@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -20,7 +20,7 @@ namespace NppDB.Core
         public string Id;
         public string Title;
         public string Description;
-        public string Type; // "SqlTemplate", "LlmPrompt"
+        public string Type; // "TablePrompt", "LlmPrompt"
         public string Text;
         public PromptPlaceholder[] Placeholders;
     }
@@ -32,6 +32,8 @@ namespace NppDB.Core
 
         private const int MinPlaceholdersHeight = 80;
         private const int MinPreviewTextHeight = 120;
+        
+        private bool _isShowingTablePrompts = false;
 
         public static string PromptLibraryPath { get; set; }
 
@@ -55,7 +57,7 @@ namespace NppDB.Core
             promptsListView.Columns.Add("Prompt Name", 200);
             promptsListView.Columns.Add("Description", 300);
 
-            _filteredPrompts = new List<PromptItem>(_prompts);
+            _filteredPrompts = _prompts.Where(p => p.Type != "TablePrompt").ToList();
             PopulatePromptList();
         }
 
@@ -151,6 +153,11 @@ namespace NppDB.Core
                     (p.Title != null && p.Title.ToLower().Contains(searchText)) || 
                     (p.Description != null && p.Description.ToLower().Contains(searchText))
                 ).ToList();
+            }
+            
+            if (!_isShowingTablePrompts)
+            {
+                _filteredPrompts = _filteredPrompts.Where(p => p.Type != "TablePrompt").ToList();
             }
 
             PopulatePromptList();
@@ -507,6 +514,12 @@ namespace NppDB.Core
                 };
                 timer.Start();
             }
+        }
+
+        private void ShowTablePromptCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            _isShowingTablePrompts = showTablePromptsCheckbox.Checked;
+            txtSearch_TextChanged(this, EventArgs.Empty);
         }
     }
 }

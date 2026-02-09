@@ -324,4 +324,369 @@ distributions).
         </Metadata>
     </Prompt>
 
+    <Prompt type="TablePrompt">
+        <Id>TablePrompt1</Id>
+        <Title>Explain table in plain language</Title>
+        <Description>Explains what the table likely represents and what each column likely means</Description>
+        <Text>**Role**
+You are a Business Analyst.
+
+**Task**
+- Explain the purpose and content of this database table in plain, non-technical English.
+- Infer what the table represents and what a single row means (grain).
+- Call out likely identifiers, dates, amounts, statuses, and any suspicious/unclear columns.
+
+**Constraints**
+- Base your reasoning only on the provided table name and column names/types.
+- Do not invent extra columns/tables.
+- If something is uncertain, state assumptions explicitly and keep them conservative.
+
+**Response**
+- Provide, in order:
+1) 1 paragraph plain-language summary
+2) Bullet list: what each column likely means
+3) 5 example business questions this table can answer
+
+**Table Dialect**
+`{{dialect}}`
+
+**Table**
+`{{table_name}}`
+
+**Columns**
+```text
+{{columns_with_types}}
+```</Text>
+        <Placeholders>
+            <Placeholder name="dialect"/>
+            <Placeholder name="table_name"/>
+            <Placeholder name="columns_with_types"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Analyze</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="TablePrompt">
+        <Id>TablePrompt2</Id>
+        <Title>Generate GROUP BY aggregation query</Title>
+        <Description>Creates 3 useful aggregation queries (single-table) based on the columns</Description>
+        <Text>**Role**
+You are an expert SQL developer.
+
+**Task**
+- Create 3 useful `GROUP BY` aggregation queries for the given table using SQL dialect `{{dialect}}`.
+- Each query must answer a practical business question.
+
+**Constraints**
+- Use only the provided table and columns (no joins).
+- Quote identifiers using the dialect’s conventions (for Microsoft Access, use brackets like `[Order Date]`).
+- If date bucketing is needed, use dialect-appropriate expressions.
+- If the table lacks obvious measure/dimension columns, make the best effort and state assumptions.
+
+**Response**
+- For each query, provide:
+1) The business question it answers (1 sentence)
+2) Final SQL only (single code block)
+
+**Table Dialect**
+`{{dialect}}`
+
+**Table**
+`{{table_name}}`
+
+**Columns**
+```text
+{{columns_with_types}}
+```</Text>
+        <Placeholders>
+            <Placeholder name="dialect"/>
+            <Placeholder name="table_name"/>
+            <Placeholder name="columns_with_types"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Generate</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="TablePrompt">
+        <Id>TablePrompt3</Id>
+        <Title>Generate INSERT test data</Title>
+        <Description>Generates 10 realistic INSERT statements for the table</Description>
+        <Text>**Role**
+You are an expert SQL developer.
+
+**Task**
+- Generate realistic test data for this table.
+- Return 10 `INSERT` statements in SQL dialect `{{dialect}}`.
+
+**Constraints**
+- Use only the provided columns.
+- Keep values internally consistent (e.g., statuses, amounts, dates).
+- If there is an AutoNumber/identity key, omit it from `INSERT`.
+- Use dialect-friendly literals (for Microsoft Access: single quotes for text, `#...#` for dates).
+
+**Response**
+- Output only the 10 `INSERT` statements (no prose).
+
+**Table Dialect**
+`{{dialect}}`
+
+**Table**
+`{{table_name}}`
+
+**Columns**
+```text
+{{columns_with_types}}
+```</Text>
+        <Placeholders>
+            <Placeholder name="dialect"/>
+            <Placeholder name="table_name"/>
+            <Placeholder name="columns_with_types"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Generate</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="TablePrompt">
+        <Id>TablePrompt4</Id>
+        <Title>Propose data validation rules</Title>
+        <Description>Suggests practical column- and table-level validation/constraint rules</Description>
+        <Text>**Role**
+You are a database designer.
+
+**Task**
+- Propose practical data validation rules and constraints for this table.
+
+**Constraints**
+- Include: required/optional, allowed ranges, formats, uniqueness, cross-field rules, and referential integrity assumptions.
+- Prefer rules implementable in the target environment for dialect `{{dialect}}` (e.g., Access field validation rules, input masks, indexes, relationships).
+- Do not invent extra columns/tables; if a rule depends on missing context, state assumptions.
+
+**Response**
+- Output a concise list grouped by column, plus any table-level rules.
+
+**Table Dialect**
+`{{dialect}}`
+
+**Table**
+`{{table_name}}`
+
+**Columns**
+```text
+{{columns_with_types}}
+```</Text>
+        <Placeholders>
+            <Placeholder name="dialect"/>
+            <Placeholder name="table_name"/>
+            <Placeholder name="columns_with_types"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Analyze</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="TablePrompt">
+        <Id>TablePrompt5</Id>
+        <Title>Generate data model class (Python)</Title>
+        <Description>Creates a Python @dataclass model from the table columns</Description>
+        <Text>**Role**
+You are a software engineer.
+
+**Task**
+- Generate a Python data model for this table.
+- Use a `@dataclass` with type hints.
+- Choose reasonable Python types based on column names/types.
+
+**Constraints**
+- Use `Optional[...]` where appropriate (nullable/unknown).
+- Keep names readable (snake_case for fields is fine).
+- Do not add fields that are not in the table.
+- If a type is unclear, pick the safest general type and add a short inline comment.
+
+**Response**
+- Output only the Python code.
+
+**Table Dialect**
+`{{dialect}}`
+
+**Table**
+`{{table_name}}`
+
+**Columns**
+```text
+{{columns_with_types}}
+```</Text>
+        <Placeholders>
+            <Placeholder name="table_name"/>
+            <Placeholder name="columns_with_types"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Generate</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="TablePrompt">
+        <Id>TablePrompt6</Id>
+        <Title>Generate data model class (Java)</Title>
+        <Description>Creates a Java POJO model from the table columns</Description>
+        <Text>**Role**
+You are a software engineer.
+
+**Task**
+- Generate a Java POJO data model for this table.
+- Include fields and getters/setters.
+- Choose sensible types (e.g., `String`, `Integer/Long`, `BigDecimal`, `LocalDate/LocalDateTime`, `Boolean`) based on column names/types.
+
+**Constraints**
+- Use boxed types (`Integer`, `Long`, etc.) when nulls are plausible.
+- Do not add fields that are not in the table.
+- If a type is unclear, use `String` and add a short comment.
+
+**Response**
+- Output only the Java code.
+
+**Table Dialect**
+`{{dialect}}`
+
+**Table**
+`{{table_name}}`
+
+**Columns**
+```text
+{{columns_with_types}}
+```</Text>
+        <Placeholders>
+            <Placeholder name="table_name"/>
+            <Placeholder name="columns_with_types"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Generate</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="TablePrompt">
+        <Id>TablePrompt7</Id>
+        <Title>Generate data model class (C#)</Title>
+        <Description>Creates a C# model class from the table columns</Description>
+        <Text>**Role**
+You are a software engineer.
+
+**Task**
+- Generate a C# data model class for this table.
+- Use properties with sensible .NET types based on column names/types.
+
+**Constraints**
+- Use nullable types where appropriate (`int?`, `long?`, `decimal?`, `DateTime?`, `bool?`).
+- Do not add properties not represented by the table.
+- If a type is unclear, default to `string` and add a short comment.
+
+**Response**
+- Output only the C# code.
+
+**Table Dialect**
+`{{dialect}}`
+
+**Table**
+`{{table_name}}`
+
+**Columns**
+```text
+{{columns_with_types}}
+```</Text>
+        <Placeholders>
+            <Placeholder name="table_name"/>
+            <Placeholder name="columns_with_types"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Generate</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="TablePrompt">
+        <Id>TablePrompt8</Id>
+        <Title>Create REST API endpoints specification</Title>
+        <Description>Drafts CRUD endpoints, filtering/pagination, validation errors, and example payloads</Description>
+        <Text>**Role**
+You are a backend architect.
+
+**Task**
+- Create a specification for HTTP REST API endpoints for this table/entity.
+- Include CRUD endpoints, filtering/sorting, pagination, common validation errors, and example request/response JSON.
+
+**Constraints**
+- If a primary key is not obvious, propose one and state assumptions.
+- Use only provided columns; do not invent extra attributes.
+- Keep the spec practical for implementation (clear paths, fields, and behaviors).
+
+**Response**
+- Provide, in order:
+1) Entity assumptions (PK, key fields) (bullets)
+2) Endpoints list (method + path + purpose) (bullets)
+3) Filtering/sorting/pagination conventions
+4) Validation error patterns (bullets)
+5) Example JSON for: create request, update request, single response, list response
+
+**Table Dialect**
+`{{dialect}}`
+
+**Table**
+`{{table_name}}`
+
+**Columns**
+```text
+{{columns_with_types}}
+```</Text>
+        <Placeholders>
+            <Placeholder name="table_name"/>
+            <Placeholder name="columns_with_types"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Generate</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt type="TablePrompt">
+        <Id>TablePrompt9</Id>
+        <Title>Suggest visualizations for the data</Title>
+        <Description>Suggests charts/KPIs, required fields, grain, and business questions</Description>
+        <Text>**Role**
+You are a data analyst.
+
+**Task**
+- Suggest useful visualizations and KPIs for this table.
+
+**Constraints**
+- Base suggestions only on the provided columns.
+- For each suggestion, name the fields needed and how to group (including time grain if relevant).
+- If key columns (date/measure/category) are missing, state what would be needed and suggest alternatives.
+
+**Response**
+- Provide a list where each item includes:
+- Chart/KPI name
+- Chart type
+- Required fields
+- Grouping/time grain
+- Business question it answers
+
+**Table Dialect**
+`{{dialect}}`
+
+**Table**
+`{{table_name}}`
+
+**Columns**
+```text
+{{columns_with_types}}
+```</Text>
+        <Placeholders>
+            <Placeholder name="table_name"/>
+            <Placeholder name="columns_with_types"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Analyze</Category>
+        </Metadata>
+    </Prompt>
+
 </Prompts>
