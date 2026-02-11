@@ -1773,6 +1773,11 @@ namespace NppDB
                 return;
             }
 
+            if (!NewTabCreateEnable(_staticBehaviorSettingsPath))
+            {
+                text = "\n\n" + text;
+            }
+
             var codePage = Win32.SendMessage(scintillaHnd, SciMsg.SCI_GETCODEPAGE, 0, 0).ToInt32();
             if (codePage == 0) codePage = 65001;
 
