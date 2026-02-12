@@ -32,10 +32,11 @@ namespace NppDB.Core
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.splitContainerMain = new System.Windows.Forms.SplitContainer();
-            this.promptsListView = new System.Windows.Forms.ListView();
-            this.colName = new System.Windows.Forms.ColumnHeader();
-            this.colDesc = new System.Windows.Forms.ColumnHeader();
+            this.promptsGridView = new System.Windows.Forms.DataGridView();
+            this.colPromptName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPromptDesc = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panelSearch = new System.Windows.Forms.Panel();
             this.showTablePromptsCheckbox = new System.Windows.Forms.CheckBox();
             this.txtSearch = new System.Windows.Forms.TextBox();
@@ -58,6 +59,7 @@ namespace NppDB.Core
             this.splitContainerMain.Panel1.SuspendLayout();
             this.splitContainerMain.Panel2.SuspendLayout();
             this.splitContainerMain.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.promptsGridView)).BeginInit();
             this.panelSearch.SuspendLayout();
             this.panelLeftActions.SuspendLayout();
             this.grpPreview.SuspendLayout();
@@ -74,7 +76,7 @@ namespace NppDB.Core
             // 
             // splitContainerMain.Panel1
             // 
-            this.splitContainerMain.Panel1.Controls.Add(this.promptsListView);
+            this.splitContainerMain.Panel1.Controls.Add(this.promptsGridView);
             this.splitContainerMain.Panel1.Controls.Add(this.panelSearch);
             this.splitContainerMain.Panel1.Controls.Add(this.panelLeftActions);
             this.splitContainerMain.Panel1MinSize = 250;
@@ -89,32 +91,48 @@ namespace NppDB.Core
             this.splitContainerMain.SplitterDistance = 328;
             this.splitContainerMain.TabIndex = 0;
             // 
-            // promptsListView
+            // promptsGridView
             // 
-            this.promptsListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] { this.colName, this.colDesc });
-            this.promptsListView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.promptsListView.FullRowSelect = true;
-            this.promptsListView.GridLines = true;
-            this.promptsListView.HideSelection = false;
-            this.promptsListView.Location = new System.Drawing.Point(0, 65);
-            this.promptsListView.MinimumSize = new System.Drawing.Size(200, 120);
-            this.promptsListView.MultiSelect = false;
-            this.promptsListView.Name = "promptsListView";
-            this.promptsListView.Size = new System.Drawing.Size(328, 395);
-            this.promptsListView.TabIndex = 1;
-            this.promptsListView.UseCompatibleStateImageBehavior = false;
-            this.promptsListView.View = System.Windows.Forms.View.Details;
-            this.promptsListView.SelectedIndexChanged += new System.EventHandler(this.promptsListView_SelectedIndexChanged);
+            this.promptsGridView.AllowUserToAddRows = false;
+            this.promptsGridView.AllowUserToDeleteRows = false;
+            this.promptsGridView.AllowUserToResizeRows = false;
+            this.promptsGridView.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCellsExceptHeaders;
+            this.promptsGridView.BackgroundColor = System.Drawing.SystemColors.Window;
+            this.promptsGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.promptsGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { this.colPromptName, this.colPromptDesc });
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.promptsGridView.DefaultCellStyle = dataGridViewCellStyle1;
+            this.promptsGridView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.promptsGridView.Location = new System.Drawing.Point(0, 65);
+            this.promptsGridView.MinimumSize = new System.Drawing.Size(200, 120);
+            this.promptsGridView.MultiSelect = false;
+            this.promptsGridView.Name = "promptsGridView";
+            this.promptsGridView.ReadOnly = true;
+            this.promptsGridView.RowHeadersVisible = false;
+            this.promptsGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.promptsGridView.Size = new System.Drawing.Size(328, 395);
+            this.promptsGridView.TabIndex = 1;
+            this.promptsGridView.SelectionChanged += new System.EventHandler(this.promptsListView_SelectedIndexChanged);
             // 
-            // colName
+            // colPromptName
             // 
-            this.colName.Text = "Prompt Name";
-            this.colName.Width = 140;
+            this.colPromptName.HeaderText = "Prompt Name";
+            this.colPromptName.Name = "colPromptName";
+            this.colPromptName.ReadOnly = true;
+            this.colPromptName.Width = 140;
             // 
-            // colDesc
+            // colPromptDesc
             // 
-            this.colDesc.Text = "Description";
-            this.colDesc.Width = 160;
+            this.colPromptDesc.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.colPromptDesc.HeaderText = "Description";
+            this.colPromptDesc.Name = "colPromptDesc";
+            this.colPromptDesc.ReadOnly = true;
             // 
             // panelSearch
             // 
@@ -336,6 +354,7 @@ namespace NppDB.Core
             this.splitContainerMain.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).EndInit();
             this.splitContainerMain.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.promptsGridView)).EndInit();
             this.panelSearch.ResumeLayout(false);
             this.panelSearch.PerformLayout();
             this.panelLeftActions.ResumeLayout(false);
@@ -353,9 +372,9 @@ namespace NppDB.Core
         #endregion
 
         private System.Windows.Forms.SplitContainer splitContainerMain;
-        private System.Windows.Forms.ListView promptsListView;
-        private System.Windows.Forms.ColumnHeader colName;
-        private System.Windows.Forms.ColumnHeader colDesc;
+        private System.Windows.Forms.DataGridView promptsGridView;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPromptName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPromptDesc;
         private System.Windows.Forms.FlowLayoutPanel panelLeftActions;
         private System.Windows.Forms.Button buttonEdit;
         private System.Windows.Forms.Button buttonAdd;

@@ -34,6 +34,8 @@ namespace NppDB.Core
         private const int MinPreviewTextHeight = 120;
         
         private bool _isShowingTablePrompts = false;
+        
+        private bool _suppressPromptGridSelectionChanged;
 
         public static string PromptLibraryPath { get; set; }
 
@@ -50,12 +52,6 @@ namespace NppDB.Core
             Placeholders = new Dictionary<string, string>(placeholders);
 
             InitializeComponent();
-
-            promptsListView.View = View.Details;
-
-            promptsListView.Columns.Clear();
-            promptsListView.Columns.Add("Prompt Name", 200);
-            promptsListView.Columns.Add("Description", 300);
 
             _filteredPrompts = _prompts.Where(p => p.Type != "TablePrompt").ToList();
             PopulatePromptList();
@@ -122,20 +118,31 @@ namespace NppDB.Core
 
         private void PopulatePromptList()
         {
-            promptsListView.Items.Clear();
-            foreach (var prompt in _filteredPrompts)
+            _suppressPromptGridSelectionChanged = true;
+            try
             {
-                var item = new ListViewItem(prompt.Title);
-                item.SubItems.Add(prompt.Description);
-                item.Tag = prompt;
-                promptsListView.Items.Add(item);
+                promptsGridView.Rows.Clear();
+
+                foreach (var prompt in _filteredPrompts)
+                {
+                    var rowIndex = promptsGridView.Rows.Add(prompt.Title, prompt.Description);
+                    promptsGridView.Rows[rowIndex].Tag = prompt;
+                }
+
+                promptsGridView.ClearSelection();
+                if (promptsGridView.Rows.Count > 0)
+                    promptsGridView.CurrentCell = null;
+
+                if (promptsGridView.Rows.Count == 0)
+                {
+                    promptTextBox.Text = string.Empty;
+                    flowLayoutPanelPlaceholders.Controls.Clear();
+                    UpdateCopyButtonState(false, "No prompts match the search criteria.");
+                }
             }
-            
-            if (promptsListView.Items.Count == 0)
+            finally
             {
-                promptTextBox.Text = string.Empty;
-                flowLayoutPanelPlaceholders.Controls.Clear();
-                UpdateCopyButtonState(false, "No prompts match the search criteria.");
+                _suppressPromptGridSelectionChanged = false;
             }
         }
 
@@ -165,10 +172,15 @@ namespace NppDB.Core
 
         private void promptsListView_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (promptsListView.SelectedItems.Count > 0)
+            if (_suppressPromptGridSelectionChanged)
+                return;
+
+            if (promptsGridView.SelectedRows.Count > 0)
             {
-                var selectedItem = promptsListView.SelectedItems[0];
-                var prompt = (PromptItem)selectedItem.Tag;
+                var selectedRow = promptsGridView.SelectedRows[0];
+
+                if (!(selectedRow.Tag is PromptItem prompt))
+                    return;
 
                 GeneratePlaceholderControls(prompt);
                 UpdatePreviewText(prompt);
@@ -288,9 +300,9 @@ namespace NppDB.Core
 
             Placeholders[key] = value;
 
-            if (promptsListView.SelectedItems.Count > 0)
+            if (promptsGridView.SelectedRows.Count > 0)
             {
-                var prompt = (PromptItem)promptsListView.SelectedItems[0].Tag;
+                var prompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
                 UpdatePreviewText(prompt);
             }
 
@@ -311,13 +323,13 @@ namespace NppDB.Core
 
         private void ValidateInputs()
         {
-            if (promptsListView.SelectedItems.Count == 0)
+            if (promptsGridView.SelectedRows.Count == 0)
             {
                 UpdateCopyButtonState(false, "No prompt selected");
                 return;
             }
 
-            var prompt = (PromptItem)promptsListView.SelectedItems[0].Tag;
+            var prompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
             if (prompt.Type == "TablePrompt")
             {
                 UpdateCopyButtonState(false, "This prompt is to be used from Database Manager (F10) by right-clicking a table");
@@ -397,19 +409,19 @@ namespace NppDB.Core
 
         private void disableTemplatingCheckbox_CheckedChanged(object sender, EventArgs e)
         {
-            if (promptsListView.SelectedItems.Count > 0)
+            if (promptsGridView.SelectedRows.Count > 0)
             {
-                var prompt = (PromptItem)promptsListView.SelectedItems[0].Tag;
+                var prompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
                 UpdatePreviewText(prompt);
             }
         }
 
         private void buttonEdit_Click(object sender, EventArgs e)
         {
-            if (promptsListView.SelectedItems.Count > 0)
+            if (promptsGridView.SelectedRows.Count > 0)
             {
-                var selectedItem = promptsListView.SelectedItems[0];
-                var prompt = (PromptItem)selectedItem.Tag;
+                var selectedRow = promptsGridView.SelectedRows[0];
+                var prompt = (PromptItem)selectedRow.Tag;
 
                 using (var promptEditor = new FrmPromptEditor())
                 {
@@ -420,10 +432,11 @@ namespace NppDB.Core
                     if (result == DialogResult.OK)
                     {
                         var updatedPrompt = promptEditor.SelectedPromptItem;
-                        // update the prompt in the list
-                        selectedItem.Text = updatedPrompt.Title;
-                        selectedItem.SubItems[1].Text = updatedPrompt.Description;
-                        selectedItem.Tag = updatedPrompt;
+
+                        // update the prompt in the grid
+                        selectedRow.Cells[0].Value = updatedPrompt.Title;
+                        selectedRow.Cells[1].Value = updatedPrompt.Description;
+                        selectedRow.Tag = updatedPrompt;
 
                         var index = _prompts.FindIndex(p => p.Title == prompt.Title);
                         if (index >= 0) _prompts[index] = updatedPrompt;
@@ -455,10 +468,10 @@ namespace NppDB.Core
 
         private void buttonDelete_Click(object sender, EventArgs e)
         {
-            if (promptsListView.SelectedItems.Count > 0)
+            if (promptsGridView.SelectedRows.Count > 0)
             {
-                var selectedItem = promptsListView.SelectedItems[0];
-                var prompt = (PromptItem)selectedItem.Tag;
+                var selectedRow = promptsGridView.SelectedRows[0];
+                var prompt = (PromptItem)selectedRow.Tag;
 
                 var confirmResult = MessageBox.Show(
                     $"Are you sure you want to delete the prompt '{prompt.Title}'?",
@@ -530,10 +543,10 @@ namespace NppDB.Core
 
         private void buttonDuplicate_Click(object sender, EventArgs e)
         {
-            if (promptsListView.SelectedItems.Count > 0)
+            if (promptsGridView.SelectedRows.Count > 0)
             {
-                var selectedItem = promptsListView.SelectedItems[0];
-                var prompt = (PromptItem)selectedItem.Tag;
+                var selectedRow = promptsGridView.SelectedRows[0];
+                var prompt = (PromptItem)selectedRow.Tag;
 
                 var newPrompt = prompt;
                 newPrompt.Id = Guid.NewGuid().ToString();
