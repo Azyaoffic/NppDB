@@ -37,6 +37,8 @@ namespace NppDB.Core
         private static List<PromptItem> _prompts;
         private List<PromptItem> _filteredPrompts;
 
+        private HashSet<string> _placeholdersInCurrentView = new HashSet<string>();
+        
         private const int MinPlaceholdersHeight = 80;
         private const int MinPreviewTextHeight = 120;
 
@@ -302,11 +304,18 @@ namespace NppDB.Core
         {
             flowLayoutPanelPlaceholders.Controls.Clear();
             flowLayoutPanelPlaceholders.SuspendLayout();
+            
+            _placeholdersInCurrentView.Clear();
 
             if (prompt.Placeholders != null)
             {
                 foreach (var placeholder in prompt.Placeholders)
                 {
+                    if (string.IsNullOrEmpty(placeholder.Name) || _placeholdersInCurrentView.Contains(placeholder.Name))
+                        continue;
+                    
+                    _placeholdersInCurrentView.Add(placeholder.Name);
+                    
                     var container = new FlowLayoutPanel
                     {
                         FlowDirection = FlowDirection.TopDown,
