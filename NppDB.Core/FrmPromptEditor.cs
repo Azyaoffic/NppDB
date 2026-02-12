@@ -204,10 +204,10 @@ namespace NppDB.Core
             else
             {
                 XElement promptElement = new XElement("Prompt",
+                    new XAttribute("type", promptItem.Type),
                     new XElement("Id", promptItem.Id),
                     new XElement("Title", promptItem.Title),
                     new XElement("Description", promptItem.Description),
-                    new XElement("Type", promptItem.Type),
                     new XElement("Text", promptItem.Text),
                     new XElement("Placeholders",
                         new List<XElement>(

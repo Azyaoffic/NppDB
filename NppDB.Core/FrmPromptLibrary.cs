@@ -27,15 +27,24 @@ namespace NppDB.Core
 
     public partial class FrmPromptLibrary : Form
     {
+        private enum PromptSourceFilter
+        {
+            Library = 0,
+            SchemaAware = 1,
+            All = 2
+        }
+
         private static List<PromptItem> _prompts;
         private List<PromptItem> _filteredPrompts;
 
         private const int MinPlaceholdersHeight = 80;
         private const int MinPreviewTextHeight = 120;
-        
-        private bool _isShowingTablePrompts = false;
-        
+
+        private PromptSourceFilter _currentSourceFilter = PromptSourceFilter.Library;
+
         private bool _suppressPromptGridSelectionChanged;
+
+        private readonly ToolTip _actionToolTip = new ToolTip();
 
         public static string PromptLibraryPath { get; set; }
 
@@ -53,8 +62,22 @@ namespace NppDB.Core
 
             InitializeComponent();
 
-            _filteredPrompts = _prompts.Where(p => p.Type != "TablePrompt").ToList();
-            PopulatePromptList();
+            ConfigureSourceFilter();
+            RefreshPromptList();
+        }
+
+        private void ConfigureSourceFilter()
+        {
+            cmbPromptSource.Items.Clear();
+            cmbPromptSource.Items.Add("Library");
+            cmbPromptSource.Items.Add("Schema-Aware");
+            cmbPromptSource.Items.Add("All");
+            cmbPromptSource.SelectedIndex = (int)PromptSourceFilter.Library;
+
+            panelSchemaBanner.Visible = false;
+            lblPromptType.Text = "Type: —";
+            lblPromptCapabilities.Text = "Capabilities: —";
+            _actionToolTip.SetToolTip(buttonDuplicate, "Select a prompt to duplicate.");
         }
 
         protected override void OnShown(EventArgs e)
@@ -116,6 +139,64 @@ namespace NppDB.Core
             _prompts = promptItems;
         }
 
+        private bool IsSchemaAwarePrompt(PromptItem prompt)
+        {
+            return string.Equals(prompt.Type, "TablePrompt", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private List<PromptItem> GetFilteredPrompts(string rawSearchText)
+        {
+            IEnumerable<PromptItem> query = _prompts ?? new List<PromptItem>();
+            var searchText = (rawSearchText ?? string.Empty).Trim();
+
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                query = query.Where(p =>
+                    (!string.IsNullOrEmpty(p.Title) && p.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                    (!string.IsNullOrEmpty(p.Description) && p.Description.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0));
+            }
+
+            switch (_currentSourceFilter)
+            {
+                case PromptSourceFilter.Library:
+                    query = query.Where(p => !IsSchemaAwarePrompt(p));
+                    break;
+                case PromptSourceFilter.SchemaAware:
+                    query = query.Where(IsSchemaAwarePrompt);
+                    break;
+                case PromptSourceFilter.All:
+                    break;
+            }
+
+            return query.ToList();
+        }
+
+        private void RefreshPromptList()
+        {
+            _filteredPrompts = GetFilteredPrompts(txtSearch.Text);
+            PopulatePromptList();
+        }
+
+        private void ApplyRowStyling(DataGridViewRow row, PromptItem prompt)
+        {
+            var isSchemaAware = IsSchemaAwarePrompt(prompt);
+
+            if (isSchemaAware)
+            {
+                row.DefaultCellStyle.BackColor = Color.FromArgb(246, 241, 255);
+                row.DefaultCellStyle.SelectionBackColor = Color.FromArgb(86, 55, 141);
+                row.DefaultCellStyle.SelectionForeColor = Color.White;
+                row.Cells[colPromptType.Index].Style.ForeColor = Color.FromArgb(86, 55, 141);
+            }
+            else
+            {
+                row.DefaultCellStyle.BackColor = SystemColors.Window;
+                row.DefaultCellStyle.SelectionBackColor = SystemColors.Highlight;
+                row.DefaultCellStyle.SelectionForeColor = SystemColors.HighlightText;
+                row.Cells[colPromptType.Index].Style.ForeColor = Color.FromArgb(18, 111, 49);
+            }
+        }
+
         private void PopulatePromptList()
         {
             _suppressPromptGridSelectionChanged = true;
@@ -125,19 +206,28 @@ namespace NppDB.Core
 
                 foreach (var prompt in _filteredPrompts)
                 {
-                    var rowIndex = promptsGridView.Rows.Add(prompt.Title, prompt.Description);
-                    promptsGridView.Rows[rowIndex].Tag = prompt;
+                    var promptKind = IsSchemaAwarePrompt(prompt) ? "SCHEMA-AWARE" : "LIBRARY";
+                    var rowIndex = promptsGridView.Rows.Add(prompt.Title, prompt.Description, promptKind);
+                    var row = promptsGridView.Rows[rowIndex];
+                    row.Tag = prompt;
+                    ApplyRowStyling(row, prompt);
                 }
 
                 promptsGridView.ClearSelection();
                 if (promptsGridView.Rows.Count > 0)
                     promptsGridView.CurrentCell = null;
 
+                UpdatePromptMeta(null);
+
                 if (promptsGridView.Rows.Count == 0)
                 {
                     promptTextBox.Text = string.Empty;
                     flowLayoutPanelPlaceholders.Controls.Clear();
                     UpdateCopyButtonState(false, "No prompts match the search criteria.");
+                }
+                else
+                {
+                    UpdateCopyButtonState(false, "No prompt selected");
                 }
             }
             finally
@@ -148,26 +238,39 @@ namespace NppDB.Core
 
         private void txtSearch_TextChanged(object sender, EventArgs e)
         {
-            var searchText = txtSearch.Text.ToLower().Trim();
+            RefreshPromptList();
+        }
 
-            if (string.IsNullOrEmpty(searchText))
+        private void cmbPromptSource_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _currentSourceFilter = (PromptSourceFilter)cmbPromptSource.SelectedIndex;
+            RefreshPromptList();
+        }
+
+        private void UpdatePromptMeta(PromptItem? prompt)
+        {
+            if (!prompt.HasValue)
             {
-                _filteredPrompts = new List<PromptItem>(_prompts);
-            }
-            else
-            {
-                _filteredPrompts = _prompts.Where(p => 
-                    (p.Title != null && p.Title.ToLower().Contains(searchText)) || 
-                    (p.Description != null && p.Description.ToLower().Contains(searchText))
-                ).ToList();
-            }
-            
-            if (!_isShowingTablePrompts)
-            {
-                _filteredPrompts = _filteredPrompts.Where(p => p.Type != "TablePrompt").ToList();
+                lblPromptType.Text = "Type: —";
+                lblPromptType.ForeColor = SystemColors.GrayText;
+                lblPromptCapabilities.Text = "Capabilities: —";
+                panelSchemaBanner.Visible = false;
+                _actionToolTip.SetToolTip(buttonDuplicate, "Select a prompt to duplicate.");
+                return;
             }
 
-            PopulatePromptList();
+            var selectedPrompt = prompt.Value;
+            var isSchemaAware = IsSchemaAwarePrompt(selectedPrompt);
+
+            lblPromptType.Text = isSchemaAware ? "Type: SCHEMA-AWARE" : "Type: LIBRARY";
+            lblPromptType.ForeColor = isSchemaAware
+                ? Color.FromArgb(86, 55, 141)
+                : Color.FromArgb(18, 111, 49);
+            lblPromptCapabilities.Text = isSchemaAware
+                ? "Cannot be used outside of Database Manager context. Can contain DB Schema placeholders."
+                : "Cannot contain DB Schema placeholders. Can contain general placeholders.";
+
+            panelSchemaBanner.Visible = isSchemaAware;
         }
 
         private void promptsListView_SelectedIndexChanged(object sender, EventArgs e)
@@ -184,12 +287,14 @@ namespace NppDB.Core
 
                 GeneratePlaceholderControls(prompt);
                 UpdatePreviewText(prompt);
+                UpdatePromptMeta(prompt);
             }
             else
             {
                 promptTextBox.Text = string.Empty;
                 flowLayoutPanelPlaceholders.Controls.Clear();
                 UpdateCopyButtonState(false, "No prompt selected");
+                UpdatePromptMeta(null);
             }
         }
 
@@ -332,7 +437,7 @@ namespace NppDB.Core
             var prompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
             if (prompt.Type == "TablePrompt")
             {
-                UpdateCopyButtonState(false, "This prompt is to be used from Database Manager (F10) by right-clicking a table");
+                UpdateCopyButtonState(false, "Schema-Aware prompt: use it from Database Manager (F10), not via copy");
                 return;
             }
             
@@ -436,7 +541,9 @@ namespace NppDB.Core
                         // update the prompt in the grid
                         selectedRow.Cells[0].Value = updatedPrompt.Title;
                         selectedRow.Cells[1].Value = updatedPrompt.Description;
+                        selectedRow.Cells[colPromptType.Index].Value = IsSchemaAwarePrompt(updatedPrompt) ? "SCHEMA-AWARE" : "LIBRARY";
                         selectedRow.Tag = updatedPrompt;
+                        ApplyRowStyling(selectedRow, updatedPrompt);
 
                         var index = _prompts.FindIndex(p => p.Title == prompt.Title);
                         if (index >= 0) _prompts[index] = updatedPrompt;
@@ -461,7 +568,7 @@ namespace NppDB.Core
                     _prompts.Add(newPrompt);
                     
                     // refresh search results to possibly include the new prompt
-                    txtSearch_TextChanged(this, EventArgs.Empty);
+                    RefreshPromptList();
                 }
             }
         }
@@ -484,7 +591,7 @@ namespace NppDB.Core
                     _prompts.RemoveAll(p => p.Title == prompt.Title);
                     
                     // Update UI via search logic
-                    txtSearch_TextChanged(this, EventArgs.Empty);
+                    RefreshPromptList();
 
                     ErasePromptFromFile(prompt);
 
@@ -535,28 +642,22 @@ namespace NppDB.Core
             }
         }
 
-        private void ShowTablePromptCheckbox_CheckedChanged(object sender, EventArgs e)
-        {
-            _isShowingTablePrompts = showTablePromptsCheckbox.Checked;
-            txtSearch_TextChanged(this, EventArgs.Empty);
-        }
-
         private void buttonDuplicate_Click(object sender, EventArgs e)
         {
-            if (promptsGridView.SelectedRows.Count > 0)
-            {
-                var selectedRow = promptsGridView.SelectedRows[0];
-                var prompt = (PromptItem)selectedRow.Tag;
+            if (promptsGridView.SelectedRows.Count == 0)
+                return;
 
-                var newPrompt = prompt;
-                newPrompt.Id = Guid.NewGuid().ToString();
-                newPrompt.Title += " (Copy)";
+            var selectedRow = promptsGridView.SelectedRows[0];
+            var prompt = (PromptItem)selectedRow.Tag;
 
-                _prompts.Add(newPrompt);
-                FrmPromptEditor.SaveNewPromptToFile(newPrompt);
+            var newPrompt = prompt;
+            newPrompt.Id = Guid.NewGuid().ToString();
+            newPrompt.Title += " (Copy)";
 
-                txtSearch_TextChanged(this, EventArgs.Empty);
-            }
+            _prompts.Add(newPrompt);
+            FrmPromptEditor.SaveNewPromptToFile(newPrompt);
+
+            RefreshPromptList();
         }
     }
 }

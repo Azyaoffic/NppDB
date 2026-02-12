@@ -37,8 +37,10 @@ namespace NppDB.Core
             this.promptsGridView = new System.Windows.Forms.DataGridView();
             this.colPromptName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colPromptDesc = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPromptType = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panelSearch = new System.Windows.Forms.Panel();
-            this.showTablePromptsCheckbox = new System.Windows.Forms.CheckBox();
+            this.cmbPromptSource = new System.Windows.Forms.ComboBox();
+            this.lblSource = new System.Windows.Forms.Label();
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.lblSearch = new System.Windows.Forms.Label();
             this.panelLeftActions = new System.Windows.Forms.FlowLayoutPanel();
@@ -48,6 +50,12 @@ namespace NppDB.Core
             this.buttonDelete = new System.Windows.Forms.Button();
             this.grpPreview = new System.Windows.Forms.GroupBox();
             this.promptTextBox = new System.Windows.Forms.RichTextBox();
+            this.panelPromptMeta = new System.Windows.Forms.Panel();
+            this.lblPromptCapabilities = new System.Windows.Forms.Label();
+            this.lblPromptType = new System.Windows.Forms.Label();
+            this.panelSchemaBanner = new System.Windows.Forms.Panel();
+            this.lblSchemaBannerText = new System.Windows.Forms.Label();
+            this.lblSchemaBannerTitle = new System.Windows.Forms.Label();
             this.splitterPreview = new System.Windows.Forms.Splitter();
             this.panelPreviewBottom = new System.Windows.Forms.Panel();
             this.flowLayoutPanelPlaceholders = new System.Windows.Forms.FlowLayoutPanel();
@@ -63,6 +71,8 @@ namespace NppDB.Core
             this.panelSearch.SuspendLayout();
             this.panelLeftActions.SuspendLayout();
             this.grpPreview.SuspendLayout();
+            this.panelPromptMeta.SuspendLayout();
+            this.panelSchemaBanner.SuspendLayout();
             this.panelPreviewBottom.SuspendLayout();
             this.panelRightActions.SuspendLayout();
             this.SuspendLayout();
@@ -99,7 +109,7 @@ namespace NppDB.Core
             this.promptsGridView.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCellsExceptHeaders;
             this.promptsGridView.BackgroundColor = System.Drawing.SystemColors.Window;
             this.promptsGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.promptsGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { this.colPromptName, this.colPromptDesc });
+            this.promptsGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { this.colPromptName, this.colPromptDesc, this.colPromptType });
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -109,14 +119,14 @@ namespace NppDB.Core
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.promptsGridView.DefaultCellStyle = dataGridViewCellStyle1;
             this.promptsGridView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.promptsGridView.Location = new System.Drawing.Point(0, 65);
+            this.promptsGridView.Location = new System.Drawing.Point(0, 70);
             this.promptsGridView.MinimumSize = new System.Drawing.Size(200, 120);
             this.promptsGridView.MultiSelect = false;
             this.promptsGridView.Name = "promptsGridView";
             this.promptsGridView.ReadOnly = true;
             this.promptsGridView.RowHeadersVisible = false;
             this.promptsGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.promptsGridView.Size = new System.Drawing.Size(328, 395);
+            this.promptsGridView.Size = new System.Drawing.Size(328, 390);
             this.promptsGridView.TabIndex = 1;
             this.promptsGridView.SelectionChanged += new System.EventHandler(this.promptsListView_SelectedIndexChanged);
             // 
@@ -134,26 +144,44 @@ namespace NppDB.Core
             this.colPromptDesc.Name = "colPromptDesc";
             this.colPromptDesc.ReadOnly = true;
             // 
+            // colPromptType
+            // 
+            this.colPromptType.HeaderText = "Type";
+            this.colPromptType.Name = "colPromptType";
+            this.colPromptType.ReadOnly = true;
+            this.colPromptType.Width = 95;
+            // 
             // panelSearch
             // 
-            this.panelSearch.Controls.Add(this.showTablePromptsCheckbox);
+            this.panelSearch.Controls.Add(this.cmbPromptSource);
+            this.panelSearch.Controls.Add(this.lblSource);
             this.panelSearch.Controls.Add(this.txtSearch);
             this.panelSearch.Controls.Add(this.lblSearch);
             this.panelSearch.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelSearch.Location = new System.Drawing.Point(0, 0);
             this.panelSearch.Name = "panelSearch";
-            this.panelSearch.Size = new System.Drawing.Size(328, 65);
+            this.panelSearch.Size = new System.Drawing.Size(328, 70);
             this.panelSearch.TabIndex = 0;
             // 
-            // showTablePromptsCheckbox
+            // cmbPromptSource
             // 
-            this.showTablePromptsCheckbox.Location = new System.Drawing.Point(4, 35);
-            this.showTablePromptsCheckbox.Name = "showTablePromptsCheckbox";
-            this.showTablePromptsCheckbox.Size = new System.Drawing.Size(313, 24);
-            this.showTablePromptsCheckbox.TabIndex = 2;
-            this.showTablePromptsCheckbox.Text = "Show Schema-Aware Prompts (from DB Manager)\r\n";
-            this.showTablePromptsCheckbox.UseVisualStyleBackColor = true;
-            this.showTablePromptsCheckbox.CheckedChanged += new System.EventHandler(this.ShowTablePromptCheckbox_CheckedChanged);
+            this.cmbPromptSource.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbPromptSource.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbPromptSource.FormattingEnabled = true;
+            this.cmbPromptSource.Location = new System.Drawing.Point(55, 38);
+            this.cmbPromptSource.Name = "cmbPromptSource";
+            this.cmbPromptSource.Size = new System.Drawing.Size(270, 21);
+            this.cmbPromptSource.TabIndex = 3;
+            this.cmbPromptSource.SelectedIndexChanged += new System.EventHandler(this.cmbPromptSource_SelectedIndexChanged);
+            // 
+            // lblSource
+            // 
+            this.lblSource.AutoSize = true;
+            this.lblSource.Location = new System.Drawing.Point(4, 42);
+            this.lblSource.Name = "lblSource";
+            this.lblSource.Size = new System.Drawing.Size(45, 13);
+            this.lblSource.TabIndex = 2;
+            this.lblSource.Text = "Source:";
             // 
             // txtSearch
             // 
@@ -232,6 +260,8 @@ namespace NppDB.Core
             // grpPreview
             // 
             this.grpPreview.Controls.Add(this.promptTextBox);
+            this.grpPreview.Controls.Add(this.panelPromptMeta);
+            this.grpPreview.Controls.Add(this.panelSchemaBanner);
             this.grpPreview.Controls.Add(this.splitterPreview);
             this.grpPreview.Controls.Add(this.panelPreviewBottom);
             this.grpPreview.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -240,7 +270,7 @@ namespace NppDB.Core
             this.grpPreview.Size = new System.Drawing.Size(632, 460);
             this.grpPreview.TabIndex = 0;
             this.grpPreview.TabStop = false;
-            this.grpPreview.Text = "Prompt Preview";
+            this.grpPreview.Text = "Prompt Preview (Read-Only)";
             // 
             // promptTextBox
             // 
@@ -248,12 +278,82 @@ namespace NppDB.Core
             this.promptTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.promptTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.promptTextBox.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.promptTextBox.Location = new System.Drawing.Point(3, 18);
+            this.promptTextBox.Location = new System.Drawing.Point(3, 92);
             this.promptTextBox.Name = "promptTextBox";
             this.promptTextBox.ReadOnly = true;
-            this.promptTextBox.Size = new System.Drawing.Size(626, 295);
+            this.promptTextBox.Size = new System.Drawing.Size(626, 221);
             this.promptTextBox.TabIndex = 0;
             this.promptTextBox.Text = "";
+            // 
+            // panelPromptMeta
+            // 
+            this.panelPromptMeta.Controls.Add(this.lblPromptCapabilities);
+            this.panelPromptMeta.Controls.Add(this.lblPromptType);
+            this.panelPromptMeta.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelPromptMeta.Location = new System.Drawing.Point(3, 68);
+            this.panelPromptMeta.Name = "panelPromptMeta";
+            this.panelPromptMeta.Size = new System.Drawing.Size(626, 24);
+            this.panelPromptMeta.TabIndex = 5;
+            // 
+            // lblPromptCapabilities
+            // 
+            this.lblPromptCapabilities.AutoEllipsis = true;
+            this.lblPromptCapabilities.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblPromptCapabilities.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.lblPromptCapabilities.Location = new System.Drawing.Point(138, 0);
+            this.lblPromptCapabilities.Name = "lblPromptCapabilities";
+            this.lblPromptCapabilities.Size = new System.Drawing.Size(488, 24);
+            this.lblPromptCapabilities.TabIndex = 1;
+            this.lblPromptCapabilities.Text = "Capabilities: —";
+            this.lblPromptCapabilities.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lblPromptType
+            // 
+            this.lblPromptType.Dock = System.Windows.Forms.DockStyle.Left;
+            this.lblPromptType.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblPromptType.Location = new System.Drawing.Point(0, 0);
+            this.lblPromptType.Name = "lblPromptType";
+            this.lblPromptType.Padding = new System.Windows.Forms.Padding(0, 0, 6, 0);
+            this.lblPromptType.Size = new System.Drawing.Size(138, 24);
+            this.lblPromptType.TabIndex = 0;
+            this.lblPromptType.Text = "Type: —";
+            this.lblPromptType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // panelSchemaBanner
+            // 
+            this.panelSchemaBanner.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(243)))), ((int)(((byte)(225)))));
+            this.panelSchemaBanner.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelSchemaBanner.Controls.Add(this.lblSchemaBannerText);
+            this.panelSchemaBanner.Controls.Add(this.lblSchemaBannerTitle);
+            this.panelSchemaBanner.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelSchemaBanner.Location = new System.Drawing.Point(3, 18);
+            this.panelSchemaBanner.Name = "panelSchemaBanner";
+            this.panelSchemaBanner.Size = new System.Drawing.Size(626, 50);
+            this.panelSchemaBanner.TabIndex = 4;
+            // 
+            // lblSchemaBannerText
+            // 
+            this.lblSchemaBannerText.AutoEllipsis = true;
+            this.lblSchemaBannerText.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblSchemaBannerText.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(96)))), ((int)(((byte)(74)))), ((int)(((byte)(34)))));
+            this.lblSchemaBannerText.Location = new System.Drawing.Point(0, 18);
+            this.lblSchemaBannerText.Name = "lblSchemaBannerText";
+            this.lblSchemaBannerText.Padding = new System.Windows.Forms.Padding(8, 0, 8, 0);
+            this.lblSchemaBannerText.Size = new System.Drawing.Size(624, 26);
+            this.lblSchemaBannerText.TabIndex = 1;
+            this.lblSchemaBannerText.Text = "This template is meant to be run from Database Manager by Right-Clicking onto a T" + "able.\r\n";
+            // 
+            // lblSchemaBannerTitle
+            // 
+            this.lblSchemaBannerTitle.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblSchemaBannerTitle.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblSchemaBannerTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(82)))), ((int)(((byte)(58)))), ((int)(((byte)(15)))));
+            this.lblSchemaBannerTitle.Location = new System.Drawing.Point(0, 0);
+            this.lblSchemaBannerTitle.Name = "lblSchemaBannerTitle";
+            this.lblSchemaBannerTitle.Padding = new System.Windows.Forms.Padding(8, 4, 8, 0);
+            this.lblSchemaBannerTitle.Size = new System.Drawing.Size(624, 18);
+            this.lblSchemaBannerTitle.TabIndex = 0;
+            this.lblSchemaBannerTitle.Text = "Schema-Aware template";
             // 
             // splitterPreview
             // 
@@ -359,6 +459,8 @@ namespace NppDB.Core
             this.panelSearch.PerformLayout();
             this.panelLeftActions.ResumeLayout(false);
             this.grpPreview.ResumeLayout(false);
+            this.panelPromptMeta.ResumeLayout(false);
+            this.panelSchemaBanner.ResumeLayout(false);
             this.panelPreviewBottom.ResumeLayout(false);
             this.panelPreviewBottom.PerformLayout();
             this.panelRightActions.ResumeLayout(false);
@@ -367,7 +469,8 @@ namespace NppDB.Core
 
         private System.Windows.Forms.Button buttonDuplicate;
 
-        private System.Windows.Forms.CheckBox showTablePromptsCheckbox;
+        private System.Windows.Forms.Label lblSource;
+        private System.Windows.Forms.ComboBox cmbPromptSource;
 
         #endregion
 
@@ -375,12 +478,19 @@ namespace NppDB.Core
         private System.Windows.Forms.DataGridView promptsGridView;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPromptName;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPromptDesc;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPromptType;
         private System.Windows.Forms.FlowLayoutPanel panelLeftActions;
         private System.Windows.Forms.Button buttonEdit;
         private System.Windows.Forms.Button buttonAdd;
         private System.Windows.Forms.Button buttonDelete;
 
         private System.Windows.Forms.GroupBox grpPreview;
+        private System.Windows.Forms.Panel panelSchemaBanner;
+        private System.Windows.Forms.Label lblSchemaBannerText;
+        private System.Windows.Forms.Label lblSchemaBannerTitle;
+        private System.Windows.Forms.Panel panelPromptMeta;
+        private System.Windows.Forms.Label lblPromptCapabilities;
+        private System.Windows.Forms.Label lblPromptType;
         private System.Windows.Forms.RichTextBox promptTextBox;
         private System.Windows.Forms.Splitter splitterPreview;
         private System.Windows.Forms.Panel panelPreviewBottom;
