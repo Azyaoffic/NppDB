@@ -41,8 +41,9 @@ namespace NppDB.Core
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.lblSearch = new System.Windows.Forms.Label();
             this.panelLeftActions = new System.Windows.Forms.FlowLayoutPanel();
-            this.buttonEdit = new System.Windows.Forms.Button();
             this.buttonAdd = new System.Windows.Forms.Button();
+            this.buttonDuplicate = new System.Windows.Forms.Button();
+            this.buttonEdit = new System.Windows.Forms.Button();
             this.buttonDelete = new System.Windows.Forms.Button();
             this.grpPreview = new System.Windows.Forms.GroupBox();
             this.promptTextBox = new System.Windows.Forms.RichTextBox();
@@ -77,15 +78,15 @@ namespace NppDB.Core
             this.splitContainerMain.Panel1.Controls.Add(this.panelSearch);
             this.splitContainerMain.Panel1.Controls.Add(this.panelLeftActions);
             this.splitContainerMain.Panel1MinSize = 250;
-            this.splitContainerMain.Panel2MinSize = 430;
             // 
             // splitContainerMain.Panel2
             // 
             this.splitContainerMain.Panel2.Controls.Add(this.grpPreview);
             this.splitContainerMain.Panel2.Controls.Add(this.panelRightActions);
             this.splitContainerMain.Panel2.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
-            this.splitContainerMain.Size = new System.Drawing.Size(900, 500);
-            this.splitContainerMain.SplitterDistance = 320;
+            this.splitContainerMain.Panel2MinSize = 430;
+            this.splitContainerMain.Size = new System.Drawing.Size(969, 500);
+            this.splitContainerMain.SplitterDistance = 328;
             this.splitContainerMain.TabIndex = 0;
             // 
             // promptsListView
@@ -99,7 +100,7 @@ namespace NppDB.Core
             this.promptsListView.MinimumSize = new System.Drawing.Size(200, 120);
             this.promptsListView.MultiSelect = false;
             this.promptsListView.Name = "promptsListView";
-            this.promptsListView.Size = new System.Drawing.Size(320, 395);
+            this.promptsListView.Size = new System.Drawing.Size(328, 395);
             this.promptsListView.TabIndex = 1;
             this.promptsListView.UseCompatibleStateImageBehavior = false;
             this.promptsListView.View = System.Windows.Forms.View.Details;
@@ -123,7 +124,7 @@ namespace NppDB.Core
             this.panelSearch.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelSearch.Location = new System.Drawing.Point(0, 0);
             this.panelSearch.Name = "panelSearch";
-            this.panelSearch.Size = new System.Drawing.Size(320, 65);
+            this.panelSearch.Size = new System.Drawing.Size(328, 65);
             this.panelSearch.TabIndex = 0;
             // 
             // showTablePromptsCheckbox
@@ -132,7 +133,7 @@ namespace NppDB.Core
             this.showTablePromptsCheckbox.Name = "showTablePromptsCheckbox";
             this.showTablePromptsCheckbox.Size = new System.Drawing.Size(313, 24);
             this.showTablePromptsCheckbox.TabIndex = 2;
-            this.showTablePromptsCheckbox.Text = "Show Table-Based Prompts";
+            this.showTablePromptsCheckbox.Text = "Show Schema-Aware Prompts (from DB Manager)\r\n";
             this.showTablePromptsCheckbox.UseVisualStyleBackColor = true;
             this.showTablePromptsCheckbox.CheckedChanged += new System.EventHandler(this.ShowTablePromptCheckbox_CheckedChanged);
             // 
@@ -142,7 +143,7 @@ namespace NppDB.Core
             this.txtSearch.Location = new System.Drawing.Point(55, 7);
             this.txtSearch.MinimumSize = new System.Drawing.Size(100, 22);
             this.txtSearch.Name = "txtSearch";
-            this.txtSearch.Size = new System.Drawing.Size(262, 22);
+            this.txtSearch.Size = new System.Drawing.Size(270, 22);
             this.txtSearch.TabIndex = 1;
             this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
             // 
@@ -157,31 +158,22 @@ namespace NppDB.Core
             // 
             // panelLeftActions
             // 
-            this.panelLeftActions.Controls.Add(this.buttonEdit);
             this.panelLeftActions.Controls.Add(this.buttonAdd);
+            this.panelLeftActions.Controls.Add(this.buttonDuplicate);
+            this.panelLeftActions.Controls.Add(this.buttonEdit);
             this.panelLeftActions.Controls.Add(this.buttonDelete);
             this.panelLeftActions.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.panelLeftActions.Location = new System.Drawing.Point(0, 460);
             this.panelLeftActions.MinimumSize = new System.Drawing.Size(250, 40);
             this.panelLeftActions.Name = "panelLeftActions";
             this.panelLeftActions.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
-            this.panelLeftActions.Size = new System.Drawing.Size(320, 40);
+            this.panelLeftActions.Size = new System.Drawing.Size(328, 40);
             this.panelLeftActions.TabIndex = 2;
             this.panelLeftActions.WrapContents = false;
             // 
-            // buttonEdit
-            // 
-            this.buttonEdit.Location = new System.Drawing.Point(3, 8);
-            this.buttonEdit.Name = "buttonEdit";
-            this.buttonEdit.Size = new System.Drawing.Size(75, 28);
-            this.buttonEdit.TabIndex = 0;
-            this.buttonEdit.Text = "Edit";
-            this.buttonEdit.UseVisualStyleBackColor = true;
-            this.buttonEdit.Click += new System.EventHandler(this.buttonEdit_Click);
-            // 
             // buttonAdd
             // 
-            this.buttonAdd.Location = new System.Drawing.Point(84, 8);
+            this.buttonAdd.Location = new System.Drawing.Point(3, 8);
             this.buttonAdd.Name = "buttonAdd";
             this.buttonAdd.Size = new System.Drawing.Size(75, 28);
             this.buttonAdd.TabIndex = 1;
@@ -189,9 +181,29 @@ namespace NppDB.Core
             this.buttonAdd.UseVisualStyleBackColor = true;
             this.buttonAdd.Click += new System.EventHandler(this.buttonAdd_Click);
             // 
+            // buttonDuplicate
+            // 
+            this.buttonDuplicate.Location = new System.Drawing.Point(84, 8);
+            this.buttonDuplicate.Name = "buttonDuplicate";
+            this.buttonDuplicate.Size = new System.Drawing.Size(75, 28);
+            this.buttonDuplicate.TabIndex = 3;
+            this.buttonDuplicate.Text = "Duplicate";
+            this.buttonDuplicate.UseVisualStyleBackColor = true;
+            this.buttonDuplicate.Click += new System.EventHandler(this.buttonDuplicate_Click);
+            // 
+            // buttonEdit
+            // 
+            this.buttonEdit.Location = new System.Drawing.Point(165, 8);
+            this.buttonEdit.Name = "buttonEdit";
+            this.buttonEdit.Size = new System.Drawing.Size(75, 28);
+            this.buttonEdit.TabIndex = 0;
+            this.buttonEdit.Text = "Edit";
+            this.buttonEdit.UseVisualStyleBackColor = true;
+            this.buttonEdit.Click += new System.EventHandler(this.buttonEdit_Click);
+            // 
             // buttonDelete
             // 
-            this.buttonDelete.Location = new System.Drawing.Point(165, 8);
+            this.buttonDelete.Location = new System.Drawing.Point(246, 8);
             this.buttonDelete.Name = "buttonDelete";
             this.buttonDelete.Size = new System.Drawing.Size(75, 28);
             this.buttonDelete.TabIndex = 2;
@@ -207,7 +219,7 @@ namespace NppDB.Core
             this.grpPreview.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grpPreview.Location = new System.Drawing.Point(5, 0);
             this.grpPreview.Name = "grpPreview";
-            this.grpPreview.Size = new System.Drawing.Size(571, 460);
+            this.grpPreview.Size = new System.Drawing.Size(632, 460);
             this.grpPreview.TabIndex = 0;
             this.grpPreview.TabStop = false;
             this.grpPreview.Text = "Prompt Preview";
@@ -221,7 +233,7 @@ namespace NppDB.Core
             this.promptTextBox.Location = new System.Drawing.Point(3, 18);
             this.promptTextBox.Name = "promptTextBox";
             this.promptTextBox.ReadOnly = true;
-            this.promptTextBox.Size = new System.Drawing.Size(565, 295);
+            this.promptTextBox.Size = new System.Drawing.Size(626, 295);
             this.promptTextBox.TabIndex = 0;
             this.promptTextBox.Text = "";
             // 
@@ -232,7 +244,7 @@ namespace NppDB.Core
             this.splitterPreview.MinExtra = 120;
             this.splitterPreview.MinSize = 80;
             this.splitterPreview.Name = "splitterPreview";
-            this.splitterPreview.Size = new System.Drawing.Size(565, 6);
+            this.splitterPreview.Size = new System.Drawing.Size(626, 6);
             this.splitterPreview.TabIndex = 1;
             this.splitterPreview.TabStop = false;
             // 
@@ -243,7 +255,7 @@ namespace NppDB.Core
             this.panelPreviewBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.panelPreviewBottom.Location = new System.Drawing.Point(3, 319);
             this.panelPreviewBottom.Name = "panelPreviewBottom";
-            this.panelPreviewBottom.Size = new System.Drawing.Size(565, 138);
+            this.panelPreviewBottom.Size = new System.Drawing.Size(626, 138);
             this.panelPreviewBottom.TabIndex = 1;
             // 
             // flowLayoutPanelPlaceholders
@@ -254,7 +266,7 @@ namespace NppDB.Core
             this.flowLayoutPanelPlaceholders.Location = new System.Drawing.Point(3, 22);
             this.flowLayoutPanelPlaceholders.MinimumSize = new System.Drawing.Size(200, 80);
             this.flowLayoutPanelPlaceholders.Name = "flowLayoutPanelPlaceholders";
-            this.flowLayoutPanelPlaceholders.Size = new System.Drawing.Size(559, 113);
+            this.flowLayoutPanelPlaceholders.Size = new System.Drawing.Size(620, 113);
             this.flowLayoutPanelPlaceholders.TabIndex = 6;
             this.flowLayoutPanelPlaceholders.WrapContents = false;
             // 
@@ -276,14 +288,13 @@ namespace NppDB.Core
             this.panelRightActions.Location = new System.Drawing.Point(5, 460);
             this.panelRightActions.MinimumSize = new System.Drawing.Size(430, 40);
             this.panelRightActions.Name = "panelRightActions";
-            this.panelRightActions.Size = new System.Drawing.Size(571, 40);
+            this.panelRightActions.Size = new System.Drawing.Size(632, 40);
             this.panelRightActions.TabIndex = 1;
             // 
             // disableTemplatingCheckbox
             // 
             this.disableTemplatingCheckbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.disableTemplatingCheckbox.AutoEllipsis = true;
-            this.disableTemplatingCheckbox.AutoSize = false;
             this.disableTemplatingCheckbox.Location = new System.Drawing.Point(6, 11);
             this.disableTemplatingCheckbox.Name = "disableTemplatingCheckbox";
             this.disableTemplatingCheckbox.Size = new System.Drawing.Size(260, 17);
@@ -301,7 +312,7 @@ namespace NppDB.Core
             this.buttonCopy.Location = new System.Drawing.Point(275, 6);
             this.buttonCopy.MinimumSize = new System.Drawing.Size(140, 28);
             this.buttonCopy.Name = "buttonCopy";
-            this.buttonCopy.Size = new System.Drawing.Size(293, 28);
+            this.buttonCopy.Size = new System.Drawing.Size(354, 28);
             this.buttonCopy.TabIndex = 9;
             this.buttonCopy.Text = "Copy Prompt";
             this.buttonCopy.UseVisualStyleBackColor = false;
@@ -312,7 +323,7 @@ namespace NppDB.Core
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(920, 520);
+            this.ClientSize = new System.Drawing.Size(989, 520);
             this.Controls.Add(this.splitContainerMain);
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.MinimumSize = new System.Drawing.Size(740, 460);
@@ -332,9 +343,10 @@ namespace NppDB.Core
             this.panelPreviewBottom.ResumeLayout(false);
             this.panelPreviewBottom.PerformLayout();
             this.panelRightActions.ResumeLayout(false);
-            this.panelRightActions.PerformLayout();
             this.ResumeLayout(false);
         }
+
+        private System.Windows.Forms.Button buttonDuplicate;
 
         private System.Windows.Forms.CheckBox showTablePromptsCheckbox;
 

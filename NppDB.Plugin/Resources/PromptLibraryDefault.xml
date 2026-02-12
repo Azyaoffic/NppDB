@@ -31,7 +31,7 @@ You are an expert SQL instructor.
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
-            <Placeholder name="dialect"/>
+            <Placeholder name="dialect" editable="true"/>
         </Placeholders>
         <Metadata>
             <Category>Refactor</Category>
@@ -70,7 +70,7 @@ subqueries, N+1-like patterns in SQL).
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
-            <Placeholder name="dialect"/>
+            <Placeholder name="dialect" editable="true"/>
         </Placeholders>
         <Metadata>
             <Category>Refactor</Category>
@@ -118,7 +118,7 @@ still provide the best-effort fix.
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
-            <Placeholder name="dialect"/>
+            <Placeholder name="dialect" editable="true"/>
             <Placeholder name="error_message" editable="true" rich="true"/>
         </Placeholders>
         <Metadata>
@@ -190,7 +190,7 @@ involved.
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
-            <Placeholder name="dialect"/>
+            <Placeholder name="dialect" editable="true"/>
             <Placeholder name="format" editable="true"/>
         </Placeholders>
         <Metadata>
@@ -268,7 +268,7 @@ query.
 {{user_input}}
 ```</Text>
         <Placeholders>
-            <Placeholder name="dialect"/>
+            <Placeholder name="dialect" editable="true"/>
             <Placeholder name="user_input" editable="true" rich="true"/>
         </Placeholders>
         <Metadata>

@@ -135,7 +135,7 @@ namespace NppDB.Core
             {
                 promptTextBox.Text = string.Empty;
                 flowLayoutPanelPlaceholders.Controls.Clear();
-                UpdateCopyButtonState(false);
+                UpdateCopyButtonState(false, "No prompts match the search criteria.");
             }
         }
 
@@ -177,7 +177,7 @@ namespace NppDB.Core
             {
                 promptTextBox.Text = string.Empty;
                 flowLayoutPanelPlaceholders.Controls.Clear();
-                UpdateCopyButtonState(false);
+                UpdateCopyButtonState(false, "No prompt selected");
             }
         }
 
@@ -313,11 +313,17 @@ namespace NppDB.Core
         {
             if (promptsListView.SelectedItems.Count == 0)
             {
-                UpdateCopyButtonState(false);
+                UpdateCopyButtonState(false, "No prompt selected");
                 return;
             }
 
             var prompt = (PromptItem)promptsListView.SelectedItems[0].Tag;
+            if (prompt.Type == "TablePrompt")
+            {
+                UpdateCopyButtonState(false, "This prompt is to be used from Database Manager (F10) by right-clicking a table");
+                return;
+            }
+            
             var isValid = true;
 
             if (prompt.Placeholders != null)
@@ -335,10 +341,10 @@ namespace NppDB.Core
                 }
             }
 
-            UpdateCopyButtonState(isValid);
+            UpdateCopyButtonState(isValid, "Fill required fields (*) to Copy");
         }
 
-        private void UpdateCopyButtonState(bool enabled)
+        private void UpdateCopyButtonState(bool enabled, string reason)
         {
             buttonCopy.Enabled = enabled;
             if (enabled)
@@ -349,7 +355,7 @@ namespace NppDB.Core
             }
             else
             {
-                buttonCopy.Text = "Fill required fields (*) to Copy";
+                buttonCopy.Text = reason;
                 buttonCopy.BackColor = Color.LightGray;
                 buttonCopy.ForeColor = Color.DimGray;
             }
@@ -471,7 +477,7 @@ namespace NppDB.Core
 
                     promptTextBox.Text = string.Empty;
                     flowLayoutPanelPlaceholders.Controls.Clear();
-                    UpdateCopyButtonState(false);
+                    UpdateCopyButtonState(false, "No prompt selected");
                 }
             }
         }
@@ -520,6 +526,24 @@ namespace NppDB.Core
         {
             _isShowingTablePrompts = showTablePromptsCheckbox.Checked;
             txtSearch_TextChanged(this, EventArgs.Empty);
+        }
+
+        private void buttonDuplicate_Click(object sender, EventArgs e)
+        {
+            if (promptsListView.SelectedItems.Count > 0)
+            {
+                var selectedItem = promptsListView.SelectedItems[0];
+                var prompt = (PromptItem)selectedItem.Tag;
+
+                var newPrompt = prompt;
+                newPrompt.Id = Guid.NewGuid().ToString();
+                newPrompt.Title += " (Copy)";
+
+                _prompts.Add(newPrompt);
+                FrmPromptEditor.SaveNewPromptToFile(newPrompt);
+
+                txtSearch_TextChanged(this, EventArgs.Empty);
+            }
         }
     }
 }

@@ -124,7 +124,7 @@ namespace NppDB.Core
             Close();
         }
 
-        private void SaveNewPromptToFile(PromptItem promptItem)
+        public static void SaveNewPromptToFile(PromptItem promptItem)
         {
             string promptLibraryPath = FrmPromptLibrary.PromptLibraryPath;
             if (!File.Exists(promptLibraryPath))
