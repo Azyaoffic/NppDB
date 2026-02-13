@@ -357,6 +357,7 @@ namespace NppDB
              }
              SetCommand(8, "Show LLM Response Preferences", ShowPromptPreferences);
              SetCommand(9, "Show Behavior Settings", ShowBehaviorSettings);
+             SetCommand(10, "Show AI Prompt Template Editor", ShowAiTemplateEditor);
 
              _cmdFrmDbExplorerIdx = 2; 
         }
@@ -1456,6 +1457,14 @@ namespace NppDB
         private static void ShowBehaviorSettings()
         {
             var dlg = new FrmBehaviorSettings(_staticBehaviorSettingsPath);
+            dlg.ShowDialog();
+        }
+
+        private void ShowAiTemplateEditor()
+        {
+            var templateFilePath = Path.Combine(_nppDbPluginDir, "AIPromptTemplate.txt");
+
+            var dlg = new FrmAiPromptTemplateEditor(templateFilePath);
             dlg.ShowDialog();
         }
 
