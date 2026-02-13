@@ -345,11 +345,11 @@ namespace NppDB
              
              SetCommand(0, "Execute SQL", Execute, new ShortcutKey(false, false, false, Keys.F9));
              SetCommand(1, "Analyze SQL", Analyze, new ShortcutKey(false, false, true, Keys.F9));
-             SetCommand(2, "Database Connect Manager", ToggleDbManager, new ShortcutKey(false, false, false, Keys.F10));
-             SetCommand(3, "Clear analysis", ClearAnalysis, new ShortcutKey(true, false, true, Keys.F9));
-             SetCommand(4, "Open console", OpenConsole);
-             SetCommand(5, "About", ShowAbout);
-             SetCommand(6, "Generate AI prompt:", HandleCtrlF9ForAiPrompt, new ShortcutKey(true, false, false, Keys.F9));
+             SetCommand(2, "Analyze and Create Prompt", HandleCtrlF9ForAiPrompt, new ShortcutKey(true, false, false, Keys.F9));
+             SetCommand(3, "Database Connect Manager", ToggleDbManager, new ShortcutKey(false, false, false, Keys.F10));
+             SetCommand(4, "Clear analysis", ClearAnalysis, new ShortcutKey(true, false, true, Keys.F9));
+             SetCommand(5, "Open console", OpenConsole);
+             SetCommand(6, "About", ShowAbout);
 
              if (!_isPromptLibraryDisabled)
              {
@@ -1808,21 +1808,8 @@ namespace NppDB
 
         private void HandleCtrlF9ForAiPrompt()
         {
-            var analysisInfoAvailable = _lastAnalysisResult != null && _lastEditor != null &&
-                                        ((_lastAnalysisResult.Errors != null && _lastAnalysisResult.Errors.Any(e => e != null)) ||
-                                         (_lastAnalysisResult.Commands != null && _lastAnalysisResult.Commands.Any(c => c != null &&
-                                             ((c.Warnings != null && c.Warnings.Any(w => w != null)) ||
-                                              (c.AnalyzeErrors != null && c.AnalyzeErrors.Any(ae => ae != null))))));
-
-            if (analysisInfoAvailable)
-            {
-                GenerateAiPromptForAllIssues(_lastAnalysisResult, _lastAnalyzedText, _lastUsedDialect, _lastEditor);
-            }
-            else
-            {
-                MessageBox.Show("No active analysis results to generate an AI prompt for. Please run an analysis first.",
-                    PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
+            Analyze();
+            GenerateAiPromptForAllIssues(_lastAnalysisResult, _lastAnalyzedText, _lastUsedDialect, _lastEditor);
         }
 
         private void GenerateAiPromptForAllIssues(ParserResult analysisResult, string fullQuery, SqlDialect dialect, IScintillaGateway editor)
