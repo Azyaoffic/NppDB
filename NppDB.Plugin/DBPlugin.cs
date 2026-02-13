@@ -358,6 +358,7 @@ namespace NppDB
              SetCommand(8, "Show LLM Response Preferences", ShowPromptPreferences);
              SetCommand(9, "Show Behavior Settings", ShowBehaviorSettings);
              SetCommand(10, "Show AI Prompt Template Editor", ShowAiTemplateEditor);
+             SetCommand(11, "Analyze and Create Prompt (Issue at Caret)", AnalyzeAndCreatePromptForIssueAtCaret, new ShortcutKey(false, true, false, Keys.F9));
 
              _cmdFrmDbExplorerIdx = 2; 
         }
@@ -588,12 +589,12 @@ namespace NppDB
         
         
 
-        private void AnalyzeAndExecute(bool showFeedbackOnSuccess, bool onlyAnalyze)
+        private void AnalyzeAndExecute(bool showFeedbackOnSuccess, bool onlyAnalyze, bool forceFullDocument = false)
         {
             SqlResult attachedResult = null;
             IScintillaGateway editor = null;
             var baseLine = 0;
-            var selectionOnly = true;
+            var selectionOnly = !forceFullDocument;
 
             try
             {
@@ -610,8 +611,9 @@ namespace NppDB
                 SetSqlLang(bufId);
 
                 var currentScintilla = GetCurrentScintilla();
-                var textToParse = GetScintillaText(currentScintilla, true);
-                if (string.IsNullOrWhiteSpace(textToParse))
+
+                var textToParse = GetScintillaText(currentScintilla, selectionOnly);
+                if (!forceFullDocument && string.IsNullOrWhiteSpace(textToParse))
                 {
                     selectionOnly = false;
                     textToParse = GetScintillaText(currentScintilla, false);
@@ -781,6 +783,283 @@ namespace NppDB
                 _lastAnalyzedText = null;
                 _lastUsedDialect = SqlDialect.NONE;
                 _lastEditor = null;
+            }
+        }
+
+        private void AnalyzeAndCreatePromptForIssueAtCaret()
+        {
+            AnalyzeAndExecute(true, true, forceFullDocument: true);
+            GenerateAiPromptForIssueAtCaret(_lastAnalysisResult, _lastAnalyzedText, _lastUsedDialect, _lastEditor);
+        }
+
+        private void GenerateAiPromptForIssueAtCaret(ParserResult analysisResult, string fullQuery, SqlDialect dialect, IScintillaGateway editor)
+        {
+            if (analysisResult == null || string.IsNullOrEmpty(fullQuery) || editor == null)
+            {
+                MessageBox.Show("Not enough information to generate AI debug prompt (Initial check failed).", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var caret = GetCaretPosition(editor);
+            var caretLine = caret.Line;
+            var caretCol = caret.Column;
+
+            bool HasValidLineRange(ParserMessage m)
+            {
+                if (m == null) return false;
+                if (m.StartLine <= 0) return false;
+                var stopLine = (m.StopLine > 0) ? m.StopLine : m.StartLine;
+                return stopLine >= m.StartLine;
+            }
+
+            bool LineOverlaps(ParserMessage m, int startLine, int stopLine)
+            {
+                if (!HasValidLineRange(m)) return false;
+                var mStop = (m.StopLine > 0) ? m.StopLine : m.StartLine;
+                return m.StartLine <= stopLine && mStop >= startLine;
+            }
+
+            bool ContainsCaret(ParserMessage m)
+            {
+                if (!HasValidLineRange(m)) return false;
+
+                var mStopLine = (m.StopLine > 0) ? m.StopLine : m.StartLine;
+                if (caretLine < m.StartLine || caretLine > mStopLine) return false;
+
+                // Same-line column checks (best-effort; StopColumn is often -1)
+                if (caretLine == m.StartLine && m.StartColumn >= 0 && caretCol < m.StartColumn) return false;
+                if (caretLine == mStopLine && m.StopColumn >= 0 && caretCol > m.StopColumn) return false;
+
+                return true;
+            }
+
+            int LineDistanceToCaret(ParserMessage m)
+            {
+                if (!HasValidLineRange(m)) return int.MaxValue;
+
+                var mStopLine = (m.StopLine > 0) ? m.StopLine : m.StartLine;
+                if (caretLine < m.StartLine) return m.StartLine - caretLine;
+                if (caretLine > mStopLine) return caretLine - mStopLine;
+                return 0;
+            }
+
+            ParsedCommand caretCommand = null;
+
+            if (analysisResult.Commands != null && analysisResult.Commands.Any())
+            {
+                var candidates = analysisResult.Commands
+                    .Where(c => c != null && HasValidLineRange(c))
+                    .Where(c =>
+                    {
+                        var cStop = (c.StopLine > 0) ? c.StopLine : c.StartLine;
+                        return caretLine >= c.StartLine && caretLine <= cStop;
+                    })
+                    .ToList();
+
+                if (candidates.Count == 1)
+                {
+                    caretCommand = candidates[0];
+                }
+                else if (candidates.Count > 1)
+                {
+                    caretCommand = candidates
+                        .OrderByDescending(c => ContainsCaret(c))
+                        .ThenBy(c => ((c.StopLine > 0) ? c.StopLine : c.StartLine) - c.StartLine)
+                        .ThenBy(c => Math.Abs((c.StartColumn >= 0 ? c.StartColumn : 0) - caretCol))
+                        .FirstOrDefault();
+                }
+
+                if (caretCommand == null
+                    && analysisResult.EnclosingCommandIndex >= 0
+                    && analysisResult.EnclosingCommandIndex < analysisResult.Commands.Count)
+                {
+                    caretCommand = analysisResult.Commands[analysisResult.EnclosingCommandIndex];
+                }
+
+                if (caretCommand == null)
+                {
+                    caretCommand = analysisResult.Commands.FirstOrDefault(c => c != null);
+                }
+            }
+
+            var scopedMessages = new List<ParserMessage>();
+
+            if (caretCommand != null)
+            {
+                if (caretCommand.Warnings != null)
+                    scopedMessages.AddRange(caretCommand.Warnings.Where(w => w != null));
+
+                if (caretCommand.AnalyzeErrors != null)
+                    scopedMessages.AddRange(caretCommand.AnalyzeErrors.Where(w => w != null));
+
+                if (analysisResult.Errors != null && HasValidLineRange(caretCommand))
+                {
+                    var cmdStartLine = caretCommand.StartLine;
+                    var cmdStopLine = (caretCommand.StopLine > 0) ? caretCommand.StopLine : caretCommand.StartLine;
+                    scopedMessages.AddRange(analysisResult.Errors.Where(e => e != null && LineOverlaps(e, cmdStartLine, cmdStopLine)));
+                }
+            }
+            else
+            {
+                if (analysisResult.Errors != null)
+                    scopedMessages.AddRange(analysisResult.Errors.Where(e => e != null));
+            }
+
+            if (!scopedMessages.Any())
+            {
+                MessageBox.Show("No issues found for the SQL statement at the caret.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var chosenMessage = scopedMessages
+                .OrderByDescending(m => m is ParserError)
+                .ThenByDescending(ContainsCaret)
+                .ThenBy(LineDistanceToCaret)
+                .ThenBy(m => (m.StopLine > 0 ? m.StopLine : m.StartLine) - m.StartLine)
+                .FirstOrDefault();
+
+            if (chosenMessage == null)
+            {
+                MessageBox.Show("Could not determine an issue near caret to generate a prompt for.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                int SafePosFromLineCol(int line1Based, int col0Based)
+                {
+                    var line0 = Math.Max(0, line1Based - 1);
+                    var lineStart = editor.PositionFromLine(line0);
+                    var lineEnd = editor.GetLineEndPosition(line0);
+
+                    var col = Math.Max(0, col0Based);
+                    var pos = lineStart + col;
+                    if (pos < lineStart) pos = lineStart;
+                    if (pos > lineEnd) pos = lineEnd;
+                    return pos;
+                }
+
+                var startLine = chosenMessage.StartLine > 0 ? chosenMessage.StartLine : caretLine;
+                var startCol = chosenMessage.StartColumn >= 0 ? chosenMessage.StartColumn : 0;
+
+                var stopLine = chosenMessage.StopLine > 0 ? chosenMessage.StopLine : startLine;
+                var stopCol = chosenMessage.StopColumn >= 0 ? chosenMessage.StopColumn : startCol;
+
+                var startPos = SafePosFromLineCol(startLine, startCol);
+                var endPos = SafePosFromLineCol(stopLine, stopCol);
+
+                if (endPos <= startPos)
+                {
+                    var line0 = Math.Max(0, startLine - 1);
+                    startPos = editor.PositionFromLine(line0);
+                    endPos = editor.GetLineEndPosition(line0);
+                }
+                else
+                {
+                    endPos = Math.Min(editor.GetLength(), endPos + 1);
+                }
+
+                editor.SetSel(startPos, endPos);
+                editor.GotoPos(startPos);
+            }
+            catch
+            {
+                // ignore selection failures
+            }
+
+            var commandText = (caretCommand != null && !string.IsNullOrWhiteSpace(caretCommand.Text))
+                ? caretCommand.Text
+                : fullQuery;
+
+            var translatedMessage = _warningMessages.TryGetValue(chosenMessage.Type, out var translated)
+                ? translated
+                : chosenMessage.Text;
+
+            if (string.IsNullOrEmpty(translatedMessage))
+                translatedMessage = chosenMessage.Text ?? "N/A";
+
+            var issueType = chosenMessage is ParserError ? "Error" : "Warning";
+
+            var issuesDetailedListBuilder = new StringBuilder();
+            issuesDetailedListBuilder.AppendLine("    Issue 1:");
+            issuesDetailedListBuilder.AppendLine($"      Type: {issueType}");
+            issuesDetailedListBuilder.AppendLine($"      Message: \"{translatedMessage}\"");
+
+            if (chosenMessage.StartLine > 0 && chosenMessage.StartColumn >= 0)
+                issuesDetailedListBuilder.AppendLine($"      Location: Line {chosenMessage.StartLine}, Column {chosenMessage.StartColumn + 1}");
+            else
+                issuesDetailedListBuilder.AppendLine("      Location: N/A");
+
+            if (chosenMessage.StartLine > 0)
+            {
+                var msgLineZeroBased = chosenMessage.StartLine - 1;
+                var snippetBuilderForMsg = new StringBuilder();
+                var startSnippetLine = Math.Max(0, msgLineZeroBased - 1);
+                var endSnippetLine = Math.Min(editor.GetLineCount() - 1, msgLineZeroBased + 1);
+
+                for (var i = startSnippetLine; i <= endSnippetLine; i++)
+                {
+                    var lineText = editor.GetLine(i);
+                    snippetBuilderForMsg.AppendLine($"          {i + 1:D3}: {lineText.TrimEnd('\r', '\n')}");
+                }
+
+                var codeSnippetForMsg = snippetBuilderForMsg.ToString().Trim();
+                if (string.IsNullOrWhiteSpace(codeSnippetForMsg))
+                    codeSnippetForMsg = "        Could not retrieve code snippet.";
+
+                issuesDetailedListBuilder.AppendLine("      Code Context:");
+                issuesDetailedListBuilder.AppendLine(codeSnippetForMsg);
+            }
+
+            var analysisIssuesWithDetailsListString = issuesDetailedListBuilder.ToString().TrimEnd('\r', '\n');
+
+            string generatedPrompt;
+            var dbDialectString = dialect.ToString();
+
+            try
+            {
+                var templateFilePath = Path.Combine(_nppDbPluginDir, "AIPromptTemplate.txt");
+
+                if (!File.Exists(templateFilePath))
+                {
+                    MessageBox.Show($"AI prompt template file not found: {templateFilePath}\nUsing default prompt structure.",
+                        PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                    generatedPrompt = GenerateDefaultAiPromptOptionB(dbDialectString, commandText, analysisIssuesWithDetailsListString);
+                    if (string.IsNullOrEmpty(generatedPrompt)) return;
+                }
+                else
+                {
+                    var promptTemplate = File.ReadAllText(templateFilePath);
+
+                    generatedPrompt = promptTemplate
+                        .Replace("{DATABASE_DIALECT}", dbDialectString)
+                        .Replace("{SQL_QUERY}", commandText.Trim())
+                        .Replace("{ANALYSIS_ISSUES_WITH_DETAILS_LIST}", analysisIssuesWithDetailsListString);
+                }
+            }
+            catch (Exception exReadTemplate)
+            {
+                MessageBox.Show($"Error reading or processing AI prompt template: {exReadTemplate.Message}\nFalling back to default prompt structure.",
+                    PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                generatedPrompt = GenerateDefaultAiPromptOptionB(dbDialectString, commandText, analysisIssuesWithDetailsListString);
+                if (string.IsNullOrEmpty(generatedPrompt)) return;
+            }
+
+            try
+            {
+                Clipboard.SetText(generatedPrompt);
+                var dialogMessage = "AI debug prompt (issue at caret) copied to clipboard!\n\n" +
+                                    "--- Prompt Content: ---\n" +
+                                    generatedPrompt;
+
+                MessageBox.Show(dialogMessage, PLUGIN_NAME + " - AI Prompt Generated", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception exClipboard)
+            {
+                MessageBox.Show($"Error copying prompt to clipboard or displaying prompt: {exClipboard.Message}",
+                    PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
