@@ -1946,24 +1946,39 @@ namespace NppDB
                 return null;
             }
 
-            var promptBuilder = new StringBuilder();
-            promptBuilder.AppendLine($"You are an expert {dbDialectString} SQL developer and troubleshooter.");
-            promptBuilder.AppendLine("I need help understanding and fixing issues with my SQL query.");
-            promptBuilder.AppendLine();
-            promptBuilder.AppendLine("Here is the information:");
-            promptBuilder.AppendLine($"1.  Database Dialect: {dbDialectString}");
-            promptBuilder.AppendLine("2.  SQL Query:");
-            promptBuilder.AppendLine(fullQuery.Trim());
-            promptBuilder.AppendLine("3.  Detected Issues (Errors/Warnings):");
-            promptBuilder.AppendLine(analysisIssuesWithDetailsList);
-            promptBuilder.AppendLine();
-            promptBuilder.AppendLine("Please, for each issue detailed in point 3 above:");
-            promptBuilder.AppendLine($"a. Explain what the feedback message means in the context of my query and the {dbDialectString} dialect.");
-            promptBuilder.AppendLine("b. Identify the most likely cause(s) of this issue in my query.");
-            promptBuilder.AppendLine("c. Provide specific, corrected SQL code snippet(s) to resolve the issue, or indicate how the query structure should change for that specific issue.");
-            promptBuilder.AppendLine("d. If applicable, suggest any SQL best practices related to this problem to avoid it in the future.");
+            var defaultPrompt = $@"**Role**
+You are an expert {dbDialectString} SQL developer and troubleshooter.
 
-            return promptBuilder.ToString();
+**Task**
+- Diagnose and fix problems in the provided SQL query using the detected issues list.
+- For each issue, explain what it means, why it happens, and how to fix it.
+
+**Constraints**
+- Use the {dbDialectString} dialect only.
+- Preserve the query’s intended result; prefer minimal, targeted changes.
+- If critical context is missing (schema, sample data, constraints), state assumptions explicitly.
+- Any SQL you propose must be valid and runnable for this dialect.
+
+**Response**
+For each issue (in the same order as provided), output:
+1) Meaning (1–3 sentences)
+2) Likely cause(s) (bullets)
+3) Fix (final SQL or snippet in one `sql` code block)
+4) Best-practice note (optional, 1–2 bullets)
+
+**Database Dialect**
+`{dbDialectString}`
+
+**SQL Query**
+```sql
+{fullQuery}`
+```
+**Detected Issues**
+```
+{analysisIssuesWithDetailsList}
+```
+";
+            return defaultPrompt;
         }
     }
 }

@@ -17,22 +17,37 @@ namespace NppDB.Core
             "{ANALYSIS_ISSUES_WITH_DETAILS_LIST}"
         };
 
-        private const string DefaultTemplate =
-@"You are an expert {DATABASE_DIALECT} SQL developer and troubleshooter.
-I need help understanding and fixing issues with my SQL query.
+        private const string DefaultTemplate = @"**Role**
+You are an expert {DATABASE_DIALECT} SQL developer and troubleshooter.
 
-Here is the information:
-1.  Database Dialect: {DATABASE_DIALECT}
-2.  SQL Query:
+**Task**
+- Diagnose and fix problems in the provided SQL query using the detected issues list.
+- For each issue, explain what it means, why it happens, and how to fix it.
+
+**Constraints**
+- Use the {DATABASE_DIALECT} dialect only.
+- Preserve the query’s intended result; prefer minimal, targeted changes.
+- If critical context is missing (schema, sample data, constraints), state assumptions explicitly.
+- Any SQL you propose must be valid and runnable for this dialect.
+
+**Response**
+For each issue (in the same order as provided), output:
+1) Meaning (1–3 sentences)
+2) Likely cause(s) (bullets)
+3) Fix (final SQL or snippet in one `sql` code block)
+4) Best-practice note (optional, 1–2 bullets)
+
+**Database Dialect**
+`{DATABASE_DIALECT}`
+
+**SQL Query**
+```sql
 {SQL_QUERY}
-3.  Detected Issues (Errors/Warnings):
+```
+**Detected Issues**
+```
 {ANALYSIS_ISSUES_WITH_DETAILS_LIST}
-
-Please, for each issue detailed in point 3 above:
-a. Explain what the feedback message means in the context of my query and the {DATABASE_DIALECT} dialect.
-b. Identify the most likely cause(s) of this issue in my query.
-c. Provide specific, corrected SQL code snippet(s) to resolve the issue, or indicate how the query structure should change for that specific issue.
-d. If applicable, suggest any SQL best practices related to this problem to avoid it in the future.
+```
 ";
 
         public FrmAiPromptTemplateEditor(string templateFilePath)
