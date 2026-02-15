@@ -170,6 +170,9 @@
         <EmbeddedResource Include="Resources\LanguageCodes.csv" />
     </ItemGroup>
     <ItemGroup>
+        <EmbeddedResource Include="Resources\Tutorial.txt" />
+    </ItemGroup>
+    <ItemGroup>
         <Content Include="DllExport\DllExport.bat" />
         <Content Include="DllExport\Mono.Cecil.dll" />
         <Content Include="DllExport\NppPlugin.DllExport.dll" />

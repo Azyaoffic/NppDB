@@ -1,0 +1,61 @@
+﻿# NppDB Quick Tutorial
+
+## What NppDB does
+- Connect to MS Access or PostgreSQL inside Notepad++
+- Run SQL from the editor and view results
+- Analyze SQL (warnings/errors + highlights)
+- Generate copy-paste AI prompts from analysis
+- Use schema-aware table prompts from the DB tree
+
+## Most useful shortcuts
+- Ctrl + F11 - See this tutorial again
+- F10 - Database Connect Manager  
+- F9 - Execute SQL  
+- Shift + F9 - Analyze SQL  
+- Ctrl + Shift + F9 - Clear analysis highlights/messages  
+- Ctrl + F9 - Analyze + AI prompt (all issues)  
+- Alt + F9 - Analyze + AI prompt (issue at caret)  
+- Ctrl + F10 - Prompt Library (if enabled)
+
+## First launch setup (1 minute)
+1. Open Database Connect Manager (F10)
+2. Add connection  
+   - MS Access: choose `.accdb` / `.mdb`  
+   - PostgreSQL: host / port / database / user / password
+3. Connect and expand nodes to browse schemas/tables/views
+
+## Run SQL (F9)
+- If text is selected: executes statements inside the selection
+- If nothing selected: executes the statement your caret is currently inside
+
+Results appear in NppDB’s result/messages panel (at the bottom of Notepad++ window).
+
+## Analyze SQL (Shift + F9)
+- If text is selected: analyzes the selection
+- If nothing selected: analyzes the whole document
+
+Issues show as highlights as well as in the analysis output.  
+Clear analysis with Ctrl + Shift + F9.
+
+## AI prompts from analysis
+- Ctrl + F9: create one prompt from all detected issues (copied to clipboard)
+- Alt + F9: create a prompt for the issue at your caret (copied to clipboard)
+
+Paste the prompt into your LLM to get explanations/fixes.  
+You can edit the template used for these prompts via the AI Prompt Template editor.
+
+## Prompt Library (reusable prompts)
+- Open via plugin menu or Ctrl + F10
+- Pick a prompt -> fill missing placeholders (if needed) -> press blue button to copy to clipboard
+- You can add and edit prompts
+
+## Schema-aware table prompts (DB tree)
+1. Open DB Manager (F10) and connect
+2. Expand the table once so columns load
+3. Right-click table -> AI Prompts -> choose a prompt
+
+NppDB builds a prompt including table name + columns and copies it to clipboard.
+
+## Common problems
+- “No database connection attached”: open F10 and connect, then retry F9.
+- Table prompts missing columns: expand the table node so columns load, then retry.

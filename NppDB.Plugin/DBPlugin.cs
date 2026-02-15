@@ -340,6 +340,10 @@ namespace NppDB
                      _isPromptLibraryDisabled = true;
                      MessageBox.Show("Prompt Library file not found. Prompt Library features will be disabled.");
                  }
+                 
+                 // we'll assume that this is mostly run on the first plugin load,
+                 // so we can use this as injection point for first launch tutorial
+                 ShowTutorial();
              }
 
              
@@ -359,8 +363,9 @@ namespace NppDB
              SetCommand(9, "Show Behavior Settings", ShowBehaviorSettings);
              SetCommand(10, "Show AI Prompt Template Editor", ShowAiTemplateEditor);
              SetCommand(11, "Analyze and Create Prompt (Issue at Caret)", AnalyzeAndCreatePromptForIssueAtCaret, new ShortcutKey(false, true, false, Keys.F9));
+             SetCommand(12, "Show Tutorial", ShowTutorial, new ShortcutKey(true, false, false, Keys.F11));
 
-             _cmdFrmDbExplorerIdx = 2; 
+             _cmdFrmDbExplorerIdx = 3; 
         }
 
         private void ReadTranslations()
@@ -1924,6 +1929,31 @@ namespace NppDB
             FrmPromptLibrary.SetPrompts(promptItems);
         }
 
+        private void ShowTutorial()
+        {
+            using (var stream = Assembly.GetExecutingAssembly()
+                       .GetManifestResourceStream("NppDB.Resources.Tutorial.txt"))
+            {
+                if (stream == null)
+                {
+                    MessageBox.Show("Embedded resource `NppDB.Plugin.Resources.Tutorial.txt` not found.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                
+                using (var reader = new StreamReader(stream))
+                {
+                    var content = reader.ReadToEnd();
+                    NewFile(forceNewTab: true);
+                    var hndScin = GetCurrentScintilla();
+                    if (hndScin != IntPtr.Zero)
+                    {
+                        AppendToScintillaText(hndScin, content, forceIgnoreTwoNewLines: true);
+                    }
+                }
+            }
+            
+        }
+
         private void UpdateCurrentSqlResult()
          {
             if (SQLResultManager.Instance == null) return;
@@ -2009,9 +2039,10 @@ namespace NppDB
             return value.EnableNewTabCreation;
         }
 
-        private static void NewFile()
+        private static void NewFile(bool forceNewTab = false)
         {
-            if (!NewTabCreateEnable(_staticBehaviorSettingsPath)) return;
+            
+            if (!forceNewTab && !NewTabCreateEnable(_staticBehaviorSettingsPath)) return;
             
             Win32.SendMessage(nppData._nppHandle, (uint)Win32.Wm.COMMAND, (int)NppMenuCmd.IDM_FILE_NEW, 0);
         }
@@ -2054,14 +2085,14 @@ namespace NppDB
             Win32.SendMessage(nppData._nppHandle, (uint)NppMsg.NPPM_SETBUFFERLANGTYPE, bufferId, (int)LangType.L_SQL);
         }
 
-        private static void AppendToScintillaText(IntPtr scintillaHnd, string text)
+        private static void AppendToScintillaText(IntPtr scintillaHnd, string text, bool forceIgnoreTwoNewLines = false)
         {
             if (scintillaHnd == IntPtr.Zero || string.IsNullOrEmpty(text))
             {
                 return;
             }
 
-            if (!NewTabCreateEnable(_staticBehaviorSettingsPath))
+            if (!forceIgnoreTwoNewLines && !NewTabCreateEnable(_staticBehaviorSettingsPath))
             {
                 text = "\n\n" + text;
             }
