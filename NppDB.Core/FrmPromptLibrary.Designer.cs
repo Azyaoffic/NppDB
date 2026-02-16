@@ -430,7 +430,7 @@ namespace NppDB.Core
             this.disableTemplatingCheckbox.Name = "disableTemplatingCheckbox";
             this.disableTemplatingCheckbox.Size = new System.Drawing.Size(260, 17);
             this.disableTemplatingCheckbox.TabIndex = 5;
-            this.disableTemplatingCheckbox.Text = "Show template names instead of contents";
+            this.disableTemplatingCheckbox.Text = "Show placeholder names instead of contents";
             this.disableTemplatingCheckbox.UseVisualStyleBackColor = true;
             this.disableTemplatingCheckbox.CheckedChanged += new System.EventHandler(this.disableTemplatingCheckbox_CheckedChanged);
             // 
