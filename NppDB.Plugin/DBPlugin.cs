@@ -58,6 +58,12 @@ namespace NppDB
         private Dictionary<ParserMessageType, string> _generalTranslations = new Dictionary<ParserMessageType, string>();
         private Control _currentCtr;
         private const int DEFAULT_SQL_RESULT_HEIGHT = 200;
+        private const int MIN_SQL_RESULT_HEIGHT = 80;
+        private const int MIN_EDITOR_HEIGHT = 50;
+        private int _sqlResultHeight = DEFAULT_SQL_RESULT_HEIGHT;
+        private bool _isUpdatingResultPos;
+        private bool _uiScaleInitialized;
+        private float _uiScale = 1f;
         private ParserResult _lastAnalysisResult;
         private string _lastAnalyzedText;
         private SqlDialect _lastUsedDialect;
@@ -1484,10 +1490,32 @@ namespace NppDB
             return null;
         }
 
-        private static void SetResultPos(Control control)
+        private void SetResultPos(Control control)
         {
             try
             {
+                if (_isUpdatingResultPos) return;
+                _isUpdatingResultPos = true;
+
+                if (!_uiScaleInitialized && control != null && control.IsHandleCreated)
+                {
+                    try
+                    {
+                        using (var g = control.CreateGraphics())
+                        {
+                            var scale = g.DpiY / 96f;
+                            if (scale > 0.1f) _uiScale = scale;
+                        }
+                    }
+                    catch
+                    {
+                        _uiScale = 1f;
+                    }
+
+                    _sqlResultHeight = (int)Math.Round(DEFAULT_SQL_RESULT_HEIGHT * _uiScale);
+                    _uiScaleInitialized = true;
+                }
+
                 var nppHwnd = nppData._nppHandle;
                 var hndScin = GetCurrentScintilla();
 
@@ -1508,9 +1536,6 @@ namespace NppDB
 
                 var availableHeight = nppClientHeight - statusBarHeight;
 
-                var resultTop = availableHeight - DEFAULT_SQL_RESULT_HEIGHT;
-                if (resultTop < 0) resultTop = 0;
-
                 if (!Win32.GetWindowRect(hndScin, out var scinScreenRect)) return;
 
                 var scinWidth = scinScreenRect.Right - scinScreenRect.Left;
@@ -1519,29 +1544,48 @@ namespace NppDB
                 var scinLeft = scinTopLeftScreen.X;
                 var scinTop = scinTopLeftScreen.Y;
 
-                if (resultTop < scinTop) resultTop = scinTop;
+                var minEditorHeightPx = (int)Math.Round(MIN_EDITOR_HEIGHT * _uiScale);
+                var minSqlResultHeightPx = (int)Math.Round(MIN_SQL_RESULT_HEIGHT * _uiScale);
+                if (minEditorHeightPx < 10) minEditorHeightPx = 10;
+                if (minSqlResultHeightPx < 20) minSqlResultHeightPx = 20;
+
+                var maxResultHeight = availableHeight - scinTop - minEditorHeightPx;
+                if (maxResultHeight < minSqlResultHeightPx) maxResultHeight = minSqlResultHeightPx;
+
+                var resultHeight = _sqlResultHeight;
+                if (resultHeight < minSqlResultHeightPx) resultHeight = minSqlResultHeightPx;
+                if (resultHeight > maxResultHeight) resultHeight = maxResultHeight;
+                _sqlResultHeight = resultHeight;
+
+                var resultTop = availableHeight - resultHeight;
+                var minResultTop = scinTop + minEditorHeightPx;
+                if (resultTop < minResultTop) resultTop = minResultTop;
 
                 var newScinHeight = resultTop - scinTop;
-                if (newScinHeight < 50) newScinHeight = 50;
+                if (newScinHeight < minEditorHeightPx) newScinHeight = minEditorHeightPx;
 
                 Win32.SetWindowPos(
                     hndScin, IntPtr.Zero,
                     scinLeft, scinTop,
                     scinWidth, newScinHeight,
                     Win32.SetWindowPosFlags.NO_Z_ORDER | Win32.SetWindowPosFlags.NO_ACTIVATE
-                    );
+                );
 
                 Win32.SetWindowPos(
                     control.Handle, IntPtr.Zero,
-                    scinLeft, resultTop, scinWidth, DEFAULT_SQL_RESULT_HEIGHT,
-                    Win32.SetWindowPosFlags.SHOW_WINDOW | Win32.SetWindowPosFlags.NO_ACTIVATE
-                    );
+                    scinLeft, resultTop, scinWidth, resultHeight,
+                    Win32.SetWindowPosFlags.SHOW_WINDOW | Win32.SetWindowPosFlags.NO_Z_ORDER | Win32.SetWindowPosFlags.NO_ACTIVATE
+                );
 
-                 if (!control.Visible) control.Visible = true;
+                if (!control.Visible) control.Visible = true;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error in SetResultPos: {ex.Message}", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                _isUpdatingResultPos = false;
             }
         }
 
@@ -1626,6 +1670,11 @@ namespace NppDB
             if (result.IsHandleCreated && !result.IsDisposed)
             {
                 ResetViewPos();
+            }
+            
+            if (result is SqlResult sqlResult)
+            {
+                sqlResult.UserResizeRequested -= SqlResult_UserResizeRequested;
             }
 
             if (result.IsHandleCreated && !result.IsDisposed)
@@ -2004,7 +2053,7 @@ namespace NppDB
                 SetResultPos(_currentCtr);
             }
          }
-        private static Control AddSqlResult(IntPtr bufId, IDbConnect connect, ISqlExecutor sqlExecutor)
+        private Control AddSqlResult(IntPtr bufId, IDbConnect connect, ISqlExecutor sqlExecutor)
         {
             var ctr = SQLResultManager.Instance.CreateSQLResult(bufId, connect, sqlExecutor);
 
@@ -2013,8 +2062,27 @@ namespace NppDB
 
             ctr.Visible = false;
 
+            if (ctr is SqlResult sqlResult)
+            {
+                sqlResult.UserResizeRequested -= SqlResult_UserResizeRequested;
+                sqlResult.UserResizeRequested += SqlResult_UserResizeRequested;
+            }
+
             return ctr;
         }
+        
+        private void SqlResult_UserResizeRequested(SqlResult sender, int requestedHeight)
+        {
+            if (requestedHeight <= 0) return;
+            _sqlResultHeight = requestedHeight;
+
+            if (sender == null || sender.IsDisposed || !sender.IsHandleCreated) return;
+            if (!ReferenceEquals(sender, _currentCtr)) return;
+            if (!sender.Visible) return;
+
+            SetResultPos(sender);
+        }
+
         private void ShowSqlResult(SqlResult control)
         {
             if (control == null || control.IsDisposed) return;

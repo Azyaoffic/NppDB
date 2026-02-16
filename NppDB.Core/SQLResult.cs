@@ -14,6 +14,12 @@ namespace NppDB.Core
     {
         private static readonly List<WeakReference<SqlResult>> ActiveInstances = new List<WeakReference<SqlResult>>();
         private static readonly object ListLock = new object();
+        
+        public event Action<SqlResult, int> UserResizeRequested;
+        private Panel _resizeGrip;
+        private bool _isResizing;
+        private int _resizeStartScreenY;
+        private int _resizeStartHeight;
 
         public SqlResult(IDbConnect connect, ISqlExecutor sqlExecutor)
         {
@@ -254,7 +260,54 @@ namespace NppDB.Core
                 });
                 menu.Show(tclSqlResult, e.Location);
             };
+            
+            InitResizeGrip();
         }
+        
+        private void InitResizeGrip()
+        {
+            _resizeGrip = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 4,
+                Cursor = Cursors.SizeNS,
+                BackColor = SystemColors.ControlDark
+            };
+
+            Controls.Add(_resizeGrip);
+            _resizeGrip.BringToFront();
+
+            _resizeGrip.MouseDown += (s, e) =>
+            {
+                if (e.Button != MouseButtons.Left) return;
+                _isResizing = true;
+                _resizeStartScreenY = MousePosition.Y;
+                _resizeStartHeight = Height;
+                _resizeGrip.Capture = true;
+            };
+
+            _resizeGrip.MouseMove += (s, e) =>
+            {
+                if (!_isResizing) return;
+                var delta = MousePosition.Y - _resizeStartScreenY;
+                var requestedHeight = _resizeStartHeight - delta;
+                UserResizeRequested?.Invoke(this, requestedHeight);
+            };
+
+            _resizeGrip.MouseUp += (s, e) =>
+            {
+                if (e.Button != MouseButtons.Left) return;
+                _isResizing = false;
+                _resizeGrip.Capture = false;
+            };
+
+            _resizeGrip.MouseCaptureChanged += (s, e) =>
+            {
+                if (_resizeGrip.Capture) return;
+                _isResizing = false;
+            };
+        }
+
         
         private static void Numbering(DataGridView dgv)
         {
