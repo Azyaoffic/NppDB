@@ -12,6 +12,7 @@ namespace NppDB.Core
     {
         public string ResponseLanguage {get; set;}
         public string CustomInstructions {get; set;}
+        public string OpenLlmUrl { get; set; }
     }
     
     public partial class FrmPromptPreferences : Form
@@ -48,6 +49,11 @@ namespace NppDB.Core
                     {
                         comboBoxResponseLanguage.SelectedItem = value.ResponseLanguage;
                     }
+                    
+                    if (value.OpenLlmUrl != null)
+                    {
+                        textBoxOpenLlmUrl.Text = value.OpenLlmUrl;
+                    }
 
                     if (value.CustomInstructions != null)
                     {
@@ -59,10 +65,22 @@ namespace NppDB.Core
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
+            var openLlmUrl = (textBoxOpenLlmUrl.Text ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(openLlmUrl))
+            {
+                MessageBox.Show(
+                        "URL must not be empty!",
+                        "Invalid URL",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                return;
+            }
+
             var preferences = new PromptPreferences
             {
                 ResponseLanguage = _selectedLanguage,
-                CustomInstructions = richTextBoxCustomInstructions.Text
+                CustomInstructions = richTextBoxCustomInstructions.Text,
+                OpenLlmUrl = openLlmUrl
             };
 
             var jsonData = JsonConvert.SerializeObject(preferences, Formatting.Indented);
@@ -103,7 +121,8 @@ namespace NppDB.Core
                 return new PromptPreferences
                 {
                     ResponseLanguage = "English",
-                    CustomInstructions = ""
+                    CustomInstructions = "",
+                    OpenLlmUrl = "https://chatgpt.com/"
                 };
             }
         }

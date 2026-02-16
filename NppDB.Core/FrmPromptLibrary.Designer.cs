@@ -51,6 +51,7 @@ namespace NppDB.Core
             this.grpPreview = new System.Windows.Forms.GroupBox();
             this.promptTextBox = new System.Windows.Forms.RichTextBox();
             this.panelPromptMeta = new System.Windows.Forms.Panel();
+            this.buttonAiStudio = new System.Windows.Forms.Button();
             this.lblPromptCapabilities = new System.Windows.Forms.Label();
             this.lblPromptType = new System.Windows.Forms.Label();
             this.panelSchemaBanner = new System.Windows.Forms.Panel();
@@ -287,6 +288,7 @@ namespace NppDB.Core
             // 
             // panelPromptMeta
             // 
+            this.panelPromptMeta.Controls.Add(this.buttonAiStudio);
             this.panelPromptMeta.Controls.Add(this.lblPromptCapabilities);
             this.panelPromptMeta.Controls.Add(this.lblPromptType);
             this.panelPromptMeta.Dock = System.Windows.Forms.DockStyle.Top;
@@ -294,6 +296,17 @@ namespace NppDB.Core
             this.panelPromptMeta.Name = "panelPromptMeta";
             this.panelPromptMeta.Size = new System.Drawing.Size(626, 24);
             this.panelPromptMeta.TabIndex = 5;
+            // 
+            // buttonAiStudio
+            // 
+            this.buttonAiStudio.Dock = System.Windows.Forms.DockStyle.Right;
+            this.buttonAiStudio.Location = new System.Drawing.Point(506, 0);
+            this.buttonAiStudio.Name = "buttonAiStudio";
+            this.buttonAiStudio.Size = new System.Drawing.Size(120, 24);
+            this.buttonAiStudio.TabIndex = 2;
+            this.buttonAiStudio.Text = "Open LLM\r\n";
+            this.buttonAiStudio.UseVisualStyleBackColor = true;
+            this.buttonAiStudio.Click += new System.EventHandler(this.buttonAiStudio_Click);
             // 
             // lblPromptCapabilities
             // 
@@ -500,6 +513,7 @@ namespace NppDB.Core
         private System.Windows.Forms.Panel panelRightActions;
         private System.Windows.Forms.CheckBox disableTemplatingCheckbox;
         private System.Windows.Forms.Button buttonCopy;
+        private System.Windows.Forms.Button buttonAiStudio;
 
         private System.Windows.Forms.Panel panelSearch;
         private System.Windows.Forms.TextBox txtSearch;

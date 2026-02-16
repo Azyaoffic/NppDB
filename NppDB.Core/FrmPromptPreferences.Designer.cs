@@ -32,12 +32,14 @@ namespace NppDB.Core
         private void InitializeComponent()
         {
             this.tableLayoutMain = new System.Windows.Forms.TableLayoutPanel();
-            this.panelBottomActions = new System.Windows.Forms.Panel();
-            this.flowLayoutBottomActions = new System.Windows.Forms.FlowLayoutPanel();
             this.labelResponseLanguage = new System.Windows.Forms.Label();
             this.comboBoxResponseLanguage = new System.Windows.Forms.ComboBox();
+            this.labelOpenLlmUrl = new System.Windows.Forms.Label();
+            this.textBoxOpenLlmUrl = new System.Windows.Forms.TextBox();
             this.labelCustomInstructions = new System.Windows.Forms.Label();
             this.richTextBoxCustomInstructions = new System.Windows.Forms.RichTextBox();
+            this.panelBottomActions = new System.Windows.Forms.Panel();
+            this.flowLayoutBottomActions = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonSave = new System.Windows.Forms.Button();
             this.tableLayoutMain.SuspendLayout();
             this.panelBottomActions.SuspendLayout();
@@ -51,19 +53,92 @@ namespace NppDB.Core
             this.tableLayoutMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutMain.Controls.Add(this.labelResponseLanguage, 0, 0);
             this.tableLayoutMain.Controls.Add(this.comboBoxResponseLanguage, 1, 0);
-            this.tableLayoutMain.Controls.Add(this.labelCustomInstructions, 0, 1);
-            this.tableLayoutMain.Controls.Add(this.richTextBoxCustomInstructions, 0, 2);
-            this.tableLayoutMain.Controls.Add(this.panelBottomActions, 0, 3);
+            this.tableLayoutMain.Controls.Add(this.labelOpenLlmUrl, 0, 1);
+            this.tableLayoutMain.Controls.Add(this.textBoxOpenLlmUrl, 1, 1);
+            this.tableLayoutMain.Controls.Add(this.labelCustomInstructions, 0, 2);
+            this.tableLayoutMain.Controls.Add(this.richTextBoxCustomInstructions, 0, 3);
+            this.tableLayoutMain.Controls.Add(this.panelBottomActions, 0, 4);
             this.tableLayoutMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutMain.Location = new System.Drawing.Point(10, 10);
             this.tableLayoutMain.Name = "tableLayoutMain";
-            this.tableLayoutMain.RowCount = 4;
+            this.tableLayoutMain.RowCount = 5;
+            this.tableLayoutMain.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutMain.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutMain.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutMain.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutMain.Size = new System.Drawing.Size(520, 420);
             this.tableLayoutMain.TabIndex = 0;
+            // 
+            // labelResponseLanguage
+            // 
+            this.labelResponseLanguage.AutoSize = true;
+            this.labelResponseLanguage.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelResponseLanguage.Location = new System.Drawing.Point(0, 6);
+            this.labelResponseLanguage.Margin = new System.Windows.Forms.Padding(0, 6, 10, 0);
+            this.labelResponseLanguage.Name = "labelResponseLanguage";
+            this.labelResponseLanguage.Size = new System.Drawing.Size(160, 21);
+            this.labelResponseLanguage.TabIndex = 0;
+            this.labelResponseLanguage.Text = "Response Language";
+            this.labelResponseLanguage.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // comboBoxResponseLanguage
+            // 
+            this.comboBoxResponseLanguage.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.comboBoxResponseLanguage.FormattingEnabled = true;
+            this.comboBoxResponseLanguage.Location = new System.Drawing.Point(173, 3);
+            this.comboBoxResponseLanguage.MinimumSize = new System.Drawing.Size(160, 0);
+            this.comboBoxResponseLanguage.Name = "comboBoxResponseLanguage";
+            this.comboBoxResponseLanguage.Size = new System.Drawing.Size(344, 21);
+            this.comboBoxResponseLanguage.TabIndex = 1;
+            this.comboBoxResponseLanguage.SelectedIndexChanged += new System.EventHandler(this.comboBoxResponseLanguage_SelectedIndexChanged);
+            // 
+            // labelOpenLlmUrl
+            // 
+            this.labelOpenLlmUrl.AutoSize = true;
+            this.labelOpenLlmUrl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelOpenLlmUrl.Location = new System.Drawing.Point(0, 33);
+            this.labelOpenLlmUrl.Margin = new System.Windows.Forms.Padding(0, 6, 10, 0);
+            this.labelOpenLlmUrl.Name = "labelOpenLlmUrl";
+            this.labelOpenLlmUrl.Size = new System.Drawing.Size(160, 22);
+            this.labelOpenLlmUrl.TabIndex = 11;
+            this.labelOpenLlmUrl.Text = "Open LLM URL";
+            this.labelOpenLlmUrl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // textBoxOpenLlmUrl
+            // 
+            this.textBoxOpenLlmUrl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBoxOpenLlmUrl.Location = new System.Drawing.Point(173, 30);
+            this.textBoxOpenLlmUrl.MinimumSize = new System.Drawing.Size(160, 4);
+            this.textBoxOpenLlmUrl.Name = "textBoxOpenLlmUrl";
+            this.textBoxOpenLlmUrl.Size = new System.Drawing.Size(344, 22);
+            this.textBoxOpenLlmUrl.TabIndex = 12;
+            // 
+            // labelCustomInstructions
+            // 
+            this.labelCustomInstructions.AutoSize = true;
+            this.tableLayoutMain.SetColumnSpan(this.labelCustomInstructions, 2);
+            this.labelCustomInstructions.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelCustomInstructions.Location = new System.Drawing.Point(0, 65);
+            this.labelCustomInstructions.Margin = new System.Windows.Forms.Padding(0, 10, 0, 4);
+            this.labelCustomInstructions.Name = "labelCustomInstructions";
+            this.labelCustomInstructions.Size = new System.Drawing.Size(118, 15);
+            this.labelCustomInstructions.TabIndex = 2;
+            this.labelCustomInstructions.Text = "Custom Instructions";
+            // 
+            // richTextBoxCustomInstructions
+            // 
+            this.richTextBoxCustomInstructions.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.tableLayoutMain.SetColumnSpan(this.richTextBoxCustomInstructions, 2);
+            this.richTextBoxCustomInstructions.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBoxCustomInstructions.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.richTextBoxCustomInstructions.Location = new System.Drawing.Point(0, 84);
+            this.richTextBoxCustomInstructions.Margin = new System.Windows.Forms.Padding(0);
+            this.richTextBoxCustomInstructions.MinimumSize = new System.Drawing.Size(200, 120);
+            this.richTextBoxCustomInstructions.Name = "richTextBoxCustomInstructions";
+            this.richTextBoxCustomInstructions.Size = new System.Drawing.Size(520, 286);
+            this.richTextBoxCustomInstructions.TabIndex = 3;
+            this.richTextBoxCustomInstructions.Text = "";
             // 
             // panelBottomActions
             // 
@@ -85,59 +160,9 @@ namespace NppDB.Core
             this.flowLayoutBottomActions.Location = new System.Drawing.Point(0, 0);
             this.flowLayoutBottomActions.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutBottomActions.Name = "flowLayoutBottomActions";
-            this.flowLayoutBottomActions.Padding = new System.Windows.Forms.Padding(0);
             this.flowLayoutBottomActions.Size = new System.Drawing.Size(520, 40);
             this.flowLayoutBottomActions.TabIndex = 0;
             this.flowLayoutBottomActions.WrapContents = false;
-            // 
-            // labelResponseLanguage
-            // 
-            this.labelResponseLanguage.AutoSize = true;
-            this.labelResponseLanguage.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelResponseLanguage.Location = new System.Drawing.Point(0, 0);
-            this.labelResponseLanguage.Margin = new System.Windows.Forms.Padding(0, 6, 10, 0);
-            this.labelResponseLanguage.Name = "labelResponseLanguage";
-            this.labelResponseLanguage.Size = new System.Drawing.Size(160, 19);
-            this.labelResponseLanguage.TabIndex = 0;
-            this.labelResponseLanguage.Text = "Response Language";
-            this.labelResponseLanguage.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // comboBoxResponseLanguage
-            // 
-            this.comboBoxResponseLanguage.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.comboBoxResponseLanguage.FormattingEnabled = true;
-            this.comboBoxResponseLanguage.Location = new System.Drawing.Point(170, 3);
-            this.comboBoxResponseLanguage.MinimumSize = new System.Drawing.Size(160, 0);
-            this.comboBoxResponseLanguage.Name = "comboBoxResponseLanguage";
-            this.comboBoxResponseLanguage.Size = new System.Drawing.Size(347, 21);
-            this.comboBoxResponseLanguage.TabIndex = 1;
-            this.comboBoxResponseLanguage.SelectedIndexChanged += new System.EventHandler(this.comboBoxResponseLanguage_SelectedIndexChanged);
-            // 
-            // labelCustomInstructions
-            // 
-            this.labelCustomInstructions.AutoSize = true;
-            this.tableLayoutMain.SetColumnSpan(this.labelCustomInstructions, 2);
-            this.labelCustomInstructions.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelCustomInstructions.Location = new System.Drawing.Point(0, 34);
-            this.labelCustomInstructions.Margin = new System.Windows.Forms.Padding(0, 10, 0, 4);
-            this.labelCustomInstructions.Name = "labelCustomInstructions";
-            this.labelCustomInstructions.Size = new System.Drawing.Size(117, 15);
-            this.labelCustomInstructions.TabIndex = 2;
-            this.labelCustomInstructions.Text = "Custom Instructions";
-            // 
-            // richTextBoxCustomInstructions
-            // 
-            this.richTextBoxCustomInstructions.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.tableLayoutMain.SetColumnSpan(this.richTextBoxCustomInstructions, 2);
-            this.richTextBoxCustomInstructions.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBoxCustomInstructions.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.richTextBoxCustomInstructions.Location = new System.Drawing.Point(0, 53);
-            this.richTextBoxCustomInstructions.Margin = new System.Windows.Forms.Padding(0);
-            this.richTextBoxCustomInstructions.MinimumSize = new System.Drawing.Size(200, 120);
-            this.richTextBoxCustomInstructions.Name = "richTextBoxCustomInstructions";
-            this.richTextBoxCustomInstructions.Size = new System.Drawing.Size(520, 317);
-            this.richTextBoxCustomInstructions.TabIndex = 3;
-            this.richTextBoxCustomInstructions.Text = "";
             // 
             // buttonSave
             // 
@@ -159,6 +184,7 @@ namespace NppDB.Core
             this.AcceptButton = this.buttonSave;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScroll = true;
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(540, 440);
             this.Controls.Add(this.tableLayoutMain);
@@ -188,6 +214,9 @@ namespace NppDB.Core
         private System.Windows.Forms.ComboBox comboBoxResponseLanguage;
 
         private System.Windows.Forms.Label labelResponseLanguage;
+        
+        private System.Windows.Forms.Label labelOpenLlmUrl;
+        private System.Windows.Forms.TextBox textBoxOpenLlmUrl;
 
         #endregion
     }

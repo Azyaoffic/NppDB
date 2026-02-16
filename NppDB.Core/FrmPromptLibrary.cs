@@ -668,5 +668,27 @@ namespace NppDB.Core
 
             RefreshPromptList();
         }
+        
+        private void buttonAiStudio_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var url = FrmPromptPreferences.ReadUserPreferences().OpenLlmUrl;
+                if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+                {
+                    url = "https://" + url;
+                }
+                
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not open the browser: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }
