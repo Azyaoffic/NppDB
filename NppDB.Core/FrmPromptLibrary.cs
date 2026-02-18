@@ -63,6 +63,8 @@ namespace NppDB.Core
             Placeholders = new Dictionary<string, string>(placeholders);
 
             InitializeComponent();
+            
+            promptsGridView.CellDoubleClick += promptsGridView_CellDoubleClick; 
 
             ConfigureSourceFilter();
             RefreshPromptList();
@@ -248,6 +250,21 @@ namespace NppDB.Core
             _currentSourceFilter = (PromptSourceFilter)cmbPromptSource.SelectedIndex;
             RefreshPromptList();
         }
+        
+        private void promptsGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            promptsGridView.ClearSelection();
+            var row = promptsGridView.Rows[e.RowIndex];
+            row.Selected = true;
+
+            if (e.ColumnIndex >= 0 && e.ColumnIndex < row.Cells.Count)
+                promptsGridView.CurrentCell = row.Cells[e.ColumnIndex];
+
+            buttonEdit_Click(buttonEdit, EventArgs.Empty);
+        }
+
 
         private void UpdatePromptMeta(PromptItem? prompt)
         {

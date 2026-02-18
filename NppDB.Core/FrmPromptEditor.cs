@@ -60,8 +60,9 @@ namespace NppDB.Core
             }
             
             string type;
-
-            switch (_selectedTypePretty)
+            
+            var selectedPretty = _selectedTypePretty ?? comboBoxType.SelectedItem?.ToString();
+            switch (selectedPretty)
             {
                 case "Prompt Library Prompt":
                     type = "LlmPrompt";
@@ -91,7 +92,27 @@ namespace NppDB.Core
             txtName.Text = promptItem.Title;
             txtDescription.Text = promptItem.Description;
             txtPrompt.Text = promptItem.Text;
+
+            var type = (promptItem.Type ?? string.Empty).Trim();
+            string pretty = null;
+
+            if (type.Equals("LlmPrompt", StringComparison.OrdinalIgnoreCase))
+                pretty = "Prompt Library Prompt";
+            else if (type.Equals("TablePrompt", StringComparison.OrdinalIgnoreCase))
+                pretty = "Table Prompt";
+
+            if (pretty != null)
+            {
+                comboBoxType.SelectedItem = pretty;
+                _selectedTypePretty = pretty;
+            }
+            else
+            {
+                comboBoxType.SelectedIndex = -1;
+                _selectedTypePretty = null;
+            }
         }
+
 
         public void LoadPlaceholders(List<string> placeholders)
         {
