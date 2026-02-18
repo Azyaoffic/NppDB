@@ -404,10 +404,11 @@ namespace NppDB.Core
             // lblPlaceholders
             // 
             this.lblPlaceholders.AutoSize = true;
-            this.lblPlaceholders.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.lblPlaceholders.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblPlaceholders.ForeColor = System.Drawing.SystemColors.ControlText;
             this.lblPlaceholders.Location = new System.Drawing.Point(3, 3);
             this.lblPlaceholders.Name = "lblPlaceholders";
-            this.lblPlaceholders.Size = new System.Drawing.Size(93, 13);
+            this.lblPlaceholders.Size = new System.Drawing.Size(113, 17);
             this.lblPlaceholders.TabIndex = 5;
             this.lblPlaceholders.Text = "Fill Placeholders:";
             // 

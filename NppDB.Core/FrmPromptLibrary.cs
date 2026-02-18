@@ -51,6 +51,9 @@ namespace NppDB.Core
         public static string PromptLibraryPath { get; set; }
 
         public static Dictionary<string, string> Placeholders;
+        
+        private Control _resizingControl;
+        private int _resizeStartY;
 
         // TODO: Maybe there is a better way to manage supported placeholders?
         public static readonly List<string> SupportedPlaceholders = new List<string>
@@ -378,11 +381,12 @@ namespace NppDB.Core
                         {
                             var rtBox = new RichTextBox
                             {
-                                Height = 60,
+                                Height = 80,
                                 Width = container.Width,
                                 Text = initialValue,
                                 Tag = placeholder.Name,
-                                BorderStyle = BorderStyle.FixedSingle
+                                BorderStyle = BorderStyle.FixedSingle,
+                                ScrollBars = RichTextBoxScrollBars.Vertical
                             };
                             rtBox.TextChanged += InputControl_TextChanged;
                             inputControl = rtBox;
@@ -393,17 +397,34 @@ namespace NppDB.Core
                             {
                                 Width = container.Width,
                                 Text = initialValue,
-                                Tag = placeholder.Name
+                                Tag = placeholder.Name,
+                                Multiline = true,
+                                Height = 60,
+                                ScrollBars = ScrollBars.Vertical
                             };
                             txtBox.TextChanged += InputControl_TextChanged;
                             inputControl = txtBox;
                         }
                         container.Controls.Add(inputControl);
+
+                        // vertical resize grip
+                        var grip = new Panel
+                        {
+                            Height = 5,
+                            Dock = DockStyle.Bottom,
+                            Cursor = Cursors.SizeNS,
+                            BackColor = SystemColors.ControlDark
+                        };
+                        grip.MouseDown += Grip_MouseDown;
+                        grip.MouseMove += Grip_MouseMove;
+                        grip.MouseUp += Grip_MouseUp;
+                        grip.Tag = inputControl;
+                        container.Controls.Add(grip);
                     }
                     else
                     {
                         // read-only placeholders
-                        var lblValue = new TextBox
+                        var lblValue = new RichTextBox
                         {
                             Width = container.Width,
                             Text = string.IsNullOrEmpty(initialValue) ? "<No context available>" : initialValue,
@@ -421,6 +442,33 @@ namespace NppDB.Core
             flowLayoutPanelPlaceholders.ResumeLayout();
             
             ValidateInputs();
+        }
+        
+        private void Grip_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                _resizingControl = (Control)((Panel)sender).Tag;
+                _resizeStartY = Cursor.Position.Y;
+                ((Panel)sender).Capture = true;
+            }
+        }
+
+        private void Grip_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_resizingControl != null && e.Button == MouseButtons.Left)
+            {
+                int delta = Cursor.Position.Y - _resizeStartY;
+                _resizingControl.Height = Math.Max(40, _resizingControl.Height + delta);
+                _resizeStartY = Cursor.Position.Y;
+                flowLayoutPanelPlaceholders.PerformLayout();
+            }
+        }
+
+        private void Grip_MouseUp(object sender, MouseEventArgs e)
+        {
+            _resizingControl = null;
+            if (sender is Panel p) p.Capture = false;
         }
 
         private void InputControl_TextChanged(object sender, EventArgs e)
