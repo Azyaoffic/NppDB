@@ -439,17 +439,33 @@ namespace NppDB.Core
 
             ValidateInputs();
         }
+        
+        private void SetPreviewText(string text)
+        {
+            promptTextBox.SuspendLayout();
+
+            promptTextBox.Clear();
+            promptTextBox.Text = text;
+
+            promptTextBox.SelectAll();
+            promptTextBox.SelectionFont = promptTextBox.Font;
+            promptTextBox.SelectionColor = promptTextBox.ForeColor;
+
+            promptTextBox.SelectionStart = 0;
+            promptTextBox.SelectionLength = 0;
+            promptTextBox.ScrollToCaret();
+
+            promptTextBox.ResumeLayout();
+        }
+
 
         private void UpdatePreviewText(PromptItem prompt)
         {
-            if (disableTemplatingCheckbox.Checked)
-            {
-                promptTextBox.Text = ConstructPromptPreview(prompt.Text);
-            }
-            else
-            {
-                promptTextBox.Text = ConstructPromptPreview(SubstitutePlaceholders(prompt.Text));
-            }
+            
+            var baseText = ConstructPromptPreview(disableTemplatingCheckbox.Checked 
+                ? prompt.Text : SubstitutePlaceholders(prompt.Text));
+
+            SetPreviewText(baseText);
         }
 
         private void ValidateInputs()
