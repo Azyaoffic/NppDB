@@ -40,6 +40,7 @@ namespace NppDB
         private string _languageConfigPath;
         private string _translationsConfigPath;
         private string _promptLibraryPath;
+        private string _tutorialPath;
         private static string _staticPromptLibraryPath;
         private static string _staticLanguageCodesPath;
         private static string _staticPromptPreferencesPath;
@@ -68,6 +69,8 @@ namespace NppDB
         private string _lastAnalyzedText;
         private SqlDialect _lastUsedDialect;
         private IScintillaGateway _lastEditor;
+        
+        private bool _showRecreationNotificationsToUsers = false; // TODO: might be good to turn off to confuse users less?
 
 
         static NppDbPlugin()
@@ -304,16 +307,20 @@ namespace NppDB
              }
              
              _promptLibraryPath = Path.Combine(_nppDbConfigDir, "promptLibrary.xml");
+             _tutorialPath = Path.Combine(_nppDbConfigDir, "tutorial.md");
              _staticPromptLibraryPath = _promptLibraryPath;
              FrmPromptLibrary.PromptLibraryPath = _promptLibraryPath;
              if (!File.Exists(_promptLibraryPath))
              {
                  // Ask user whether to recreate default prompt library
-                 DialogResult result = MessageBox.Show(
-                     "Prompt Library file not found. Do you want to create a default Prompt Library file?",
-                     PLUGIN_NAME,
-                     MessageBoxButtons.YesNo,
-                     MessageBoxIcon.Question);
+                 DialogResult result = _showRecreationNotificationsToUsers
+                     ? MessageBox.Show(
+                         "Prompt Library file not found. Do you want to create a default Prompt Library file?",
+                         PLUGIN_NAME,
+                         MessageBoxButtons.YesNo,
+                         MessageBoxIcon.Question)
+                     : DialogResult.Yes;
+                 
 
                  if (result == DialogResult.Yes)
                  {
@@ -1980,28 +1987,62 @@ namespace NppDB
 
         private void ShowTutorial()
         {
-            using (var stream = Assembly.GetExecutingAssembly()
-                       .GetManifestResourceStream("NppDB.Resources.Tutorial.txt"))
+            if (!EnsureTutorialFileExists())
+                return;
+
+            Win32.SendMessage(nppData._nppHandle, (uint)NppMsg.NPPM_DOOPEN, 0, _tutorialPath);
+        }
+        
+        private bool EnsureTutorialFileExists()
+        {
+            try
             {
-                if (stream == null)
+                if (!string.IsNullOrWhiteSpace(_tutorialPath) && File.Exists(_tutorialPath))
+                    return true;
+
+                var result = _showRecreationNotificationsToUsers
+                    ? MessageBox.Show(
+                    "Tutorial file not found. Do you want to recreate the default tutorial file?",
+                    PLUGIN_NAME,
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question)
+                    : DialogResult.Yes;
+
+                if (result != DialogResult.Yes)
+                    return false;
+
+                using (var stream = Assembly.GetExecutingAssembly()
+                           .GetManifestResourceStream("NppDB.Resources.Tutorial.txt"))
                 {
-                    MessageBox.Show("Embedded resource `NppDB.Plugin.Resources.Tutorial.txt` not found.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                
-                using (var reader = new StreamReader(stream))
-                {
-                    var content = reader.ReadToEnd();
-                    NewFile(forceNewTab: true);
-                    var hndScin = GetCurrentScintilla();
-                    if (hndScin != IntPtr.Zero)
+                    if (stream == null)
                     {
-                        AppendToScintillaText(hndScin, content, forceIgnoreTwoNewLines: true);
+                        MessageBox.Show(
+                            "Embedded resource `NppDB.Resources.Tutorial.txt` not found.",
+                            PLUGIN_NAME,
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
+                        return false;
+                    }
+
+                    using (var file = File.Create(_tutorialPath))
+                    {
+                        stream.CopyTo(file);
                     }
                 }
+
+                return File.Exists(_tutorialPath);
             }
-            
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Error creating default tutorial file:\n{ex.Message}",
+                    PLUGIN_NAME,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                return false;
+            }
         }
+
 
         private void UpdateCurrentSqlResult()
          {
