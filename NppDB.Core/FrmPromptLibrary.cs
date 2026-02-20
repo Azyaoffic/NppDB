@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace NppDB.Core
 {
@@ -48,6 +49,14 @@ namespace NppDB.Core
 
         private readonly ToolTip _actionToolTip = new ToolTip();
 
+        private bool _isEditingTemplate;
+        private bool _suppressPromptTextBoxChange;
+        private Timer _templateAutoSaveTimer;
+        private PromptItem? _pendingAutoSavePrompt;
+        private bool _autoSaveErrorShown;
+
+        private const int TemplateAutoSaveDebounceMs = 650;
+
         public static string PromptLibraryPath { get; set; }
 
         public static Dictionary<string, string> Placeholders;
@@ -68,6 +77,10 @@ namespace NppDB.Core
             InitializeComponent();
             
             promptsGridView.CellDoubleClick += promptsGridView_CellDoubleClick; 
+            promptTextBox.TextChanged += promptTextBox_TextChanged;
+
+            _templateAutoSaveTimer = new Timer { Interval = TemplateAutoSaveDebounceMs };
+            _templateAutoSaveTimer.Tick += TemplateAutoSaveTimer_Tick;
 
             ConfigureSourceFilter();
             RefreshPromptList();
@@ -95,6 +108,7 @@ namespace NppDB.Core
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
+            FlushPendingAutoSave();
             SaveLayoutToSettings();
             base.OnFormClosing(e);
         }
@@ -245,11 +259,13 @@ namespace NppDB.Core
 
         private void txtSearch_TextChanged(object sender, EventArgs e)
         {
+            FlushPendingAutoSave();
             RefreshPromptList();
         }
 
         private void cmbPromptSource_SelectedIndexChanged(object sender, EventArgs e)
         {
+            FlushPendingAutoSave();
             _currentSourceFilter = (PromptSourceFilter)cmbPromptSource.SelectedIndex;
             RefreshPromptList();
         }
@@ -265,7 +281,8 @@ namespace NppDB.Core
             if (e.ColumnIndex >= 0 && e.ColumnIndex < row.Cells.Count)
                 promptsGridView.CurrentCell = row.Cells[e.ColumnIndex];
 
-            buttonEdit_Click(buttonEdit, EventArgs.Empty);
+            editingModeCheckbox.Checked = true;
+            promptTextBox.Focus();
         }
 
 
@@ -300,6 +317,8 @@ namespace NppDB.Core
             if (_suppressPromptGridSelectionChanged)
                 return;
 
+            FlushPendingAutoSave();
+
             if (promptsGridView.SelectedRows.Count > 0)
             {
                 var selectedRow = promptsGridView.SelectedRows[0];
@@ -308,12 +327,12 @@ namespace NppDB.Core
                     return;
 
                 GeneratePlaceholderControls(prompt);
-                UpdatePreviewText(prompt);
+                UpdatePromptTextBoxForCurrentMode(prompt);
                 UpdatePromptMeta(prompt);
             }
             else
             {
-                promptTextBox.Text = string.Empty;
+                SetPreviewText(string.Empty);
                 flowLayoutPanelPlaceholders.Controls.Clear();
                 UpdateCopyButtonState(false, "No prompt selected");
                 UpdatePromptMeta(null);
@@ -482,7 +501,7 @@ namespace NppDB.Core
             if (promptsGridView.SelectedRows.Count > 0)
             {
                 var prompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
-                UpdatePreviewText(prompt);
+                if (!_isEditingTemplate) UpdatePreviewText(prompt);
             }
 
             ValidateInputs();
@@ -492,28 +511,187 @@ namespace NppDB.Core
         {
             promptTextBox.SuspendLayout();
 
-            promptTextBox.Clear();
-            promptTextBox.Text = text;
+            _suppressPromptTextBoxChange = true;
+            try
+            {
+                promptTextBox.Clear();
+                promptTextBox.Text = text;
 
-            promptTextBox.SelectAll();
-            promptTextBox.SelectionFont = promptTextBox.Font;
-            promptTextBox.SelectionColor = promptTextBox.ForeColor;
+                promptTextBox.SelectAll();
+                promptTextBox.SelectionFont = promptTextBox.Font;
+                promptTextBox.SelectionColor = promptTextBox.ForeColor;
 
-            promptTextBox.SelectionStart = 0;
-            promptTextBox.SelectionLength = 0;
-            promptTextBox.ScrollToCaret();
-
-            promptTextBox.ResumeLayout();
+                promptTextBox.SelectionStart = 0;
+                promptTextBox.SelectionLength = 0;
+                promptTextBox.ScrollToCaret();
+            }
+            finally
+            {
+                _suppressPromptTextBoxChange = false;
+                promptTextBox.ResumeLayout();
+            }
         }
 
 
         private void UpdatePreviewText(PromptItem prompt)
         {
-            
-            var baseText = ConstructPromptPreview(disableTemplatingCheckbox.Checked 
-                ? prompt.Text : SubstitutePlaceholders(prompt.Text));
+            if (_isEditingTemplate)
+            {
+                SetPreviewText(prompt.Text ?? string.Empty);
+                return;
+            }
 
+            var baseText = ConstructPromptPreview(SubstitutePlaceholders(prompt.Text));
             SetPreviewText(baseText);
+        }
+        
+        private void SetEditingMode(bool isEditing)
+        {
+            FlushPendingAutoSave();
+
+            _isEditingTemplate = isEditing;
+
+            grpPreview.Text = _isEditingTemplate ? "Edit Template (Auto-Save)" : "Prompt Preview";
+            promptTextBox.ReadOnly = !_isEditingTemplate;
+            promptTextBox.BorderStyle = _isEditingTemplate ? BorderStyle.FixedSingle : BorderStyle.None;
+
+            if (promptsGridView.SelectedRows.Count > 0)
+            {
+                var prompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
+                UpdatePromptTextBoxForCurrentMode(prompt);
+            }
+        }
+
+        private void UpdatePromptTextBoxForCurrentMode(PromptItem prompt)
+        {
+            if (_isEditingTemplate)
+                SetPreviewText(prompt.Text ?? string.Empty);
+            else
+                UpdatePreviewText(prompt);
+        }
+
+        private void promptTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (_suppressPromptTextBoxChange)
+                return;
+
+            if (!_isEditingTemplate)
+                return;
+
+            if (promptsGridView.SelectedRows.Count == 0)
+                return;
+
+            var selectedRow = promptsGridView.SelectedRows[0];
+            if (!(selectedRow.Tag is PromptItem prompt))
+                return;
+
+            prompt.Text = promptTextBox.Text;
+            prompt.Placeholders = BuildPlaceholdersFromText(prompt.Text, prompt.Placeholders);
+
+            selectedRow.Tag = prompt;
+            ReplacePromptInCollections(prompt);
+
+            _pendingAutoSavePrompt = prompt;
+            _templateAutoSaveTimer.Stop();
+            _templateAutoSaveTimer.Start();
+        }
+
+        private void TemplateAutoSaveTimer_Tick(object sender, EventArgs e)
+        {
+            _templateAutoSaveTimer.Stop();
+
+            if (!_pendingAutoSavePrompt.HasValue)
+                return;
+
+            var promptToSave = _pendingAutoSavePrompt.Value;
+            _pendingAutoSavePrompt = null;
+
+            try
+            {
+                FrmPromptEditor.SaveNewPromptToFile(promptToSave);
+                _autoSaveErrorShown = false;
+
+                if (promptsGridView.SelectedRows.Count > 0)
+                {
+                    var selectedPrompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
+                    if (selectedPrompt.Id == promptToSave.Id)
+                    {
+                        GeneratePlaceholderControls(promptToSave);
+                        ValidateInputs();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!_autoSaveErrorShown)
+                {
+                    _autoSaveErrorShown = true;
+                    MessageBox.Show("Auto-save failed: " + ex.Message, "Prompt Auto-Save",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+        }
+
+        private void FlushPendingAutoSave()
+        {
+            if (_templateAutoSaveTimer != null && _templateAutoSaveTimer.Enabled)
+            {
+                TemplateAutoSaveTimer_Tick(this, EventArgs.Empty);
+            }
+        }
+
+        private void ReplacePromptInCollections(PromptItem updatedPrompt)
+        {
+            if (_prompts != null)
+            {
+                var index = _prompts.FindIndex(p => p.Id == updatedPrompt.Id);
+                if (index >= 0)
+                    _prompts[index] = updatedPrompt;
+            }
+
+            if (_filteredPrompts != null)
+            {
+                var index = _filteredPrompts.FindIndex(p => p.Id == updatedPrompt.Id);
+                if (index >= 0)
+                    _filteredPrompts[index] = updatedPrompt;
+            }
+        }
+
+        private PromptPlaceholder[] BuildPlaceholdersFromText(string promptText, PromptPlaceholder[] existingPlaceholders)
+        {
+            var extracted = new List<PromptPlaceholder>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            const string pattern = @"\{\{(.*?)\}\}";
+            foreach (System.Text.RegularExpressions.Match match in
+                     System.Text.RegularExpressions.Regex.Matches(promptText ?? string.Empty, pattern))
+            {
+                var name = match.Groups[1].Value.Trim();
+                if (string.IsNullOrEmpty(name))
+                    continue;
+
+                if (!seen.Add(name))
+                    continue;
+
+                var placeholder = new PromptPlaceholder { Name = name, IsEditable = true, IsRichText = false };
+
+                if (existingPlaceholders != null)
+                {
+                    for (int i = 0; i < existingPlaceholders.Length; i++)
+                    {
+                        if (!string.Equals(existingPlaceholders[i].Name, name, StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        placeholder.IsEditable = existingPlaceholders[i].IsEditable;
+                        placeholder.IsRichText = existingPlaceholders[i].IsRichText;
+                        break;
+                    }
+                }
+
+                extracted.Add(placeholder);
+            }
+
+            return extracted.ToArray();
         }
 
         private void ValidateInputs()
@@ -570,6 +748,8 @@ namespace NppDB.Core
 
         private string SubstitutePlaceholders(string text)
         {
+            text = text ?? string.Empty;
+
             var selectedSql = Placeholders.TryGetValue("selected_sql", out var plh)
                 ? plh
                 : string.Empty;
@@ -602,51 +782,14 @@ namespace NppDB.Core
                    $"\nAlso follow user's custom instructions: {preferences.CustomInstructions}.";
         }
 
-        private void disableTemplatingCheckbox_CheckedChanged(object sender, EventArgs e)
+        private void editingModeCheckbox_CheckedChanged(object sender, EventArgs e)
         {
-            if (promptsGridView.SelectedRows.Count > 0)
-            {
-                var prompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
-                UpdatePreviewText(prompt);
-            }
-        }
-
-        private void buttonEdit_Click(object sender, EventArgs e)
-        {
-            if (promptsGridView.SelectedRows.Count > 0)
-            {
-                var selectedRow = promptsGridView.SelectedRows[0];
-                var prompt = (PromptItem)selectedRow.Tag;
-
-                using (var promptEditor = new FrmPromptEditor())
-                {
-                    promptEditor.LoadPromptItem(prompt);
-                    promptEditor.LoadPlaceholders(SupportedPlaceholders);
-
-                    var result = promptEditor.ShowDialog();
-                    if (result == DialogResult.OK)
-                    {
-                        var updatedPrompt = promptEditor.SelectedPromptItem;
-
-                        // update the prompt in the grid
-                        selectedRow.Cells[0].Value = updatedPrompt.Title;
-                        selectedRow.Cells[1].Value = updatedPrompt.Description;
-                        selectedRow.Cells[colPromptType.Index].Value = IsSchemaAwarePrompt(updatedPrompt) ? "SCHEMA-AWARE" : "LIBRARY";
-                        selectedRow.Tag = updatedPrompt;
-                        ApplyRowStyling(selectedRow, updatedPrompt);
-
-                        var index = _prompts.FindIndex(p => p.Title == prompt.Title);
-                        if (index >= 0) _prompts[index] = updatedPrompt;
-
-                        // refresh
-                        promptsListView_SelectedIndexChanged(this, EventArgs.Empty);
-                    }
-                }
-            }
+            SetEditingMode(editingModeCheckbox.Checked);
         }
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
+            FlushPendingAutoSave();
             using (var promptEditor = new FrmPromptEditor())
             {
                 promptEditor.LoadPlaceholders(SupportedPlaceholders);
@@ -665,6 +808,7 @@ namespace NppDB.Core
 
         private void buttonDelete_Click(object sender, EventArgs e)
         {
+            FlushPendingAutoSave();
             if (promptsGridView.SelectedRows.Count > 0)
             {
                 var selectedRow = promptsGridView.SelectedRows[0];
@@ -678,7 +822,7 @@ namespace NppDB.Core
 
                 if (confirmResult == DialogResult.Yes)
                 {
-                    _prompts.RemoveAll(p => p.Title == prompt.Title);
+                    _prompts.RemoveAll(p => p.Id == prompt.Id);
                     
                     // Update UI via search logic
                     RefreshPromptList();
@@ -700,12 +844,12 @@ namespace NppDB.Core
                 throw new FileNotFoundException("Prompt library file not found.", promptLibraryPath);
             }
 
-            var doc = System.Xml.Linq.XDocument.Load(promptLibraryPath);
+            var doc = XDocument.Load(promptLibraryPath);
             var root = doc.Element("Prompts");
             if (root == null) return;
 
-            var promptElement = System.Linq.Enumerable.FirstOrDefault(root.Elements("Prompt"), e =>
-                (string)e.Element("Title") == promptItem.Title);
+            var promptElement = Enumerable.FirstOrDefault(root.Elements("Prompt"), e =>
+                (string)e.Element("Id") == promptItem.Id);
             if (promptElement != null)
             {
                 promptElement.Remove();
@@ -717,9 +861,17 @@ namespace NppDB.Core
         {
             if (!buttonCopy.Enabled) return;
 
-            if (!string.IsNullOrEmpty(promptTextBox.Text))
+            var textToCopy = promptTextBox.Text;
+
+            if (promptsGridView.SelectedRows.Count > 0)
             {
-                Clipboard.SetText(promptTextBox.Text);
+                var prompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
+                textToCopy = ConstructPromptPreview(SubstitutePlaceholders(prompt.Text));
+            }
+
+            if (!string.IsNullOrEmpty(textToCopy))
+            {
+                Clipboard.SetText(textToCopy);
                 buttonCopy.BackColor = Color.LightGreen;
                 buttonCopy.Text = "Copied!";
                 var timer = new Timer { Interval = 1000 };
@@ -734,6 +886,7 @@ namespace NppDB.Core
 
         private void buttonDuplicate_Click(object sender, EventArgs e)
         {
+            FlushPendingAutoSave();
             if (promptsGridView.SelectedRows.Count == 0)
                 return;
 

@@ -46,7 +46,6 @@ namespace NppDB.Core
             this.panelLeftActions = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonAdd = new System.Windows.Forms.Button();
             this.buttonDuplicate = new System.Windows.Forms.Button();
-            this.buttonEdit = new System.Windows.Forms.Button();
             this.buttonDelete = new System.Windows.Forms.Button();
             this.grpPreview = new System.Windows.Forms.GroupBox();
             this.promptTextBox = new System.Windows.Forms.RichTextBox();
@@ -62,7 +61,7 @@ namespace NppDB.Core
             this.flowLayoutPanelPlaceholders = new System.Windows.Forms.FlowLayoutPanel();
             this.lblPlaceholders = new System.Windows.Forms.Label();
             this.panelRightActions = new System.Windows.Forms.Panel();
-            this.disableTemplatingCheckbox = new System.Windows.Forms.CheckBox();
+            this.editingModeCheckbox = new System.Windows.Forms.CheckBox();
             this.buttonCopy = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).BeginInit();
             this.splitContainerMain.Panel1.SuspendLayout();
@@ -207,7 +206,6 @@ namespace NppDB.Core
             // 
             this.panelLeftActions.Controls.Add(this.buttonAdd);
             this.panelLeftActions.Controls.Add(this.buttonDuplicate);
-            this.panelLeftActions.Controls.Add(this.buttonEdit);
             this.panelLeftActions.Controls.Add(this.buttonDelete);
             this.panelLeftActions.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.panelLeftActions.Location = new System.Drawing.Point(0, 460);
@@ -238,19 +236,9 @@ namespace NppDB.Core
             this.buttonDuplicate.UseVisualStyleBackColor = true;
             this.buttonDuplicate.Click += new System.EventHandler(this.buttonDuplicate_Click);
             // 
-            // buttonEdit
-            // 
-            this.buttonEdit.Location = new System.Drawing.Point(165, 8);
-            this.buttonEdit.Name = "buttonEdit";
-            this.buttonEdit.Size = new System.Drawing.Size(75, 28);
-            this.buttonEdit.TabIndex = 0;
-            this.buttonEdit.Text = "Edit";
-            this.buttonEdit.UseVisualStyleBackColor = true;
-            this.buttonEdit.Click += new System.EventHandler(this.buttonEdit_Click);
-            // 
             // buttonDelete
             // 
-            this.buttonDelete.Location = new System.Drawing.Point(246, 8);
+            this.buttonDelete.Location = new System.Drawing.Point(165, 8);
             this.buttonDelete.Name = "buttonDelete";
             this.buttonDelete.Size = new System.Drawing.Size(75, 28);
             this.buttonDelete.TabIndex = 2;
@@ -271,7 +259,7 @@ namespace NppDB.Core
             this.grpPreview.Size = new System.Drawing.Size(632, 460);
             this.grpPreview.TabIndex = 0;
             this.grpPreview.TabStop = false;
-            this.grpPreview.Text = "Prompt Preview (Read-Only)";
+            this.grpPreview.Text = "Prompt Preview";
             // 
             // promptTextBox
             // 
@@ -414,7 +402,7 @@ namespace NppDB.Core
             // 
             // panelRightActions
             // 
-            this.panelRightActions.Controls.Add(this.disableTemplatingCheckbox);
+            this.panelRightActions.Controls.Add(this.editingModeCheckbox);
             this.panelRightActions.Controls.Add(this.buttonCopy);
             this.panelRightActions.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.panelRightActions.Location = new System.Drawing.Point(5, 460);
@@ -423,17 +411,17 @@ namespace NppDB.Core
             this.panelRightActions.Size = new System.Drawing.Size(632, 40);
             this.panelRightActions.TabIndex = 1;
             // 
-            // disableTemplatingCheckbox
+            // editingModeCheckbox
             // 
-            this.disableTemplatingCheckbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.disableTemplatingCheckbox.AutoEllipsis = true;
-            this.disableTemplatingCheckbox.Location = new System.Drawing.Point(6, 11);
-            this.disableTemplatingCheckbox.Name = "disableTemplatingCheckbox";
-            this.disableTemplatingCheckbox.Size = new System.Drawing.Size(260, 17);
-            this.disableTemplatingCheckbox.TabIndex = 5;
-            this.disableTemplatingCheckbox.Text = "Show placeholder names instead of contents";
-            this.disableTemplatingCheckbox.UseVisualStyleBackColor = true;
-            this.disableTemplatingCheckbox.CheckedChanged += new System.EventHandler(this.disableTemplatingCheckbox_CheckedChanged);
+            this.editingModeCheckbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.editingModeCheckbox.AutoEllipsis = true;
+            this.editingModeCheckbox.Location = new System.Drawing.Point(6, 11);
+            this.editingModeCheckbox.Name = "editingModeCheckbox";
+            this.editingModeCheckbox.Size = new System.Drawing.Size(260, 17);
+            this.editingModeCheckbox.TabIndex = 5;
+            this.editingModeCheckbox.Text = "Prompt Editing Mode";
+            this.editingModeCheckbox.UseVisualStyleBackColor = true;
+            this.editingModeCheckbox.CheckedChanged += new System.EventHandler(this.editingModeCheckbox_CheckedChanged);
             // 
             // buttonCopy
             // 
@@ -494,7 +482,6 @@ namespace NppDB.Core
         private System.Windows.Forms.DataGridViewTextBoxColumn colPromptDesc;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPromptType;
         private System.Windows.Forms.FlowLayoutPanel panelLeftActions;
-        private System.Windows.Forms.Button buttonEdit;
         private System.Windows.Forms.Button buttonAdd;
         private System.Windows.Forms.Button buttonDelete;
 
@@ -512,7 +499,7 @@ namespace NppDB.Core
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelPlaceholders;
 
         private System.Windows.Forms.Panel panelRightActions;
-        private System.Windows.Forms.CheckBox disableTemplatingCheckbox;
+        private System.Windows.Forms.CheckBox editingModeCheckbox;
         private System.Windows.Forms.Button buttonCopy;
         private System.Windows.Forms.Button buttonAiStudio;
 
