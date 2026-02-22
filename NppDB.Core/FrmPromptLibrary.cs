@@ -79,6 +79,7 @@ namespace NppDB.Core
             InitializeComponent();
             
             promptsGridView.CellDoubleClick += promptsGridView_CellDoubleClick; 
+            promptsGridView.RowPostPaint += promptsGridView_RowPostPaint;
             promptTextBox.TextChanged += promptTextBox_TextChanged;
             txtTags.TextChanged += txtTags_TextChanged;
 
@@ -337,6 +338,44 @@ namespace NppDB.Core
             finally
             {
                 _suppressPromptGridSelectionChanged = false;
+            }
+        }
+
+        private void promptsGridView_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
+        {
+            var row = promptsGridView.Rows[e.RowIndex];
+            if (row.DividerHeight > 0 && row.Tag is PromptItem prompt)
+            {
+                var tagsText = FormatTags(prompt.Tags);
+                if (!string.IsNullOrEmpty(tagsText))
+                {
+                    var startX = e.RowBounds.Left;
+                    if (promptsGridView.RowHeadersVisible)
+                        startX += promptsGridView.RowHeadersWidth;
+
+                    var rect = new Rectangle(startX, e.RowBounds.Bottom - row.DividerHeight, e.RowBounds.Width - (startX - e.RowBounds.Left), row.DividerHeight);
+
+                    var isSelected = row.Selected;
+                    var bgColor = isSelected ? row.DefaultCellStyle.SelectionBackColor : row.DefaultCellStyle.BackColor;
+                    var textColor = isSelected ? row.DefaultCellStyle.SelectionForeColor : Color.DimGray;
+
+                    using (var bgBrush = new SolidBrush(bgColor))
+                    {
+                        e.Graphics.FillRectangle(bgBrush, rect);
+                    }
+
+                    var fontSize = 8f;
+                    using (var font = new Font(promptsGridView.Font.FontFamily, fontSize, FontStyle.Regular))
+                    using (var textBrush = new SolidBrush(textColor))
+                    {
+                        e.Graphics.DrawString("Tags: " + tagsText, font, textBrush, startX + 5, rect.Top + 1);
+                    }
+
+                    using (var linePen = new Pen(promptsGridView.GridColor))
+                    {
+                        e.Graphics.DrawLine(linePen, rect.Left, rect.Bottom - 1, rect.Right, rect.Bottom - 1);
+                    }
+                }
             }
         }
 
