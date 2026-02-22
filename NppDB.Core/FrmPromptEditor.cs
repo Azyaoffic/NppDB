@@ -38,6 +38,7 @@ namespace NppDB.Core
 
             var id = lblIdValue.Text.Trim();
             var description = txtDescription.Text.Trim();
+            var tagsRaw = txtTags.Text;
             var promptText = txtPrompt.Text.Trim();
 
             if (string.IsNullOrEmpty(promptText))
@@ -81,38 +82,31 @@ namespace NppDB.Core
                 Title = name,
                 Description = description,
                 Type = type,
+                Tags = ParseTags(tagsRaw),
                 Text = promptText,
                 Placeholders = placeholders.ToArray()
             };
         }
-        
-        public void LoadPromptItem(PromptItem promptItem)
+
+        private static string[] ParseTags(string raw)
         {
-            lblIdValue.Text = promptItem.Id;
-            txtName.Text = promptItem.Title;
-            txtDescription.Text = promptItem.Description;
-            txtPrompt.Text = promptItem.Text;
+            if (string.IsNullOrWhiteSpace(raw))
+                return Array.Empty<string>();
 
-            var type = (promptItem.Type ?? string.Empty).Trim();
-            string pretty = null;
-
-            if (type.Equals("LlmPrompt", StringComparison.OrdinalIgnoreCase))
-                pretty = "Prompt Library Prompt";
-            else if (type.Equals("TablePrompt", StringComparison.OrdinalIgnoreCase))
-                pretty = "Table Prompt";
-
-            if (pretty != null)
-            {
-                comboBoxType.SelectedItem = pretty;
-                _selectedTypePretty = pretty;
-            }
-            else
-            {
-                comboBoxType.SelectedIndex = -1;
-                _selectedTypePretty = null;
-            }
+            return raw
+                .Split(new[] { ',', ';', '\n', '\r', '\t' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(t => (t ?? string.Empty).Trim())
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
         }
 
+        private static string FormatTags(string[] tags)
+        {
+            if (tags == null || tags.Length == 0)
+                return string.Empty;
+            return string.Join(", ", tags.Where(t => !string.IsNullOrWhiteSpace(t)).Select(t => t.Trim()));
+        }
 
         public void LoadPlaceholders(List<string> placeholders)
         {
@@ -178,6 +172,17 @@ namespace NppDB.Core
                 prompt.SetElementValue("Description", promptItem.Description);
                 prompt.SetElementValue("Text", promptItem.Text);
                 prompt.SetElementValue("Title", promptItem.Title);
+
+                var normalizedTags = promptItem.Tags ?? Array.Empty<string>();
+                var tagsValue = string.Join(",", normalizedTags.Where(t => !string.IsNullOrWhiteSpace(t)).Select(t => t.Trim()));
+                if (string.IsNullOrWhiteSpace(tagsValue))
+                {
+                    prompt.Element("Tags")?.Remove();
+                }
+                else
+                {
+                    prompt.SetElementValue("Tags", tagsValue);
+                }
                 
                 prompt.SetAttributeValue("type", promptItem.Type);
                 
@@ -224,11 +229,15 @@ namespace NppDB.Core
             }
             else
             {
+                var normalizedTags = promptItem.Tags ?? Array.Empty<string>();
+                var tagsValue = string.Join(",", normalizedTags.Where(t => !string.IsNullOrWhiteSpace(t)).Select(t => t.Trim()));
+
                 XElement promptElement = new XElement("Prompt",
                     new XAttribute("type", promptItem.Type),
                     new XElement("Id", promptItem.Id),
                     new XElement("Title", promptItem.Title),
                     new XElement("Description", promptItem.Description),
+                    string.IsNullOrWhiteSpace(tagsValue) ? null : new XElement("Tags", tagsValue),
                     new XElement("Text", promptItem.Text),
                     new XElement("Placeholders",
                         new List<XElement>(

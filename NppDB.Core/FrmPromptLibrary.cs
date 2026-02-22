@@ -22,6 +22,7 @@ namespace NppDB.Core
         public string Title;
         public string Description;
         public string Type; // "TablePrompt", "LlmPrompt"
+        public string[] Tags;
         public string Text;
         public PromptPlaceholder[] Placeholders;
     }
@@ -51,6 +52,7 @@ namespace NppDB.Core
 
         private bool _isEditingTemplate;
         private bool _suppressPromptTextBoxChange;
+        private bool _suppressTagsTextBoxChange;
         private Timer _templateAutoSaveTimer;
         private PromptItem? _pendingAutoSavePrompt;
         private bool _autoSaveErrorShown;
@@ -78,6 +80,7 @@ namespace NppDB.Core
             
             promptsGridView.CellDoubleClick += promptsGridView_CellDoubleClick; 
             promptTextBox.TextChanged += promptTextBox_TextChanged;
+            txtTags.TextChanged += txtTags_TextChanged;
 
             _templateAutoSaveTimer = new Timer { Interval = TemplateAutoSaveDebounceMs };
             _templateAutoSaveTimer.Tick += TemplateAutoSaveTimer_Tick;
@@ -165,17 +168,94 @@ namespace NppDB.Core
             return string.Equals(prompt.Type, "TablePrompt", StringComparison.OrdinalIgnoreCase);
         }
 
+        private static string[] ParseTags(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                return Array.Empty<string>();
+
+            return raw
+                .Split(new[] { ',', ';', '\n', '\r', '\t' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(t => (t ?? string.Empty).Trim())
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+
+        private static string FormatTags(string[] tags)
+        {
+            if (tags == null || tags.Length == 0)
+                return string.Empty;
+
+            return string.Join(", ", tags.Where(t => !string.IsNullOrWhiteSpace(t)).Select(t => t.Trim()));
+        }
+
+        private static bool ContainsIgnoreCase(string haystack, string needle)
+        {
+            if (string.IsNullOrEmpty(needle))
+                return true;
+            if (string.IsNullOrEmpty(haystack))
+                return false;
+            return haystack.IndexOf(needle, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static bool PromptMatchesSearch(PromptItem prompt, string rawSearchText)
+        {
+            var searchText = (rawSearchText ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(searchText))
+                return true;
+
+            var tokens = searchText
+                .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(t => (t ?? string.Empty).Trim())
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .ToArray();
+
+            if (tokens.Length == 0)
+                return true;
+
+            var tags = prompt.Tags ?? Array.Empty<string>();
+
+            bool tagHas(string needle)
+            {
+                if (string.IsNullOrWhiteSpace(needle))
+                    return true;
+                return tags.Any(t => ContainsIgnoreCase(t, needle));
+            }
+
+            bool textHas(string needle)
+            {
+                return ContainsIgnoreCase(prompt.Title, needle)
+                       || ContainsIgnoreCase(prompt.Description, needle)
+                       || tags.Any(t => ContainsIgnoreCase(t, needle));
+            }
+
+            foreach (var token in tokens)
+            {
+                if (token.StartsWith("#") && token.Length > 1)
+                {
+                    if (!tagHas(token.Substring(1)))
+                        return false;
+                }
+                else if (token.StartsWith("tag:", StringComparison.OrdinalIgnoreCase) && token.Length > 4)
+                {
+                    if (!tagHas(token.Substring(4)))
+                        return false;
+                }
+                else
+                {
+                    if (!textHas(token))
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
         private List<PromptItem> GetFilteredPrompts(string rawSearchText)
         {
             IEnumerable<PromptItem> query = _prompts ?? new List<PromptItem>();
-            var searchText = (rawSearchText ?? string.Empty).Trim();
 
-            if (!string.IsNullOrEmpty(searchText))
-            {
-                query = query.Where(p =>
-                    (!string.IsNullOrEmpty(p.Title) && p.Title.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                    (!string.IsNullOrEmpty(p.Description) && p.Description.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0));
-            }
+            query = query.Where(p => PromptMatchesSearch(p, rawSearchText));
 
             switch (_currentSourceFilter)
             {
@@ -231,6 +311,7 @@ namespace NppDB.Core
                     var rowIndex = promptsGridView.Rows.Add(prompt.Title, prompt.Description, promptKind);
                     var row = promptsGridView.Rows[rowIndex];
                     row.Tag = prompt;
+                    row.DividerHeight = (prompt.Tags != null && prompt.Tags.Length > 0) ? 16 : 0; // “mini row” height
                     ApplyRowStyling(row, prompt);
                 }
 
@@ -239,11 +320,13 @@ namespace NppDB.Core
                     promptsGridView.CurrentCell = null;
 
                 UpdatePromptMeta(null);
+                UpdateTagsBox(null);
 
                 if (promptsGridView.Rows.Count == 0)
                 {
                     promptTextBox.Text = string.Empty;
                     flowLayoutPanelPlaceholders.Controls.Clear();
+                    UpdateTagsBox(null);
                     UpdateCopyButtonState(false, "No prompts match the search criteria.");
                 }
                 else
@@ -329,13 +412,34 @@ namespace NppDB.Core
                 GeneratePlaceholderControls(prompt);
                 UpdatePromptTextBoxForCurrentMode(prompt);
                 UpdatePromptMeta(prompt);
+                UpdateTagsBox(prompt);
             }
             else
             {
                 SetPreviewText(string.Empty);
                 flowLayoutPanelPlaceholders.Controls.Clear();
+                UpdateTagsBox(null);
                 UpdateCopyButtonState(false, "No prompt selected");
                 UpdatePromptMeta(null);
+            }
+        }
+
+        private void UpdateTagsBox(PromptItem? prompt)
+        {
+            _suppressTagsTextBoxChange = true;
+            try
+            {
+                if (!prompt.HasValue)
+                {
+                    txtTags.Text = string.Empty;
+                    return;
+                }
+
+                txtTags.Text = FormatTags(prompt.Value.Tags);
+            }
+            finally
+            {
+                _suppressTagsTextBoxChange = false;
             }
         }
 
@@ -555,11 +659,39 @@ namespace NppDB.Core
             promptTextBox.ReadOnly = !_isEditingTemplate;
             promptTextBox.BorderStyle = _isEditingTemplate ? BorderStyle.FixedSingle : BorderStyle.None;
 
+            txtTags.ReadOnly = !_isEditingTemplate;
+            txtTags.BorderStyle = _isEditingTemplate ? BorderStyle.FixedSingle : BorderStyle.None;
+
             if (promptsGridView.SelectedRows.Count > 0)
             {
                 var prompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
                 UpdatePromptTextBoxForCurrentMode(prompt);
             }
+        }
+
+        private void txtTags_TextChanged(object sender, EventArgs e)
+        {
+            if (_suppressTagsTextBoxChange)
+                return;
+
+            if (!_isEditingTemplate)
+                return;
+
+            if (promptsGridView.SelectedRows.Count == 0)
+                return;
+
+            var selectedRow = promptsGridView.SelectedRows[0];
+            if (!(selectedRow.Tag is PromptItem prompt))
+                return;
+
+            prompt.Tags = ParseTags(txtTags.Text);
+
+            selectedRow.Tag = prompt;
+            ReplacePromptInCollections(prompt);
+
+            _pendingAutoSavePrompt = prompt;
+            _templateAutoSaveTimer.Stop();
+            _templateAutoSaveTimer.Start();
         }
 
         private void UpdatePromptTextBoxForCurrentMode(PromptItem prompt)

@@ -49,6 +49,9 @@ namespace NppDB.Core
             this.buttonDelete = new System.Windows.Forms.Button();
             this.grpPreview = new System.Windows.Forms.GroupBox();
             this.promptTextBox = new System.Windows.Forms.RichTextBox();
+            this.panelPromptTags = new System.Windows.Forms.Panel();
+            this.txtTags = new System.Windows.Forms.TextBox();
+            this.lblTags = new System.Windows.Forms.Label();
             this.panelPromptMeta = new System.Windows.Forms.Panel();
             this.buttonAiStudio = new System.Windows.Forms.Button();
             this.lblPromptCapabilities = new System.Windows.Forms.Label();
@@ -71,6 +74,7 @@ namespace NppDB.Core
             this.panelSearch.SuspendLayout();
             this.panelLeftActions.SuspendLayout();
             this.grpPreview.SuspendLayout();
+            this.panelPromptTags.SuspendLayout();
             this.panelPromptMeta.SuspendLayout();
             this.panelSchemaBanner.SuspendLayout();
             this.panelPreviewBottom.SuspendLayout();
@@ -249,6 +253,7 @@ namespace NppDB.Core
             // grpPreview
             // 
             this.grpPreview.Controls.Add(this.promptTextBox);
+            this.grpPreview.Controls.Add(this.panelPromptTags);
             this.grpPreview.Controls.Add(this.panelPromptMeta);
             this.grpPreview.Controls.Add(this.panelSchemaBanner);
             this.grpPreview.Controls.Add(this.splitterPreview);
@@ -267,12 +272,41 @@ namespace NppDB.Core
             this.promptTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.promptTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.promptTextBox.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.promptTextBox.Location = new System.Drawing.Point(3, 92);
+            this.promptTextBox.Location = new System.Drawing.Point(3, 116);
             this.promptTextBox.Name = "promptTextBox";
             this.promptTextBox.ReadOnly = true;
-            this.promptTextBox.Size = new System.Drawing.Size(626, 221);
+            this.promptTextBox.Size = new System.Drawing.Size(626, 197);
             this.promptTextBox.TabIndex = 0;
             this.promptTextBox.Text = "";
+            // 
+            // panelPromptTags
+            // 
+            this.panelPromptTags.Controls.Add(this.txtTags);
+            this.panelPromptTags.Controls.Add(this.lblTags);
+            this.panelPromptTags.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelPromptTags.Location = new System.Drawing.Point(3, 92);
+            this.panelPromptTags.Name = "panelPromptTags";
+            this.panelPromptTags.Size = new System.Drawing.Size(626, 24);
+            this.panelPromptTags.TabIndex = 6;
+            // 
+            // txtTags
+            // 
+            this.txtTags.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtTags.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtTags.Location = new System.Drawing.Point(47, 4);
+            this.txtTags.Name = "txtTags";
+            this.txtTags.ReadOnly = true;
+            this.txtTags.Size = new System.Drawing.Size(456, 13);
+            this.txtTags.TabIndex = 1;
+            // 
+            // lblTags
+            // 
+            this.lblTags.AutoSize = true;
+            this.lblTags.Location = new System.Drawing.Point(0, 4);
+            this.lblTags.Name = "lblTags";
+            this.lblTags.Size = new System.Drawing.Size(34, 13);
+            this.lblTags.TabIndex = 0;
+            this.lblTags.Text = "Tags:";
             // 
             // panelPromptMeta
             // 
@@ -466,6 +500,8 @@ namespace NppDB.Core
             this.panelPreviewBottom.ResumeLayout(false);
             this.panelPreviewBottom.PerformLayout();
             this.panelRightActions.ResumeLayout(false);
+            this.panelPromptTags.ResumeLayout(false);
+            this.panelPromptTags.PerformLayout();
             this.ResumeLayout(false);
         }
 
@@ -502,6 +538,10 @@ namespace NppDB.Core
         private System.Windows.Forms.CheckBox editingModeCheckbox;
         private System.Windows.Forms.Button buttonCopy;
         private System.Windows.Forms.Button buttonAiStudio;
+
+        private System.Windows.Forms.Panel panelPromptTags;
+        private System.Windows.Forms.TextBox txtTags;
+        private System.Windows.Forms.Label lblTags;
 
         private System.Windows.Forms.Panel panelSearch;
         private System.Windows.Forms.TextBox txtSearch;

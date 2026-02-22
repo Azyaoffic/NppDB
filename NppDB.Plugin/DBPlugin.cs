@@ -1880,7 +1880,21 @@ namespace NppDB
                     var id = promptNode.SelectSingleNode("Id")?.InnerText.Trim() ?? string.Empty;
                     var title = promptNode.SelectSingleNode("Title")?.InnerText.Trim() ?? string.Empty;
                     var description = promptNode.SelectSingleNode("Description")?.InnerText.Trim() ?? string.Empty;
+                    var tagsRaw = promptNode.SelectSingleNode("Tags")?.InnerText ?? string.Empty;
                     var text = promptNode.SelectSingleNode("Text")?.InnerText ?? string.Empty;
+
+                    string[] ParseTags(string raw)
+                    {
+                        if (string.IsNullOrWhiteSpace(raw))
+                            return Array.Empty<string>();
+
+                        return raw
+                            .Split(new[] { ',', ';', '\n', '\r', '\t' }, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(t => (t ?? string.Empty).Trim())
+                            .Where(t => !string.IsNullOrWhiteSpace(t))
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .ToArray();
+                    }
 
                     var placeholderList = new List<PromptPlaceholder>();
                     var placeholdersNode = promptNode.SelectSingleNode("Placeholders");
@@ -1917,6 +1931,7 @@ namespace NppDB
                         Title = title,
                         Description = description,
                         Type = typeAttr,
+                        Tags = ParseTags(tagsRaw),
                         Text = text,
                         Placeholders = placeholderList.ToArray()
                     };

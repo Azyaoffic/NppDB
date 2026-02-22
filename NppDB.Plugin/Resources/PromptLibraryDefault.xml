@@ -5,6 +5,7 @@
         <Id>DefaultPrompt1</Id>
         <Title>Explain Selected Query</Title>
         <Description>Explains complex logic. Breaks down the query execution flow.</Description>
+        <Tags>explain, analysis, learning</Tags>
         <Text>**Role**
 You are an expert SQL instructor.
 
@@ -42,6 +43,7 @@ You are an expert SQL instructor.
         <Id>DefaultPrompt2</Id>
         <Title>Optimize and Analyze Performance</Title>
         <Description>Detailed performance suggestions</Description>
+        <Tags>performance, optimization, indexing</Tags>
         <Text>**Role**
 You are a Senior Database Performance Engineer.
 
@@ -83,6 +85,7 @@ subqueries, N+1-like patterns in SQL).
         <Description>Finds logical issues when the query runs but returns unexpected results (based on user
             description)
         </Description>
+        <Tags>debugging, correctness, logic</Tags>
         <Text>**Role**
 You are a Senior Database Administrator focused on query correctness.
 
@@ -130,6 +133,7 @@ still provide the best-effort fix.
         <Id>DefaultPrompt4</Id>
         <Title>Convert SQL dialect</Title>
         <Description>Migrates code between systems (e.g. Access to PostgreSQL)</Description>
+        <Tags>migration, dialect, portability</Tags>
         <Text>**Role**
 You are a SQL Migration Specialist.
 
@@ -167,6 +171,7 @@ TOP).
         <Id>DefaultPrompt5</Id>
         <Title>Generate documentation</Title>
         <Description>Creates technical docs</Description>
+        <Tags>documentation, explain, maintainability</Tags>
         <Text>**Role**
 You are a Technical Writer specializing in databases.
 
@@ -202,6 +207,7 @@ involved.
         <Id>DefaultPrompt6</Id>
         <Title>Generate Table from description</Title>
         <Description>Writes CREATE TABLE SQL based on natural language requirements</Description>
+        <Tags>ddl, schema, design</Tags>
         <Text>**Role**
 You are a Database Architect.
 
@@ -238,6 +244,7 @@ You are a Database Architect.
         <Id>DefaultPrompt7</Id>
         <Title>Generate SQL Query from description</Title>
         <Description>Translates a natural-language requirement into a SQL query</Description>
+        <Tags>generation, query, requirements</Tags>
         <Text>**Role**
 You are a SQL Query Generator.
 
@@ -280,6 +287,7 @@ query.
         <Id>DefaultPrompt8</Id>
         <Title>Compare two SQL queries</Title>
         <Description>Compares logic, result equivalence, and performance characteristics</Description>
+        <Tags>comparison, correctness, performance</Tags>
         <Text>**Role**
 You are a SQL Comparator.
 
@@ -328,7 +336,8 @@ distributions).
         <Id>TablePrompt1</Id>
         <Title>Explain table in plain language</Title>
         <Description>Explains what the table likely represents and what each column likely means</Description>
-        <Text>**Role**
+        <Tags>schema, explain, onboarding</Tags>
+    <Text>**Role**
 You are a Business Analyst.
 
 **Task**
@@ -371,6 +380,7 @@ You are a Business Analyst.
         <Id>TablePrompt2</Id>
         <Title>Generate GROUP BY aggregation query</Title>
         <Description>Creates 3 useful aggregation queries (single-table) based on the columns</Description>
+        <Tags>aggregation, analytics, group-by</Tags>
         <Text>**Role**
 You are an expert SQL developer.
 
@@ -413,6 +423,7 @@ You are an expert SQL developer.
         <Id>TablePrompt3</Id>
         <Title>Generate INSERT test data</Title>
         <Description>Generates 10 realistic INSERT statements for the table</Description>
+        <Tags>test-data, inserts, seeding</Tags>
         <Text>**Role**
 You are an expert SQL developer.
 
@@ -453,6 +464,7 @@ You are an expert SQL developer.
         <Id>TablePrompt4</Id>
         <Title>Propose data validation rules</Title>
         <Description>Suggests practical column- and table-level validation/constraint rules</Description>
+        <Tags>constraints, data-quality, validation</Tags>
         <Text>**Role**
 You are a database designer.
 
@@ -491,6 +503,7 @@ You are a database designer.
         <Id>TablePrompt5</Id>
         <Title>Generate data model class (Python)</Title>
         <Description>Creates a Python @dataclass model from the table columns</Description>
+        <Tags>modeling, python, codegen</Tags>
         <Text>**Role**
 You are a software engineer.
 
@@ -531,6 +544,7 @@ You are a software engineer.
         <Id>TablePrompt6</Id>
         <Title>Generate data model class (Java)</Title>
         <Description>Creates a Java POJO model from the table columns</Description>
+        <Tags>modeling, java, codegen</Tags>
         <Text>**Role**
 You are a software engineer.
 
@@ -570,6 +584,7 @@ You are a software engineer.
         <Id>TablePrompt7</Id>
         <Title>Generate data model class (C#)</Title>
         <Description>Creates a C# model class from the table columns</Description>
+        <Tags>modeling, csharp, codegen</Tags>
         <Text>**Role**
 You are a software engineer.
 
@@ -608,6 +623,7 @@ You are a software engineer.
         <Id>TablePrompt8</Id>
         <Title>Create REST API endpoints specification</Title>
         <Description>Drafts CRUD endpoints, filtering/pagination, validation errors, and example payloads</Description>
+        <Tags>api, rest, specification</Tags>
         <Text>**Role**
 You are a backend architect.
 
@@ -651,6 +667,7 @@ You are a backend architect.
         <Id>TablePrompt9</Id>
         <Title>Suggest visualizations for the data</Title>
         <Description>Suggests charts/KPIs, required fields, grain, and business questions</Description>
+        <Tags>visualization, analytics, kpi</Tags>
         <Text>**Role**
 You are a data analyst.
 

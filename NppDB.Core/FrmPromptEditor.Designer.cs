@@ -41,6 +41,8 @@ namespace NppDB.Core
             this.txtName = new System.Windows.Forms.TextBox();
             this.lblDescription = new System.Windows.Forms.Label();
             this.txtDescription = new System.Windows.Forms.TextBox();
+            this.lblTags = new System.Windows.Forms.Label();
+            this.txtTags = new System.Windows.Forms.TextBox();
             this.lblPrompt = new System.Windows.Forms.Label();
             this.txtPrompt = new System.Windows.Forms.RichTextBox();
             this.lblPlaceholders = new System.Windows.Forms.Label();
@@ -141,11 +143,28 @@ namespace NppDB.Core
             this.txtDescription.Size = new System.Drawing.Size(657, 50);
             this.txtDescription.TabIndex = 1;
             // 
+            // lblTags
+            // 
+            this.lblTags.AutoSize = true;
+            this.lblTags.Location = new System.Drawing.Point(12, 142);
+            this.lblTags.Name = "lblTags";
+            this.lblTags.Size = new System.Drawing.Size(114, 15);
+            this.lblTags.TabIndex = 10;
+            this.lblTags.Text = "Tags (comma-sep):";
+            // 
+            // txtTags
+            // 
+            this.txtTags.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtTags.Location = new System.Drawing.Point(15, 160);
+            this.txtTags.Name = "txtTags";
+            this.txtTags.Size = new System.Drawing.Size(657, 23);
+            this.txtTags.TabIndex = 2;
+            // 
             // lblPrompt
             // 
             this.lblPrompt.AutoSize = true;
             this.lblPrompt.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblPrompt.Location = new System.Drawing.Point(12, 145);
+            this.lblPrompt.Location = new System.Drawing.Point(12, 192);
             this.lblPrompt.Name = "lblPrompt";
             this.lblPrompt.Size = new System.Drawing.Size(52, 15);
             this.lblPrompt.TabIndex = 4;
@@ -157,10 +176,10 @@ namespace NppDB.Core
             this.txtPrompt.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.txtPrompt.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtPrompt.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtPrompt.Location = new System.Drawing.Point(15, 163);
+            this.txtPrompt.Location = new System.Drawing.Point(15, 210);
             this.txtPrompt.Name = "txtPrompt";
-            this.txtPrompt.Size = new System.Drawing.Size(657, 313);
-            this.txtPrompt.TabIndex = 2;
+            this.txtPrompt.Size = new System.Drawing.Size(657, 266);
+            this.txtPrompt.TabIndex = 3;
             this.txtPrompt.Text = "";
             // 
             // lblPlaceholders
@@ -204,6 +223,8 @@ namespace NppDB.Core
             this.Controls.Add(this.lblPlaceholders);
             this.Controls.Add(this.txtPrompt);
             this.Controls.Add(this.lblPrompt);
+            this.Controls.Add(this.txtTags);
+            this.Controls.Add(this.lblTags);
             this.Controls.Add(this.txtDescription);
             this.Controls.Add(this.lblDescription);
             this.Controls.Add(this.txtName);
@@ -238,6 +259,9 @@ namespace NppDB.Core
         
         private System.Windows.Forms.Label lblDescription;
         private System.Windows.Forms.TextBox txtDescription;
+
+        private System.Windows.Forms.Label lblTags;
+        private System.Windows.Forms.TextBox txtTags;
         
         private System.Windows.Forms.Label lblPrompt;
         private System.Windows.Forms.RichTextBox txtPrompt;
