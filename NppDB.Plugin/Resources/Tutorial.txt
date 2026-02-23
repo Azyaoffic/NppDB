@@ -24,6 +24,16 @@
    - PostgreSQL: host / port / database / user / password
 3. Connect and expand nodes to browse schemas/tables/views
 
+## Settings/Preferences
+There are two windows for preferences:
+- "LLM Response Preferences", which contains settings for how AI responses are formatted and what info they include. This includes:
+    - Response language
+    - Custom instructions for a model (appended at the end of every prompt)
+    - Option to change the URL pointed by "Open LLM" button in prompt library
+- "Behavior Settings", which control some specific aspects of behavior, such as:
+    - Opening new tab on query append, creating connection, etc.
+    - Enabling destructive SELECT INTO statements for MS Access (parity with Access's own behavior)
+
 ## Run SQL (F9)
 - If text is selected: executes statements inside the selection
 - If nothing selected: executes the statement your caret is currently inside
