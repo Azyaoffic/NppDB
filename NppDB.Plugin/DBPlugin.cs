@@ -69,6 +69,7 @@ namespace NppDB
         private string _lastAnalyzedText;
         private SqlDialect _lastUsedDialect;
         private IScintillaGateway _lastEditor;
+        private readonly DbPluginMenuBuilder _menuBuilder = new DbPluginMenuBuilder(PLUGIN_NAME);
         
         private bool _showRecreationNotificationsToUsers = false; // TODO: might be good to turn off to confuse users less?
 
@@ -197,6 +198,7 @@ namespace NppDB
                     break;
                 case (uint)SciMsg.SCN_DWELLSTART: ShowTip(nc.Position); break;
                 case (uint)SciMsg.SCN_DWELLEND: CloseTip(); break;
+                case (uint)NppMsg.NPPN_READY: _menuBuilder.TryRebuildOnce(nppData._nppHandle, _funcItems); break;
             }
         }
         #endregion

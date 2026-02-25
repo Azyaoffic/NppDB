@@ -109,6 +109,7 @@
     <ItemGroup>
         <Compile Include="ClikeStringArray.cs" />
         <Compile Include="DBPlugin.cs" />
+        <Compile Include="DBPluginMenuBuilder.cs" />
         <Compile Include="DllExportAttribute.cs" />
         <Compile Include="Docking_h.cs" />
         <Compile Include="GatewayDomain.cs" />
