@@ -3,7 +3,6 @@ using System.IO;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 
-
 namespace NppDB.Core
 {
     // also needs to be updated in MSAccessTable.cs
@@ -11,32 +10,65 @@ namespace NppDB.Core
     {
         public bool EnableDestructiveSelectInto { get; set; }
         public bool EnableNewTabCreation { get; set; }
+        public float DbManagerFontScale { get; set; } = 1.0f;
     }
 
     public partial class FrmBehaviorSettings : Form
     {
         private string _preferencesFilePath;
+        private bool _loading;
 
-        public FrmBehaviorSettings(String preferencesFilePath)
+        public FrmBehaviorSettings(string preferencesFilePath)
         {
             _preferencesFilePath = preferencesFilePath;
-            
+
             InitializeComponent();
-            
-            var existingSettings = loadExistingSettings();
-            destructiveSelectIntoCheckbox.Checked = existingSettings.EnableDestructiveSelectInto;
-            newTabCheckbox.Checked = existingSettings.EnableNewTabCreation;
+
+            _loading = true;
+            try
+            {
+                var existingSettings = loadExistingSettings();
+                destructiveSelectIntoCheckbox.Checked = existingSettings.EnableDestructiveSelectInto;
+                newTabCheckbox.Checked = existingSettings.EnableNewTabCreation;
+
+                var scale = existingSettings.DbManagerFontScale;
+                if (scale < 0.75f || scale > 2.5f) scale = 1.0f;
+                numDbManagerFontScale.Value = (decimal)scale;
+            }
+            finally
+            {
+                _loading = false;
+            }
         }
 
         private void destructiveSelectIntoCheckbox_CheckedChanged(object sender, EventArgs e)
         {
+            if (_loading) return;
+            SaveCurrentSettings();
+        }
+
+        private void newTabCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (_loading) return;
+            SaveCurrentSettings();
+        }
+
+        private void numDbManagerFontScale_ValueChanged(object sender, EventArgs e)
+        {
+            if (_loading) return;
+            SaveCurrentSettings();
+        }
+
+        private void SaveCurrentSettings()
+        {
             var settings = new BehaviorSettings
             {
-                EnableDestructiveSelectInto = destructiveSelectIntoCheckbox.Checked
+                EnableDestructiveSelectInto = destructiveSelectIntoCheckbox.Checked,
+                EnableNewTabCreation = newTabCheckbox.Checked,
+                DbManagerFontScale = (float)numDbManagerFontScale.Value
             };
 
             var json = JsonConvert.SerializeObject(settings, Formatting.Indented);
-
             File.WriteAllText(_preferencesFilePath, json);
         }
 
@@ -50,7 +82,7 @@ namespace NppDB.Core
                     if (!string.IsNullOrEmpty(readData))
                     {
                         var value = JsonConvert.DeserializeObject<BehaviorSettings>(readData);
-                        return value;
+                        return value ?? new BehaviorSettings();
                     }
                 }
                 catch (Exception ex)
@@ -58,26 +90,14 @@ namespace NppDB.Core
                     MessageBox.Show($"Error loading settings: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return new BehaviorSettings
                     {
-                            EnableDestructiveSelectInto = false,
-                            EnableNewTabCreation = false
+                        EnableDestructiveSelectInto = false,
+                        EnableNewTabCreation = false
                     };
                 }
 
             }
 
             return new BehaviorSettings();
-        }
-
-        private void newTabCheckbox_CheckedChanged(object sender, EventArgs e)
-        {
-            var settings = new BehaviorSettings
-            {
-                EnableNewTabCreation = newTabCheckbox.Checked
-            };
-
-            var json = JsonConvert.SerializeObject(settings, Formatting.Indented);
-
-            File.WriteAllText(_preferencesFilePath, json);
         }
     }
 }

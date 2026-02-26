@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Newtonsoft.Json;
 using NppDB.Comm;
 using NppDB.Core.Properties;
 using NppDB.PostgreSQL;
@@ -20,6 +21,8 @@ namespace NppDB.Core
     public partial class FrmDatabaseExplore : Form
     {
         private readonly INppDbCommandHost _commandHostInstance;
+        private bool _dbManagerFontScaleApplied;
+
         public FrmDatabaseExplore(INppDbCommandHost commandHost)
         {
             InitializeComponent();
@@ -31,6 +34,8 @@ namespace NppDB.Core
         {
             try
             {
+                ApplyDbManagerFontScale();
+
                 InitTreeIcons();
 
                 if (DbServerManager.Instance == null)
@@ -77,7 +82,45 @@ namespace NppDB.Core
                                 "FrmDatabaseExplore Init CRASH", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        
+        private void ApplyDbManagerFontScale()
+        {
+            if (_dbManagerFontScaleApplied) return;
+            _dbManagerFontScaleApplied = true;
 
+            var scale = 1.0f;
+
+            try
+            {
+                var configDir = _commandHostInstance.Execute(NppDbCommandType.GET_PLUGIN_CONFIG_DIRECTORY, null) as string;
+                if (!string.IsNullOrWhiteSpace(configDir))
+                {
+                    var settingsPath = Path.Combine(configDir, "behavior_settings.json");
+                    if (File.Exists(settingsPath))
+                    {
+                        var json = File.ReadAllText(settingsPath);
+                        if (!string.IsNullOrWhiteSpace(json))
+                        {
+                            var settings = JsonConvert.DeserializeObject<BehaviorSettings>(json);
+                            if (settings != null && settings.DbManagerFontScale > 0.1f)
+                                scale = settings.DbManagerFontScale;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            if (scale < 0.75f || scale > 2.5f) scale = 1.0f;
+            if (Math.Abs(scale - 1.0f) < 0.01f) return;
+
+            if (trvDBList == null) return;
+
+            trvDBList.Font = new Font(trvDBList.Font.FontFamily, trvDBList.Font.Size * scale, trvDBList.Font.Style);
+            trvDBList.ItemHeight = (int)Math.Round(trvDBList.Font.Height * 1.35) + 2;
+        }
+        
         private void InitTreeIcons()
         {
             trvDBList.ImageList = new ImageList { ColorDepth = ColorDepth.Depth32Bit };

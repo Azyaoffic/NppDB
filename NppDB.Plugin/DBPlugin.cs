@@ -299,7 +299,8 @@ namespace NppDB
                      var defaultSettings = new BehaviorSettings
                      {
                          EnableDestructiveSelectInto = false,
-                         EnableNewTabCreation = false
+                         EnableNewTabCreation = false,
+                         DbManagerFontScale = 1.0f
                      };
                      
                     var jsonData = JsonConvert.SerializeObject(defaultSettings, Formatting.None);
