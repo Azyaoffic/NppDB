@@ -165,6 +165,18 @@
         <None Include="Resources\DBPPManage16.png" />
     </ItemGroup>
     <ItemGroup>
+        <Content Include="Resources\IconExecute.png" />
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Resources\IconAnalyze.png" />
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Resources\IconSources.txt" />
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Resources\IconPromptLibrary.png" />
+    </ItemGroup>
+    <ItemGroup>
         <EmbeddedResource Include="Resources\PromptLibraryDefault.xml" />
     </ItemGroup>
     <ItemGroup>

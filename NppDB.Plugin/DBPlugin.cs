@@ -49,7 +49,10 @@ namespace NppDB
         private FrmDatabaseExplore _frmDbExplorer;
         private static FrmDatabaseExplore _staticFrmDbExplorer;
         private int _cmdFrmDbExplorerIdx = -1;
-        private readonly Bitmap _imgMan = Resources.DBPPManage16;
+        private readonly Bitmap _imgDbManager = Resources.DBPPManage16;
+        private readonly Bitmap _imgExecute = Resources.IconExecute;
+        private readonly Bitmap _imgAnalyze = Resources.IconAnalyze;
+        private readonly Bitmap _imgPromptLibrary = Resources.IconPromptLibrary;
         private Icon _tbIcon;
         private readonly Func<IScintillaGateway> _getCurrentEditor = GetGatewayFactory();
         private static readonly Func<IScintillaGateway> _getStaticCurrentEditor = GetGatewayFactory();
@@ -352,8 +355,9 @@ namespace NppDB
                  }
                  else
                  {
-                     _isPromptLibraryDisabled = true;
-                     MessageBox.Show("Prompt Library file not found. Prompt Library features will be disabled.");
+                     // Todo: deprecate disabling
+                     // _isPromptLibraryDisabled = true;
+                     // MessageBox.Show("Prompt Library file not found. Prompt Library features will be disabled.");
                  }
                  
                  // we'll assume that this is mostly run on the first plugin load,
@@ -531,13 +535,21 @@ namespace NppDB
         /// </summary>
         private void SetToolBarIcons()
         {
-            if (_cmdFrmDbExplorerIdx < 0 || _cmdFrmDbExplorerIdx >= _funcItems.Items.Count)
+            TryAddToolbarIcon(0, Resources.IconExecute);
+            TryAddToolbarIcon(1, Resources.IconAnalyze);
+            TryAddToolbarIcon(7, Resources.IconPromptLibrary);
+            TryAddToolbarIcon(3, Resources.DBPPManage16);
+        }
+
+        private void TryAddToolbarIcon(int funcItemIndex, Bitmap bmp)
+        {
+            if (bmp == null)
             {
-                Console.WriteLine($"Error: Invalid command index ({_cmdFrmDbExplorerIdx}) for setting toolbar icon.");
+                Console.WriteLine($"Toolbar icon bitmap is null for index {funcItemIndex}");
                 return;
             }
 
-            if (_imgMan == null)
+            if (funcItemIndex < 0 || funcItemIndex >= _funcItems.Items.Count)
             {
                 Console.WriteLine("Error: Toolbar icon image resource (_imgMan) is null.");
                 return;
@@ -549,17 +561,17 @@ namespace NppDB
             {
                 var tbIcons = new toolbarIcons
                 {
-                    hToolbarBmp = _imgMan.GetHbitmap()
+                    hToolbarBmp = bmp.GetHbitmap()
                 };
 
                 pTbIcons = Marshal.AllocHGlobal(Marshal.SizeOf(tbIcons));
-
                 Marshal.StructureToPtr(tbIcons, pTbIcons, false);
 
                 Win32.SendMessage(
                     nppData._nppHandle,
                     (uint)NppMsg.NPPM_ADDTOOLBARICON,
-                    _funcItems.Items[_cmdFrmDbExplorerIdx]._cmdID, pTbIcons);
+                    _funcItems.Items[funcItemIndex]._cmdID,
+                    pTbIcons);
             }
             catch (Exception ex)
             {
@@ -569,11 +581,10 @@ namespace NppDB
             finally
             {
                 if (pTbIcons != IntPtr.Zero)
-                {
                     Marshal.FreeHGlobal(pTbIcons);
-                }
             }
         }
+
         private void FinalizePlugin()
         {
             if (_ptrPluginName != IntPtr.Zero)
@@ -1739,7 +1750,7 @@ namespace NppDB
                         };
                         var attr = new ImageAttributes();
                         attr.SetRemapTable(colorMap);
-                        g.DrawImage(_imgMan, new Rectangle(0, 0, 16, 16), 0, 0, 16, 16, GraphicsUnit.Pixel, attr);
+                        g.DrawImage(_imgDbManager, new Rectangle(0, 0, 16, 16), 0, 0, 16, 16, GraphicsUnit.Pixel, attr);
                         _tbIcon = Icon.FromHandle(newBmp.GetHicon());
                     }
 
