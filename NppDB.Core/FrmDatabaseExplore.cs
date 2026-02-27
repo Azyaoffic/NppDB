@@ -88,29 +88,7 @@ namespace NppDB.Core
             if (_dbManagerFontScaleApplied) return;
             _dbManagerFontScaleApplied = true;
 
-            var scale = 1.0f;
-
-            try
-            {
-                var configDir = _commandHostInstance.Execute(NppDbCommandType.GET_PLUGIN_CONFIG_DIRECTORY, null) as string;
-                if (!string.IsNullOrWhiteSpace(configDir))
-                {
-                    var settingsPath = Path.Combine(configDir, "behavior_settings.json");
-                    if (File.Exists(settingsPath))
-                    {
-                        var json = File.ReadAllText(settingsPath);
-                        if (!string.IsNullOrWhiteSpace(json))
-                        {
-                            var settings = JsonConvert.DeserializeObject<BehaviorSettings>(json);
-                            if (settings != null && settings.DbManagerFontScale > 0.1f)
-                                scale = settings.DbManagerFontScale;
-                        }
-                    }
-                }
-            }
-            catch
-            {
-            }
+            var scale = NppDbSettingsStore.Get().Behavior.DbManagerFontScale;
 
             if (scale < 0.75f || scale > 2.5f) scale = 1.0f;
             if (Math.Abs(scale - 1.0f) < 0.01f) return;

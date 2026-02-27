@@ -50,6 +50,10 @@ namespace NppDB.Core
             chkEnableDestructiveSelectInto.Checked = _settings.Behavior != null && _settings.Behavior.EnableDestructiveSelectInto;
             chkEnableNewTabCreation.Checked = _settings.Behavior != null && _settings.Behavior.EnableNewTabCreation;
 
+            var scale = (_settings.Behavior != null) ? _settings.Behavior.DbManagerFontScale : 1.0f;
+            if (scale < 0.75f || scale > 2.5f) scale = 1.0f;
+            numDbManagerFontScale.Value = (decimal)scale;
+
             // llm preferences
             var lang = (_settings.Prompt != null && !string.IsNullOrWhiteSpace(_settings.Prompt.ResponseLanguage))
                 ? _settings.Prompt.ResponseLanguage
@@ -140,6 +144,7 @@ namespace NppDB.Core
 
             _settings.Behavior.EnableDestructiveSelectInto = chkEnableDestructiveSelectInto.Checked;
             _settings.Behavior.EnableNewTabCreation = chkEnableNewTabCreation.Checked;
+            _settings.Behavior.DbManagerFontScale = (float)numDbManagerFontScale.Value;
 
             _settings.Prompt.ResponseLanguage = selectedLang;
             _settings.Prompt.CustomInstructions = txtCustomInstructions.Text ?? string.Empty;

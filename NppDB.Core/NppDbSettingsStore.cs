@@ -13,7 +13,12 @@ namespace NppDB.Core
         public PromptPreferences Prompt { get; set; }
         public string AiPromptTemplate { get; set; }
 
-        public static readonly string[] RequiredAiTemplatePlaceholders = FrmAiPromptTemplateEditor.RequiredPlaceholders;
+        public static readonly string[] RequiredAiTemplatePlaceholders =
+        {
+            "{DATABASE_DIALECT}",
+            "{SQL_QUERY}",
+            "{ANALYSIS_ISSUES_WITH_DETAILS_LIST}"
+        };
 
         public const string DefaultAiPromptTemplate = @"**Role**
 You are an expert {DATABASE_DIALECT} SQL developer and troubleshooter.
@@ -54,7 +59,8 @@ For each issue (in the same order as provided), output:
                 Behavior = new BehaviorSettings
                 {
                     EnableDestructiveSelectInto = false,
-                    EnableNewTabCreation = false
+                    EnableNewTabCreation = false,
+                    DbManagerFontScale = 1.0f
                 },
                 Prompt = new PromptPreferences
                 {
@@ -70,6 +76,9 @@ For each issue (in the same order as provided), output:
         {
             if (Behavior == null) Behavior = new BehaviorSettings();
             if (Prompt == null) Prompt = new PromptPreferences();
+
+            if (Behavior.DbManagerFontScale < 0.75f || Behavior.DbManagerFontScale > 2.0f)
+                Behavior.DbManagerFontScale = 1.0f;
 
             if (string.IsNullOrWhiteSpace(Prompt.ResponseLanguage))
                 Prompt.ResponseLanguage = "English";
