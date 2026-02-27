@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -14,6 +15,23 @@ namespace NppDB.Core
             LlmResponse = 1,
             AiPromptTemplate = 2
         }
+        
+        // also needs to be updated in MSAccessTable.cs
+        public class BehaviorSettings
+        {
+            public bool EnableDestructiveSelectInto { get; set; }
+            public bool EnableNewTabCreation { get; set; }
+            public float DbManagerFontScale { get; set; } = 1.0f;
+        }
+        
+        public class PromptPreferences // also in PostgreSQLPromptReading.cs
+        {
+            public string ResponseLanguage {get; set;}
+            public string CustomInstructions {get; set;}
+            public string OpenLlmUrl { get; set; }
+        }
+
+        public static Dictionary<string, string> LanguageCodeDict = new Dictionary<string, string>();
 
         public FrmSettings(string settingsFilePath, SettingsTab initialTab = SettingsTab.Behavior)
         {
@@ -31,9 +49,9 @@ namespace NppDB.Core
         {
             comboResponseLanguage.Items.Clear();
 
-            if (FrmPromptPreferences.LanguageCodeDict != null && FrmPromptPreferences.LanguageCodeDict.Count > 0)
+            if (LanguageCodeDict != null && LanguageCodeDict.Count > 0)
             {
-                foreach (var lang in FrmPromptPreferences.LanguageCodeDict.Values)
+                foreach (var lang in LanguageCodeDict.Values)
                     comboResponseLanguage.Items.Add(lang);
             }
             else

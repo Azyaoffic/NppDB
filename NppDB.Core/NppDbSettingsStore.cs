@@ -4,6 +4,8 @@ using System.Text;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Formatting = Newtonsoft.Json.Formatting;
+using BehaviorSettings = NppDB.Core.FrmSettings.BehaviorSettings;
+using PromptPreferences = NppDB.Core.FrmSettings.PromptPreferences;
 
 namespace NppDB.Core
 {

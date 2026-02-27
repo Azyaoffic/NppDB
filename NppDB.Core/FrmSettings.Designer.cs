@@ -1,4 +1,6 @@
-﻿namespace NppDB.Core
+﻿using System.Collections.Generic;
+
+namespace NppDB.Core
 {
     partial class FrmSettings
     {

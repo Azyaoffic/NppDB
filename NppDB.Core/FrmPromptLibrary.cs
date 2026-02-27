@@ -948,7 +948,7 @@ namespace NppDB.Core
 
         private string LoadUserPromptPreferences()
         {
-            var preferences = FrmPromptPreferences.ReadUserPreferences();
+            var preferences = NppDbSettingsStore.Get().Prompt;
             return $"\nRespond in the following language: {preferences.ResponseLanguage}." +
                    $"\nAlso follow user's custom instructions: {preferences.CustomInstructions}.";
         }
@@ -1078,7 +1078,7 @@ namespace NppDB.Core
         {
             try
             {
-                var url = FrmPromptPreferences.ReadUserPreferences().OpenLlmUrl;
+                var url = NppDbSettingsStore.Get().Prompt.OpenLlmUrl?.Trim() ?? "https://chatgpt.com/";
                 if (!url.StartsWith("http://") && !url.StartsWith("https://"))
                 {
                     url = "https://" + url;

@@ -1953,7 +1953,7 @@ namespace NppDB
                     }
                 }
 
-                FrmPromptPreferences.LanguageCodeDict = langDict;
+                FrmSettings.LanguageCodeDict = langDict;
             }
             catch (Exception ex)
             {

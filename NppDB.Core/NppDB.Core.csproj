@@ -74,18 +74,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DBConnectManager.cs" />
-    <Compile Include="FrmAiPromptTemplateEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FrmAiPromptTemplateEditor.Designer.cs">
-      <DependentUpon>FrmAiPromptTemplateEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="FrmBehaviorSettings.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FrmBehaviorSettings.Designer.cs">
-      <DependentUpon>FrmBehaviorSettings.cs</DependentUpon>
-    </Compile>
     <Compile Include="FrmDatabaseExplore.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -109,12 +97,6 @@
     </Compile>
     <Compile Include="FrmPromptLibrary.Designer.cs">
       <DependentUpon>FrmPromptLibrary.cs</DependentUpon>
-    </Compile>
-    <Compile Include="FrmPromptPreferences.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FrmPromptPreferences.Designer.cs">
-      <DependentUpon>FrmPromptPreferences.cs</DependentUpon>
     </Compile>
     <Compile Include="frmSelectDbType.cs">
       <SubType>Form</SubType>
@@ -151,9 +133,6 @@
     <Compile Include="frmAbout.Designer.cs">
       <DependentUpon>frmAbout.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="FrmBehaviorSettings.resx">
-      <DependentUpon>FrmBehaviorSettings.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="FrmDatabaseExplore.resx">
       <DependentUpon>FrmDatabaseExplore.cs</DependentUpon>
     </EmbeddedResource>
@@ -165,9 +144,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FrmPromptLibrary.resx">
       <DependentUpon>FrmPromptLibrary.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FrmPromptPreferences.resx">
-      <DependentUpon>FrmPromptPreferences.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmSelectDbType.resx">
       <DependentUpon>frmSelectDbType.cs</DependentUpon>
