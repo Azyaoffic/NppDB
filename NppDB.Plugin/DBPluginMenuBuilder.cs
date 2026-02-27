@@ -75,9 +75,7 @@ namespace NppDB
                     "Show Prompt Library",
                 },
                 new List<string> {
-                    "Show LLM Response Preferences",
-                    "Show Behavior Settings",
-                    "Show AI Prompt Template Editor",
+                    "Settings"
                 },
                 new List<string> {
                     "Show Tutorial",

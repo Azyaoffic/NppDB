@@ -11,14 +11,11 @@ using System.Windows.Forms;
 using System.Xml;
 using Kbg.NppPluginNET.PluginInfrastructure;
 using Microsoft.Win32.SafeHandles;
-using Newtonsoft.Json;
 using NppDB.Comm;
 using NppDB.Core;
 using NppDB.MSAccess;
 using NppDB.PostgreSQL;
 using NppDB.Properties;
-using Formatting = Newtonsoft.Json.Formatting;
-using PromptPreferences = NppDB.Core.PromptPreferences;
 
 namespace NppDB
 {
@@ -43,16 +40,11 @@ namespace NppDB
         private string _tutorialPath;
         private static string _staticPromptLibraryPath;
         private static string _staticLanguageCodesPath;
-        private static string _staticPromptPreferencesPath;
-        private static string _staticBehaviorSettingsPath;
-        private bool _isPromptLibraryDisabled = false;
+        private static string _staticSettingsPath;
         private FrmDatabaseExplore _frmDbExplorer;
         private static FrmDatabaseExplore _staticFrmDbExplorer;
         private int _cmdFrmDbExplorerIdx = -1;
         private readonly Bitmap _imgDbManager = Resources.DBPPManage16;
-        private readonly Bitmap _imgExecute = Resources.IconExecute;
-        private readonly Bitmap _imgAnalyze = Resources.IconAnalyze;
-        private readonly Bitmap _imgPromptLibrary = Resources.IconPromptLibrary;
         private Icon _tbIcon;
         private readonly Func<IScintillaGateway> _getCurrentEditor = GetGatewayFactory();
         private static readonly Func<IScintillaGateway> _getStaticCurrentEditor = GetGatewayFactory();
@@ -269,48 +261,8 @@ namespace NppDB
              _staticLanguageCodesPath = Path.Combine(_nppDbConfigDir, "LanguageCodes.csv");
              LoadLanguageDoc();
              
-             _staticPromptPreferencesPath = Path.Combine(_nppDbConfigDir, "prompt_preferences.json");
-             FrmPromptPreferences.PreferencesFilePath = _staticPromptPreferencesPath;
-             if (!File.Exists(_staticPromptPreferencesPath))
-             {
-                 try
-                 {
-                     var defaultPreferences = new PromptPreferences
-                     {
-                         ResponseLanguage = "English",
-                         CustomInstructions = ""
-                     };
-                     
-                    var jsonData = JsonConvert.SerializeObject(defaultPreferences, Formatting.None);
-                     
-                     File.WriteAllText(_staticPromptPreferencesPath, jsonData);
-                 }
-                 catch (Exception ex)
-                 {
-                     MessageBox.Show("Error creating default prompt preferences file: " + ex.Message);
-                 }
-             }
-             
-             _staticBehaviorSettingsPath = Path.Combine(_nppDbConfigDir, "behavior_settings.json");
-             if (!File.Exists(_staticBehaviorSettingsPath))
-             {
-                 try
-                 {
-                     var defaultSettings = new BehaviorSettings
-                     {
-                         EnableDestructiveSelectInto = false,
-                         EnableNewTabCreation = false,
-                         DbManagerFontScale = 1.0f
-                     };
-                     
-                    var jsonData = JsonConvert.SerializeObject(defaultSettings, Formatting.None);
-                    
-                    File.WriteAllText(_staticBehaviorSettingsPath, jsonData);
-                 } catch (Exception ex)
-                 {
-                     MessageBox.Show("Error creating default behaviors file: " + ex.Message);
-                 }
-             }
+             _staticSettingsPath = Path.Combine(_nppDbConfigDir, "settings.json");
+             NppDbSettingsStore.Initialize(_staticSettingsPath, _nppDbConfigDir);
              
              _promptLibraryPath = Path.Combine(_nppDbConfigDir, "promptLibrary.xml");
              _tutorialPath = Path.Combine(_nppDbConfigDir, "tutorial.md");
@@ -374,16 +326,10 @@ namespace NppDB
              SetCommand(4, "Clear analysis", ClearAnalysis, new ShortcutKey(true, false, true, Keys.F9));
              SetCommand(5, "Open console", OpenConsole);
              SetCommand(6, "About", ShowAbout);
-
-             if (!_isPromptLibraryDisabled)
-             {
-                 SetCommand(7, "Show Prompt Library", ShowPromptLibrary, new ShortcutKey(true, false, false, Keys.F10));
-             }
-             SetCommand(8, "Show LLM Response Preferences", ShowPromptPreferences);
-             SetCommand(9, "Show Behavior Settings", ShowBehaviorSettings);
-             SetCommand(10, "Show AI Prompt Template Editor", ShowAiTemplateEditor);
-             SetCommand(11, "Analyze and Create Prompt (Issue at Caret)", AnalyzeAndCreatePromptForIssueAtCaret, new ShortcutKey(false, true, false, Keys.F9));
-             SetCommand(12, "Show Tutorial", ShowTutorial, new ShortcutKey(true, false, false, Keys.F11));
+             SetCommand(7, "Show Prompt Library", ShowPromptLibrary, new ShortcutKey(true, false, false, Keys.F10));
+             SetCommand(8, "Settings", ShowSettings);
+             SetCommand(9, "Analyze and Create Prompt (Issue at Caret)", AnalyzeAndCreatePromptForIssueAtCaret, new ShortcutKey(false, true, false, Keys.F9));
+             SetCommand(10, "Show Tutorial", ShowTutorial, new ShortcutKey(true, false, false, Keys.F11));
 
              _cmdFrmDbExplorerIdx = 3; 
         }
@@ -1500,6 +1446,22 @@ namespace NppDB
                         return _nppDbPluginDir;
                     case NppDbCommandType.GET_PLUGIN_CONFIG_DIRECTORY:
                         return _nppDbConfigDir;
+                    case NppDbCommandType.SHOW_SETTINGS:
+                        var tab = FrmSettings.SettingsTab.Behavior;
+                        if (parameters != null && parameters.Length >= 1)
+                        {
+                            if (parameters[0] is int idx && idx >= 0)
+                                tab = (FrmSettings.SettingsTab)idx;
+                            else if (parameters[0] is string s)
+                            {
+                                if (s.Equals("LLM", StringComparison.OrdinalIgnoreCase))
+                                    tab = FrmSettings.SettingsTab.LlmResponse;
+                                else if (s.Equals("AI", StringComparison.OrdinalIgnoreCase) || s.Equals("AI_TEMPLATE", StringComparison.OrdinalIgnoreCase))
+                                    tab = FrmSettings.SettingsTab.AiPromptTemplate;
+                            }
+                        }
+                        ShowSettingsInternal(tab);
+                        break;
                     default:
                         return null;
                 }
@@ -1801,24 +1763,15 @@ namespace NppDB
             dlg.ShowDialog();
         }
         
-        private static void ShowPromptPreferences()
+        private void ShowSettings()
+        {
+            ShowSettingsInternal(FrmSettings.SettingsTab.Behavior);
+        }
+
+        private void ShowSettingsInternal(FrmSettings.SettingsTab tab)
         {
             LoadLanguageDoc();
-            var dlg = new FrmPromptPreferences(_staticPromptPreferencesPath);
-            dlg.ShowDialog();
-        }
-        
-        private static void ShowBehaviorSettings()
-        {
-            var dlg = new FrmBehaviorSettings(_staticBehaviorSettingsPath);
-            dlg.ShowDialog();
-        }
-
-        private void ShowAiTemplateEditor()
-        {
-            var templateFilePath = Path.Combine(_nppDbPluginDir, "AIPromptTemplate.txt");
-
-            var dlg = new FrmAiPromptTemplateEditor(templateFilePath);
+            var dlg = new FrmSettings(_staticSettingsPath, tab);
             dlg.ShowDialog();
         }
 
@@ -2168,19 +2121,16 @@ namespace NppDB
             }
         }
         
-        static bool NewTabCreateEnable(string staticBehaviorSettingsPath)
+        static bool NewTabCreateEnable()
         {
-            var json = File.ReadAllText(staticBehaviorSettingsPath);
-            if (string.IsNullOrWhiteSpace(json)) return false;
-
-            var value = JsonConvert.DeserializeObject<BehaviorSettings>(json);
-            return value.EnableNewTabCreation;
+            try { return NppDbSettingsStore.Get().Behavior.EnableNewTabCreation; }
+            catch { return false; }
         }
 
         private static void NewFile(bool forceNewTab = false)
         {
             
-            if (!forceNewTab && !NewTabCreateEnable(_staticBehaviorSettingsPath)) return;
+            if (!forceNewTab && !NewTabCreateEnable()) return;
             
             Win32.SendMessage(nppData._nppHandle, (uint)Win32.Wm.COMMAND, (int)NppMenuCmd.IDM_FILE_NEW, 0);
         }
@@ -2230,7 +2180,7 @@ namespace NppDB
                 return;
             }
 
-            if (!forceIgnoreTwoNewLines && !NewTabCreateEnable(_staticBehaviorSettingsPath))
+            if (!forceIgnoreTwoNewLines && !NewTabCreateEnable())
             {
                 text = "\n\n" + text;
             }
@@ -2344,24 +2294,15 @@ namespace NppDB
 
             try
             {
-                var templateFilePath = Path.Combine(_nppDbPluginDir, "AIPromptTemplate.txt");
+                var promptTemplate = NppDbSettingsStore.Get().AiPromptTemplate;
+                if (string.IsNullOrWhiteSpace(promptTemplate))
+                    promptTemplate = NppDbSettings.DefaultAiPromptTemplate;
 
-                if (!File.Exists(templateFilePath))
-                {
-                    MessageBox.Show($"AI prompt template file not found: {templateFilePath}\nUsing default prompt structure.",
-                                    PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    generatedPrompt = GenerateDefaultAiPromptOptionB(dbDialectString, fullQuery, analysisIssuesWithDetailsListString);
-                    if (string.IsNullOrEmpty(generatedPrompt)) return;
-                }
-                else
-                {
-                    var promptTemplate = File.ReadAllText(templateFilePath);
-
-                    generatedPrompt = promptTemplate
-                        .Replace("{DATABASE_DIALECT}", dbDialectString)
-                        .Replace("{SQL_QUERY}", fullQuery.Trim())
-                        .Replace("{ANALYSIS_ISSUES_WITH_DETAILS_LIST}", analysisIssuesWithDetailsListString);
-                }
+                generatedPrompt = promptTemplate
+                    .Replace("{DATABASE_DIALECT}", dbDialectString)
+                    .Replace("{SQL_QUERY}", fullQuery.Trim())
+                    .Replace("{ANALYSIS_ISSUES_WITH_DETAILS_LIST}", analysisIssuesWithDetailsListString);
+            
             }
             catch (Exception exReadTemplate)
             {

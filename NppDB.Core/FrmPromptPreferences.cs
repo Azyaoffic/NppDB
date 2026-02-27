@@ -97,34 +97,8 @@ namespace NppDB.Core
 
         public static PromptPreferences ReadUserPreferences()
         {
-            try
-            {
-                if (File.Exists(PreferencesFilePath))
-                {
-                    var readData = File.ReadAllText(PreferencesFilePath);
-                    if (!string.IsNullOrEmpty(readData))
-                    {
-                        return JsonConvert.DeserializeObject<PromptPreferences>(readData);
-                    }
-                }
-
-                return new PromptPreferences
-                {
-                    ResponseLanguage = "English",
-                    CustomInstructions = ""
-                };
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error reading preferences: {ex.Message}", "Error", MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-                return new PromptPreferences
-                {
-                    ResponseLanguage = "English",
-                    CustomInstructions = "",
-                    OpenLlmUrl = "https://chatgpt.com/"
-                };
-            }
+            var settings = NppDbSettingsStore.Get();
+            return settings?.Prompt ?? new PromptPreferences();
         }
     }
 }

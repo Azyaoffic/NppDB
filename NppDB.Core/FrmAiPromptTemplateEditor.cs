@@ -10,7 +10,7 @@ namespace NppDB.Core
     {
         private readonly string _templateFilePath;
 
-        private static readonly string[] RequiredPlaceholders =
+        public static readonly string[] RequiredPlaceholders =
         {
             "{DATABASE_DIALECT}",
             "{SQL_QUERY}",
