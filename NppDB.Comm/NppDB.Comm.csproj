@@ -118,8 +118,4 @@
          Other similar extension points exist, see Microsoft.Common.targets.
     <Target Name="BeforeBuild">
     </Target>-->
-    <Target Name="AfterBuild">
-        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(MSBuildProgramFiles32)\Notepad++\" Condition="Exists('$(MSBuildProgramFiles32)\Notepad++\plugins\') AND '$(Platform)'=='x86'" ContinueOnError="false" />
-        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ProgramW6432)\Notepad++\" Condition="Exists('$(ProgramW6432)\Notepad++\plugins\') AND '$(Platform)'=='x64'" ContinueOnError="false" />
-    </Target>
 </Project>

@@ -93,29 +93,18 @@ namespace NppDB
                     return loadedAssembly;
                 }
 
-                if (requestedAssemblyName.Name.Equals("NppDB.Comm", StringComparison.OrdinalIgnoreCase))
+                var libDirectory = Path.Combine(pluginDirectory, "lib");
+                var libAssemblyPath = Path.Combine(libDirectory, requestedAssemblyName.Name + ".dll");
+                File.AppendAllText(logFilePath, $"{DateTime.Now}: Looking for '{libAssemblyPath}'.\r\n");
+                if (File.Exists(libAssemblyPath))
                 {
-                    File.AppendAllText(logFilePath,
-                        $"{DateTime.Now}: '{requestedAssemblyName.Name}.dll' not found in plugin dir. Checking N++ base dir...\r\n");
-                    var nppBaseDirectory = Path.GetFullPath(Path.Combine(pluginDirectory, "..", ".."));
-                    var commPathInBase = Path.Combine(nppBaseDirectory, "NppDB.Comm.dll");
-                    if (File.Exists(commPathInBase))
-                    {
-                        File.AppendAllText(logFilePath,
-                            $"{DateTime.Now}: Found NppDB.Comm.dll at '{commPathInBase}'. Loading...\r\n");
-                        var loadedAssembly = Assembly.LoadFrom(commPathInBase);
-                        File.AppendAllText(logFilePath,
-                            $"{DateTime.Now}: Successfully loaded '{loadedAssembly.FullName}'.\r\n");
-                        return loadedAssembly;
-                    }
+                    File.AppendAllText(logFilePath, $"{DateTime.Now}: Found at '{libAssemblyPath}'. Loading...\r\n");
+                    var loadedAssembly = Assembly.LoadFrom(libAssemblyPath);
+                    File.AppendAllText(logFilePath, $"{DateTime.Now}: Successfully loaded '{loadedAssembly.FullName}'.\r\n");
+                    return loadedAssembly;
+                }
 
-                    File.AppendAllText(logFilePath,
-                        $"{DateTime.Now}: NppDB.Comm.dll NOT found at '{commPathInBase}'.\r\n");
-                }
-                else
-                {
-                    File.AppendAllText(logFilePath, $"{DateTime.Now}: '{assemblyPath}' does not exist.\r\n");
-                }
+                File.AppendAllText(logFilePath, $"{DateTime.Now}: '{assemblyPath}' and '{libAssemblyPath}' do not exist.\r\n");
             }
             catch (Exception ex)
             {

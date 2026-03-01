@@ -204,6 +204,7 @@
 
             <NppPluginsBaseDir>$(NppDir)plugins\</NppPluginsBaseDir>
             <NppTargetPluginDir>$(NppPluginsBaseDir)NppDB\</NppTargetPluginDir>
+            <NppTargetPluginLibDir>$(NppTargetPluginDir)lib\</NppTargetPluginLibDir>
 
             <CommonBuildOutputDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\NppDB\</CommonBuildOutputDir>
         </PropertyGroup>
@@ -212,8 +213,10 @@
         <Error Text="Notepad++ plugins directory not found at $(NppPluginsBaseDir). Cannot deploy plugin." Condition="!Exists('$(NppPluginsBaseDir)')" />
 
         <MakeDir Directories="$(NppTargetPluginDir)" />
+        <MakeDir Directories="$(NppTargetPluginLibDir)" />
 
         <ItemGroup>
+            <DependencyDLLsToDeploy Include="Newtonsoft.Json.dll" />
             <DependencyDLLsToDeploy Include="Antlr4.Runtime.Standard.dll" />
             <DependencyDLLsToDeploy Include="Npgsql.dll" />
             <DependencyDLLsToDeploy Include="Microsoft.Bcl.AsyncInterfaces.dll" />
@@ -234,23 +237,24 @@
         </ItemGroup>
 
         <ItemGroup>
+            <ProjectDLLsToDeploy Include="NppDB.Comm.dll" />
             <ProjectDLLsToDeploy Include="NppDB.Core.dll" />
             <ProjectDLLsToDeploy Include="NppDB.MSAccess.dll" />
             <ProjectDLLsToDeploy Include="NppDB.PostgreSQL.dll" />
         </ItemGroup>
 
-        <Message Text="Deploying Project DLLs from $(CommonBuildOutputDir) to $(NppTargetPluginDir)... (Requires Admin)" Importance="high" />
+        <Message Text="Deploying Project DLLs from $(CommonBuildOutputDir) to $(NppTargetPluginLibDir)... (Requires Admin)" Importance="high" />
         <Copy
                 SourceFiles="@(ProjectDLLsToDeploy->'$(CommonBuildOutputDir)%(Identity)')"
-                DestinationFolder="$(NppTargetPluginDir)"
+                DestinationFolder="$(NppTargetPluginLibDir)"
                 SkipUnchangedFiles="true"
                 Condition="Exists('$(CommonBuildOutputDir)%(Identity)')"
         />
 
-        <Message Text="Deploying NuGet Dependency DLLs from $(CommonBuildOutputDir) to $(NppTargetPluginDir)... (Requires Admin)" Importance="high" />
+        <Message Text="Deploying Dependency DLLs from $(CommonBuildOutputDir) to $(NppTargetPluginLibDir)... (Requires Admin)" Importance="high" />
         <Copy
                 SourceFiles="@(DependencyDLLsToDeploy->'$(CommonBuildOutputDir)%(Identity)')"
-                DestinationFolder="$(NppTargetPluginDir)"
+                DestinationFolder="$(NppTargetPluginLibDir)"
                 SkipUnchangedFiles="true"
                 Condition="Exists('$(CommonBuildOutputDir)%(Identity)')"
         />
@@ -271,15 +275,19 @@
                 Condition="Exists('$(NppTargetPluginDir)NppDB.Plugin.dll')"
         />
 
-        <Message Text="Copying NppDB.Comm.dll from $(CommonBuildOutputDir) to $(NppDir)... (Requires Admin)" Importance="high" Condition="Exists('$(CommonBuildOutputDir)NppDB.Comm.dll')" />
+        <ItemGroup>
+            <TranslationIni Include="$(SolutionDir)translations\*.ini" />
+        </ItemGroup>
+
+        <Message Text="Deploying translations (*.ini) to $(NppTargetPluginDir)..." Importance="high" Condition="Exists('$(SolutionDir)translations')" />
         <Copy
-                SourceFiles="$(CommonBuildOutputDir)NppDB.Comm.dll"
-                DestinationFolder="$(NppDir)"
+                SourceFiles="@(TranslationIni)"
+                DestinationFolder="$(NppTargetPluginDir)"
                 SkipUnchangedFiles="true"
-                Condition="Exists('$(CommonBuildOutputDir)NppDB.Comm.dll')"
+                Condition="Exists('$(SolutionDir)translations')"
         />
 
-        <Message Text="Deployment to $(NppTargetPluginDir) and $(NppDir) complete (Ensure process was Run as Admin)." Importance="high" />
+        <Message Text="Deployment to $(NppTargetPluginDir) complete (Ensure process was Run as Admin)." Importance="high" />
 
     </Target>
 </Project>
