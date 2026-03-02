@@ -1,7 +1,5 @@
-# This README is to be updated at a later date!
-
 # NppDB
-This is a repository containing further implementation of NppDB for my bachelors thesis "Enhancement of a Plugin that Simplifies SQL Programming in the Notepad++ Source Code Editor". 
+This is a repository containing further implementation of NppDB for my bachelors thesis "Continuation of development of a plugin that simplifies SQL programming in the Notepad++ source code editor". 
 NppDB is a Notepad++ plugin originally developed by [Sangkyu Jung](https://github.com/gutkyu/NppDB) for supporting connection to different databases, execute SQL statements and show query results, 
 and further developed by [Priit Post](https://github.com/pripost/NppDB), [Andres Eelma](https://github.com/aneelm/NppDB) and [Sten Ärm](https://github.com/stenarm/NppDB).
 
@@ -21,20 +19,27 @@ and further developed by [Priit Post](https://github.com/pripost/NppDB), [Andres
 * PostgreSQL
 
 ## Requirements
-   * Notepad++ 64-bit version (tested with 8.4.7 or 8.4.9)
+   * Notepad++ 64-bit version (last tested with 8.9.1, should work with any reasonably recent version)
    * .Net Framework 4.8
-   * MS Access Database Engine 2010 Redistributable (driver) or MS Access Database Engine 2016 Redistributable (driver). The 64-bit driver version can be downloaded here: https://download.cnet.com/microsoft-access-database-engine-2010-redistributable-64-bit/3000-10254_4-75452796.html or here https://www.microsoft.com/en-us/download/details.aspx?id=54920&irgwc=1. If you also have MS Access installed on your computer, in the folder where you downloaded the driver, open the Windows Command Prompt with administrator rights and run the command: "accessdatabaseengine_X64 /quiet". (to use MS Access database)
+   * MS Access Database Engine 2016 Redistributable (driver). The 64-bit driver version can be downloaded here: https://www.microsoft.com/en-us/download/details.aspx?id=54920&irgwc=1 (if a dll file could not be found, install Visual C++ redistributable: https://aka.ms/vc14/vc_redist.x64.exe). 
+     * If you also have MS Access installed on your computer, in the folder where you downloaded the driver, open the Windows Command Prompt with administrator rights and run the command: "accessdatabaseengine_X64 /quiet". (to use MS Access database)
    * ANTLR 4.11.1 or 4.13.1 (for development)
 
 ## Installation
 Copy compiled .dll files from project folder or downloaded [.zip package](https://github.com/stenarm/NppDB/releases/tag/NppDB_26.06.2025) package as follows:
-   * Place the file "NppDB.Comm.dll" in the root folder of Notepad++ program folder, where "notepad++.exe" is located.
-   * Move the remaining .dll and translation.ini files to the "./plugins/NppDB" folder.
+1. Use the .exe installer or download the .zip package from the latest release page.
+2. If you have downloaded the .zip package, follow these steps:
+   * Extract the downloaded .zip package into a new folder in Notepad++ plugins folder (e.g. "C:\Program Files\Notepad++\plugins\NppDB").
+     * You should have the following structure: 
+        ```
+       C:\Program Files\Notepad++\plugins\NppDB\NppDB.dll, C:\Program Files\Notepad++\plugins\NppDB\estonian.ini, C:\Program Files\Notepad++\plugins\NppDB\english.ini, C:\Program Files\Notepad++\plugins\NppDB\uninstall.exe , C:\Program Files\Notepad++\plugins\NppDB\lib\*.dll
+        ```
    * If you have get an error when starting up Notepad++ after installing the plugin, make sure all the copied .dll files are unblocked, by right-clicking on them and opening properties, and if possible checking box 'unblock'.
  
 ![Unblock](https://raw.githubusercontent.com/aneelm/NppDB/master/README_images/SecurityUnblock.jpg)
 
 ## Quick Start Guide
+   0. Read included tutorial (Ctrl+F11)
    1. Open "Database connect manager" (F10).
    2. Register MS Access or PostgreSQL database
          1. For MS Access register new or existing database (.accdb, .mdb) from local filesystem in the manager window, if there is no password, in the password window just click OK.
@@ -57,8 +62,8 @@ Copy compiled .dll files from project folder or downloaded [.zip package](https:
    3. Database Connect Node is registered in Database Connect Manager by pass authentication which selected database module produce.
 	![Select Database Type](https://raw.githubusercontent.com/aneelm/NppDB/master/README_images/database_system.png)
    4. Connect to database server
-         * [MS Access](https://github.com/aneelm/NppDB.MSAccess) 
-   	   * [PostgreSQL](https://github.com/aneelm/NppDB.PostgreSQL) 
+      * [MS Access](https://github.com/azyaoffic/NppDB.MSAccess) 
+      * [PostgreSQL](https://github.com/azyaoffic/NppDB.PostgreSQL) 
       
 ### Getting into detail about sub elements
    Double-click on the nodes to expands sub elements in the database connection manager. If no connection has been made to the database, a connection window will open asking you to connect.
