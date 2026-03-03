@@ -15,7 +15,13 @@
 - Ctrl + Shift + F9 - Clear analysis highlights/messages  
 - Ctrl + F9 - Analyze + AI prompt (all issues)  
 - Alt + F9 - Analyze + AI prompt (issue at caret)  
-- Ctrl + F10 - Prompt Library (if enabled)
+- Ctrl + F10 - Prompt Library
+
+You can also find buttons on the right side of toolbar for:
+- Executing SQL (Green Arrow)
+- Analyzing SQL (Blue Magnifying Glass)
+- Opening Prompt Library (Black Stack of Books)
+- Opening DB Manager (Yellow Cylinders)
 
 ## First launch setup (1 minute)
 1. Open Database Connect Manager (F10)
