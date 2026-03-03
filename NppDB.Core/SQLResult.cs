@@ -529,9 +529,21 @@ namespace NppDB.Core
             dgv.DataBindingComplete += (s, e) => { Numbering(dgv); dgv.AutoResizeRowHeadersWidth(DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders); };
 
             ((ISupportInitialize)dgv).EndInit();
-            tp.ResumeLayout(false);
+            tp.ResumeLayout(true);
 
-            AdjustResizeColumnRow(dgv);
+            tclSqlResult.PerformLayout();
+            tclSqlResult.Invalidate(true);
+
+            BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    AdjustResizeColumnRow(dgv);
+                    dgv.Invalidate(true);
+                    dgv.Update();
+                }
+                catch {}
+            }));
         }
 
         public void Execute(IList<string> sqlQueries)
