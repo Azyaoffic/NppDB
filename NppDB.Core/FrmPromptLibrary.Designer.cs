@@ -422,6 +422,7 @@ namespace NppDB.Core
             this.flowLayoutPanelPlaceholders.Size = new System.Drawing.Size(620, 113);
             this.flowLayoutPanelPlaceholders.TabIndex = 6;
             this.flowLayoutPanelPlaceholders.WrapContents = false;
+            this.flowLayoutPanelPlaceholders.SizeChanged += flowLayoutPanelPlaceholders_SizeChanged;
             // 
             // lblPlaceholders
             // 

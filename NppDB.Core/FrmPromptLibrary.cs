@@ -99,8 +99,8 @@ namespace NppDB.Core
             cmbPromptSource.SelectedIndex = (int)PromptSourceFilter.Library;
 
             panelSchemaBanner.Visible = false;
-            lblPromptType.Text = "Type: —";
-            lblPromptCapabilities.Text = "Capabilities: —";
+            lblPromptType.Text = "Type: -";
+            lblPromptCapabilities.Text = "Capabilities: -";
             _actionToolTip.SetToolTip(buttonDuplicate, "Select a prompt to duplicate.");
         }
 
@@ -603,6 +603,8 @@ namespace NppDB.Core
 
             flowLayoutPanelPlaceholders.ResumeLayout();
             
+            ResizePlaceholderControlWidths();
+
             ValidateInputs();
         }
         
@@ -944,6 +946,31 @@ namespace NppDB.Core
             PromptStringBuilder.Append(promptBase);
             PromptStringBuilder.Append(LoadUserPromptPreferences());
             return PromptStringBuilder.ToString();
+        }
+        
+        private void flowLayoutPanelPlaceholders_SizeChanged(object sender, EventArgs e)
+        {
+            ResizePlaceholderControlWidths();
+        }
+
+        private void ResizePlaceholderControlWidths()
+        {
+            var targetWidth = flowLayoutPanelPlaceholders.ClientSize.Width - 10 - SystemInformation.VerticalScrollBarWidth;
+            if (targetWidth < 200) targetWidth = 200;
+
+            foreach (Control c in flowLayoutPanelPlaceholders.Controls)
+            {
+                if (!(c is FlowLayoutPanel container))
+                    continue;
+
+                container.Width = targetWidth;
+
+                foreach (Control inner in container.Controls)
+                {
+                    if (inner is TextBox || inner is RichTextBox || inner is Panel)
+                        inner.Width = targetWidth;
+                }
+            }
         }
 
         private string LoadUserPromptPreferences()
