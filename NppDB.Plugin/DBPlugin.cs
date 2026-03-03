@@ -1684,8 +1684,16 @@ namespace NppDB
                     _frmDbExplorer.AddNotifyHandler((ref Message msg) =>
                     {
                         var nc = (ScNotification)Marshal.PtrToStructure(msg.LParam, typeof(ScNotification));
-                        if (nc.Header.Code != (uint)DockMgrMsg.DMN_CLOSE) return;
-                        Win32.SendMessage(nppData._nppHandle, (uint)NppMsg.NPPM_SETMENUITEMCHECK, _funcItems.Items[_cmdFrmDbExplorerIdx]._cmdID, 0);
+                        if (nc.Header.Code != (uint)DockMgrMsg.DMN_CLOSE &&
+                            nc.Header.Code != (uint)DockMgrMsg.DMN_DOCK &&
+                            nc.Header.Code != (uint)DockMgrMsg.DMN_FLOAT) return;
+
+                        if (nc.Header.Code == (uint)DockMgrMsg.DMN_CLOSE)
+                        {
+                            Win32.SendMessage(nppData._nppHandle, (uint)NppMsg.NPPM_SETMENUITEMCHECK, _funcItems.Items[_cmdFrmDbExplorerIdx]._cmdID, 0);
+                        }
+
+                        ScheduleSqlResultRefresh();
                     });
 
                     _frmDbExplorer.DisconnectHandler = Disconnect;
@@ -1731,6 +1739,8 @@ namespace NppDB
                     }
                     Win32.SendMessage(nppData._nppHandle, (uint)nppMsg, 0, _frmDbExplorer.Handle);
                     Win32.SendMessage(nppData._nppHandle, (uint)NppMsg.NPPM_SETMENUITEMCHECK, _funcItems.Items[_cmdFrmDbExplorerIdx]._cmdID, toggleStatus);
+                    
+                    ScheduleSqlResultRefresh();
                 }
             }
             catch (Exception ex)
@@ -1740,6 +1750,41 @@ namespace NppDB
                 _frmDbExplorer = null;
             }
         }
+         
+        private void ScheduleSqlResultRefresh()
+        {
+            try
+            {
+                var invoker = _currentCtr;
+                if (invoker == null || invoker.IsDisposed || !invoker.IsHandleCreated)
+                {
+                    invoker = _frmDbExplorer;
+                }
+
+                if (invoker != null && !invoker.IsDisposed && invoker.IsHandleCreated)
+                {
+                    invoker.BeginInvoke(new Action(() =>
+                    {
+                        try
+                        {
+                            UpdateCurrentSqlResult();
+                            if (_currentCtr != null && _currentCtr.IsHandleCreated && !_currentCtr.IsDisposed && _currentCtr.Visible)
+                            {
+                                _currentCtr.Invalidate(true);
+                                _currentCtr.Update();
+                            }
+                        }
+                        catch {}
+                    }));
+                }
+                else
+                {
+                    UpdateCurrentSqlResult();
+                }
+            }
+            catch {}
+        }
+         
         private static void ShowAbout() { var dlg = new frmAbout(); dlg.ShowDialog(); }
 
         private static void ShowPromptLibrary()
