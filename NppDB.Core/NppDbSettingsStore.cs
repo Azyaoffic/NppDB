@@ -62,7 +62,8 @@ For each issue (in the same order as provided), output:
                 {
                     EnableDestructiveSelectInto = false,
                     EnableNewTabCreation = false,
-                    DbManagerFontScale = 1.0f
+                    DbManagerFontScale = 1.0f,
+                    ThemeMode = "FollowNotepadPlusPlus"
                 },
                 Prompt = new PromptPreferences
                 {
@@ -91,6 +92,12 @@ For each issue (in the same order as provided), output:
 
             if (string.IsNullOrWhiteSpace(AiPromptTemplate))
                 AiPromptTemplate = DefaultAiPromptTemplate;
+            
+            var theme = (Behavior.ThemeMode ?? "").Trim();
+            if (string.IsNullOrWhiteSpace(theme)) theme = "FollowNotepadPlusPlus";
+            if (theme != "FollowNotepadPlusPlus" && theme != "ForceDark" && theme != "ForceLight")
+                theme = "FollowNotepadPlusPlus";
+            Behavior.ThemeMode = theme;
         }
     }
 

@@ -133,6 +133,9 @@
     <Compile Include="frmAbout.Designer.cs">
       <DependentUpon>frmAbout.cs</DependentUpon>
     </Compile>
+    <Compile Include="UiThemeColorTable.cs" />
+    <Compile Include="UiThemeManager.cs" />
+    <Compile Include="UiThemePalette.cs" />
     <EmbeddedResource Include="FrmDatabaseExplore.resx">
       <DependentUpon>FrmDatabaseExplore.cs</DependentUpon>
     </EmbeddedResource>

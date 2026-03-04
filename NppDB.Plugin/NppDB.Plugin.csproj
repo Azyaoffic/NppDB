@@ -129,6 +129,7 @@
         <Compile Include="resource_h.cs" />
         <Compile Include="ScintillaGateway.cs" />
         <Compile Include="Scintilla_iface.cs" />
+        <Compile Include="UiThemeSync.cs" />
         <Compile Include="UnmanagedExports.cs" />
         <Compile Include="Win32.cs" />
     </ItemGroup>
