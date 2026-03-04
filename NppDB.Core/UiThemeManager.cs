@@ -146,7 +146,6 @@ namespace NppDB.Core
 
             if (c is Button btn)
             {
-                // Note: WinForms visual styles may ignore BackColor for default buttons.
                 btn.BackColor = p.SofterBackground;
                 btn.ForeColor = p.Text;
                 return;
@@ -156,6 +155,13 @@ namespace NppDB.Core
             {
                 c.BackColor = p.Background;
                 c.ForeColor = p.Text;
+                return;
+            }
+            
+            if (c is TabControl tc)
+            {
+                tc.BackColor = p.Background;
+                tc.ForeColor = p.Text;
                 return;
             }
 

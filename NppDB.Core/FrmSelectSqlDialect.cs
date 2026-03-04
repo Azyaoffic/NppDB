@@ -11,6 +11,7 @@ namespace NppDB.Core
         public FrmSelectSqlDialect()
         {
             InitializeComponent();
+            UiThemeManager.Register(this);
             PopulateDialectDropdown();
         }
 

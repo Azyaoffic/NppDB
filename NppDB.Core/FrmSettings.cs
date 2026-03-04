@@ -39,6 +39,7 @@ namespace NppDB.Core
             NppDbSettingsStore.Initialize(settingsFilePath, null);
 
             InitializeComponent();
+            UiThemeManager.Register(this);
 
             LoadLanguages();
             LoadSettingsToUi();

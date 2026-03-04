@@ -124,8 +124,19 @@ namespace NppDB.Core
                 }
             };
 
-            tclSqlResult.SizeMode = TabSizeMode.Fixed;
-            tclSqlResult.DrawMode = TabDrawMode.OwnerDrawFixed;
+            tclSqlResult.BackColor = UiThemeManager.Current.Background;
+
+            tclSqlResult.Paint += (s, e) => // tab strip area
+            {
+                var pal = UiThemeManager.Current;
+                var stripHeight = tclSqlResult.DisplayRectangle.Y;
+                if (stripHeight <= 0) return;
+
+                using (var b = new SolidBrush(pal.Background))
+                {
+                    e.Graphics.FillRectangle(b, new Rectangle(0, 0, tclSqlResult.Width, stripHeight));
+                }
+            };
 
             int initialWidth;
             int initialHeight;

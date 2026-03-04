@@ -26,6 +26,7 @@ namespace NppDB.Core
         public FrmDatabaseExplore(INppDbCommandHost commandHost)
         {
             InitializeComponent();
+            UiThemeManager.Register(this);
             _commandHostInstance = commandHost;
             Init();
         }
