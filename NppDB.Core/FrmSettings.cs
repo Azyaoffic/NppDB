@@ -22,6 +22,7 @@ namespace NppDB.Core
             public bool EnableDestructiveSelectInto { get; set; }
             public bool EnableNewTabCreation { get; set; }
             public float DbManagerFontScale { get; set; } = 1.0f;
+            public string ThemeMode { get; set; } = "FollowNotepadPlusPlus";
         }
         
         public class PromptPreferences // also in PostgreSQLPromptReading.cs
@@ -38,6 +39,7 @@ namespace NppDB.Core
             NppDbSettingsStore.Initialize(settingsFilePath, null);
 
             InitializeComponent();
+            UiThemeManager.Register(this);
 
             LoadLanguages();
             LoadSettingsToUi();
@@ -71,6 +73,15 @@ namespace NppDB.Core
             var scale = (_settings.Behavior != null) ? _settings.Behavior.DbManagerFontScale : 1.0f;
             if (scale < 0.75f || scale > 2.5f) scale = 1.0f;
             numDbManagerFontScale.Value = (decimal)scale;
+            
+            var themeMode = (_settings.Behavior != null && !string.IsNullOrWhiteSpace(_settings.Behavior.ThemeMode))
+                ? _settings.Behavior.ThemeMode
+                : "FollowNotepadPlusPlus";
+
+            if (comboThemeMode.Items.Contains(themeMode))
+                comboThemeMode.SelectedItem = themeMode;
+            else
+                comboThemeMode.SelectedIndex = comboThemeMode.Items.Count > 0 ? 0 : -1;
 
             // llm preferences
             var lang = (_settings.Prompt != null && !string.IsNullOrWhiteSpace(_settings.Prompt.ResponseLanguage))
@@ -163,6 +174,11 @@ namespace NppDB.Core
             _settings.Behavior.EnableDestructiveSelectInto = chkEnableDestructiveSelectInto.Checked;
             _settings.Behavior.EnableNewTabCreation = chkEnableNewTabCreation.Checked;
             _settings.Behavior.DbManagerFontScale = (float)numDbManagerFontScale.Value;
+            
+            var selectedTheme = comboThemeMode.SelectedItem as string;
+            if (string.IsNullOrWhiteSpace(selectedTheme))
+                selectedTheme = "FollowNotepadPlusPlus";
+            _settings.Behavior.ThemeMode = selectedTheme;
 
             _settings.Prompt.ResponseLanguage = selectedLang;
             _settings.Prompt.CustomInstructions = txtCustomInstructions.Text ?? string.Empty;

@@ -18,6 +18,7 @@ namespace NppDB.Core
         public FrmPromptEditor()
         {
             InitializeComponent();
+            UiThemeManager.Register(this);
             LoadPromptTypes();
         }
 

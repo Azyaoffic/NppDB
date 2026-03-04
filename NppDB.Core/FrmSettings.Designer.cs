@@ -31,6 +31,9 @@ namespace NppDB.Core
             this.pnlDbManagerFont = new System.Windows.Forms.FlowLayoutPanel();
             this.lblDbManagerFontScale = new System.Windows.Forms.Label();
             this.numDbManagerFontScale = new System.Windows.Forms.NumericUpDown();
+            this.pnlThemeMode = new System.Windows.Forms.FlowLayoutPanel();
+            this.lblThemeMode = new System.Windows.Forms.Label();
+            this.comboThemeMode = new System.Windows.Forms.ComboBox();
             this.tabLlm = new System.Windows.Forms.TabPage();
             this.grpLlm = new System.Windows.Forms.GroupBox();
             this.tableLlm = new System.Windows.Forms.TableLayoutPanel();
@@ -58,6 +61,7 @@ namespace NppDB.Core
             this.grpBehavior.SuspendLayout();
             this.layoutBehaviorOptions.SuspendLayout();
             this.pnlDbManagerFont.SuspendLayout();
+            this.pnlThemeMode.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numDbManagerFontScale)).BeginInit();
             this.tabLlm.SuspendLayout();
             this.grpLlm.SuspendLayout();
@@ -126,10 +130,12 @@ namespace NppDB.Core
             this.layoutBehaviorOptions.Controls.Add(this.chkEnableDestructiveSelectInto, 0, 0);
             this.layoutBehaviorOptions.Controls.Add(this.chkEnableNewTabCreation, 0, 1);
             this.layoutBehaviorOptions.Controls.Add(this.pnlDbManagerFont, 0, 2);
+            this.layoutBehaviorOptions.Controls.Add(this.pnlThemeMode, 0, 3);
             this.layoutBehaviorOptions.Dock = System.Windows.Forms.DockStyle.Top;
             this.layoutBehaviorOptions.Location = new System.Drawing.Point(10, 25);
             this.layoutBehaviorOptions.Name = "layoutBehaviorOptions";
-            this.layoutBehaviorOptions.RowCount = 4;
+            this.layoutBehaviorOptions.RowCount = 5;
+            this.layoutBehaviorOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.layoutBehaviorOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.layoutBehaviorOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.layoutBehaviorOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -195,6 +201,39 @@ namespace NppDB.Core
             this.numDbManagerFontScale.Size = new System.Drawing.Size(70, 22);
             this.numDbManagerFontScale.TabIndex = 1;
             this.numDbManagerFontScale.Value = new decimal(new int[] { 1, 0, 0, 0 });
+            // 
+            // pnlThemeMode
+            // 
+            this.pnlThemeMode.AutoSize = true;
+            this.pnlThemeMode.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.pnlThemeMode.Controls.Add(this.lblThemeMode);
+            this.pnlThemeMode.Controls.Add(this.comboThemeMode);
+            this.pnlThemeMode.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlThemeMode.Location = new System.Drawing.Point(3, 117);
+            this.pnlThemeMode.Name = "pnlThemeMode";
+            this.pnlThemeMode.Size = new System.Drawing.Size(720, 28);
+            this.pnlThemeMode.TabIndex = 3;
+            this.pnlThemeMode.WrapContents = false;
+            // 
+            // lblThemeMode
+            // 
+            this.lblThemeMode.AutoSize = true;
+            this.lblThemeMode.Location = new System.Drawing.Point(0, 6);
+            this.lblThemeMode.Margin = new System.Windows.Forms.Padding(0, 6, 8, 0);
+            this.lblThemeMode.Name = "lblThemeMode";
+            this.lblThemeMode.Size = new System.Drawing.Size(102, 13);
+            this.lblThemeMode.TabIndex = 0;
+            this.lblThemeMode.Text = "Theme (UI colors):";
+            // 
+            // comboThemeMode
+            // 
+            this.comboThemeMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboThemeMode.FormattingEnabled = true;
+            this.comboThemeMode.Items.AddRange(new object[] { "FollowNotepadPlusPlus", "ForceDark", "ForceLight" });
+            this.comboThemeMode.Location = new System.Drawing.Point(113, 3);
+            this.comboThemeMode.Name = "comboThemeMode";
+            this.comboThemeMode.Size = new System.Drawing.Size(200, 21);
+            this.comboThemeMode.TabIndex = 1;
             // 
             // tabLlm
             // 
@@ -469,6 +508,8 @@ namespace NppDB.Core
             this.layoutBehaviorOptions.PerformLayout();
             this.pnlDbManagerFont.ResumeLayout(false);
             this.pnlDbManagerFont.PerformLayout();
+            this.pnlThemeMode.ResumeLayout(false);
+            this.pnlThemeMode.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numDbManagerFontScale)).EndInit();
             this.tabLlm.ResumeLayout(false);
             this.grpLlm.ResumeLayout(false);
@@ -496,6 +537,10 @@ namespace NppDB.Core
         private System.Windows.Forms.FlowLayoutPanel pnlDbManagerFont;
         private System.Windows.Forms.Label lblDbManagerFontScale;
         private System.Windows.Forms.NumericUpDown numDbManagerFontScale;
+
+        private System.Windows.Forms.FlowLayoutPanel pnlThemeMode;
+        private System.Windows.Forms.Label lblThemeMode;
+        private System.Windows.Forms.ComboBox comboThemeMode;
 
         private System.Windows.Forms.TabPage tabLlm;
         private System.Windows.Forms.GroupBox grpLlm;

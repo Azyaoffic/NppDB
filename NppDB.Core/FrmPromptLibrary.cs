@@ -77,6 +77,7 @@ namespace NppDB.Core
             Placeholders = new Dictionary<string, string>(placeholders);
 
             InitializeComponent();
+            UiThemeManager.Register(this);
             
             promptsGridView.CellDoubleClick += promptsGridView_CellDoubleClick; 
             promptsGridView.RowPostPaint += promptsGridView_RowPostPaint;
@@ -282,7 +283,18 @@ namespace NppDB.Core
         private void ApplyRowStyling(DataGridViewRow row, PromptItem prompt)
         {
             var isSchemaAware = IsSchemaAwarePrompt(prompt);
+            var pal = UiThemeManager.Current;
 
+            if (pal.IsDark)
+            {
+                row.DefaultCellStyle.BackColor = isSchemaAware ? pal.SofterBackground : pal.PureBackground;
+                row.DefaultCellStyle.SelectionBackColor = pal.HotBackground;
+                row.DefaultCellStyle.SelectionForeColor = pal.Text;
+                row.Cells[colPromptType.Index].Style.ForeColor = isSchemaAware ? pal.LinkText : pal.Text;
+                return;
+            }
+
+            // old light behavior
             if (isSchemaAware)
             {
                 row.DefaultCellStyle.BackColor = Color.FromArgb(246, 241, 255);
@@ -356,8 +368,12 @@ namespace NppDB.Core
                     var rect = new Rectangle(startX, e.RowBounds.Bottom - row.DividerHeight, e.RowBounds.Width - (startX - e.RowBounds.Left), row.DividerHeight);
 
                     var isSelected = row.Selected;
+                    var pal = UiThemeManager.Current;
+
                     var bgColor = isSelected ? row.DefaultCellStyle.SelectionBackColor : row.DefaultCellStyle.BackColor;
-                    var textColor = isSelected ? row.DefaultCellStyle.SelectionForeColor : Color.DimGray;
+                    var textColor = isSelected
+                        ? row.DefaultCellStyle.SelectionForeColor
+                        : pal.IsDark ? pal.DarkerText : Color.DimGray;
 
                     using (var bgBrush = new SolidBrush(bgColor))
                     {
@@ -410,10 +426,12 @@ namespace NppDB.Core
 
         private void UpdatePromptMeta(PromptItem? prompt)
         {
+            var pal = UiThemeManager.Current;
+
             if (!prompt.HasValue)
             {
                 lblPromptType.Text = "Type: —";
-                lblPromptType.ForeColor = SystemColors.GrayText;
+                lblPromptType.ForeColor = pal.IsDark ? pal.DarkerText : SystemColors.GrayText;
                 lblPromptCapabilities.Text = "Capabilities: —";
                 panelSchemaBanner.Visible = false;
                 _actionToolTip.SetToolTip(buttonDuplicate, "Select a prompt to duplicate.");
@@ -424,9 +442,9 @@ namespace NppDB.Core
             var isSchemaAware = IsSchemaAwarePrompt(selectedPrompt);
 
             lblPromptType.Text = isSchemaAware ? "Type: SCHEMA-AWARE" : "Type: LIBRARY";
-            lblPromptType.ForeColor = isSchemaAware
-                ? Color.FromArgb(86, 55, 141)
-                : Color.FromArgb(18, 111, 49);
+            lblPromptType.ForeColor = pal.IsDark
+                ? isSchemaAware ? pal.LinkText : pal.Text
+                : isSchemaAware ? Color.FromArgb(86, 55, 141) : Color.FromArgb(18, 111, 49);
             lblPromptCapabilities.Text = isSchemaAware
                 ? "Cannot be used outside of Database Manager context. Can contain DB Schema placeholders."
                 : "Cannot contain DB Schema placeholders. Can contain general placeholders.";
@@ -484,6 +502,8 @@ namespace NppDB.Core
 
         private void GeneratePlaceholderControls(PromptItem prompt)
         {
+            var pal = UiThemeManager.Current;
+
             flowLayoutPanelPlaceholders.Controls.Clear();
             flowLayoutPanelPlaceholders.SuspendLayout();
             
@@ -516,7 +536,7 @@ namespace NppDB.Core
                     {
                         label.Text = $"{placeholder.Name} *";
                         label.Font = new Font(label.Font, FontStyle.Bold);
-                        label.ForeColor = Color.Black; 
+                        label.ForeColor = pal.IsDark ? pal.Text : Color.Black;
                         
                         var tip = new ToolTip();
                         tip.SetToolTip(label, "This field is required.");
@@ -524,7 +544,7 @@ namespace NppDB.Core
                     else
                     {
                         label.Text = $"{placeholder.Name} (Auto-filled)";
-                        label.ForeColor = Color.DimGray;
+                        label.ForeColor = pal.IsDark ? pal.DarkerText : Color.DimGray;
                     }
 
                     container.Controls.Add(label);
@@ -575,7 +595,7 @@ namespace NppDB.Core
                             Height = 5,
                             Dock = DockStyle.Bottom,
                             Cursor = Cursors.SizeNS,
-                            BackColor = SystemColors.ControlDark
+                            BackColor = pal.IsDark ? pal.Edge : SystemColors.ControlDark
                         };
                         grip.MouseDown += Grip_MouseDown;
                         grip.MouseMove += Grip_MouseMove;
@@ -591,8 +611,8 @@ namespace NppDB.Core
                             Width = container.Width,
                             Text = string.IsNullOrEmpty(initialValue) ? "<No context available>" : initialValue,
                             ReadOnly = true,
-                            BackColor = SystemColors.Control,
-                            ForeColor = SystemColors.WindowText
+                            BackColor = pal.IsDark ? pal.Background : SystemColors.Control,
+                            ForeColor = pal.IsDark ? pal.Text : SystemColors.WindowText
                         };
                         container.Controls.Add(lblValue);
                     }
@@ -600,6 +620,7 @@ namespace NppDB.Core
                     flowLayoutPanelPlaceholders.Controls.Add(container);
                 }
             }
+            UiThemeManager.Apply(flowLayoutPanelPlaceholders);
 
             flowLayoutPanelPlaceholders.ResumeLayout();
             
@@ -904,18 +925,20 @@ namespace NppDB.Core
 
         private void UpdateCopyButtonState(bool enabled, string reason)
         {
+            var pal = UiThemeManager.Current;
+
             buttonCopy.Enabled = enabled;
             if (enabled)
             {
                 buttonCopy.Text = "Copy Prompt";
-                buttonCopy.BackColor = SystemColors.Highlight;
-                buttonCopy.ForeColor = SystemColors.HighlightText;
+                buttonCopy.BackColor = pal.IsDark ? pal.HotBackground : SystemColors.Highlight;
+                buttonCopy.ForeColor = pal.IsDark ? pal.Text : SystemColors.HighlightText;
             }
             else
             {
                 buttonCopy.Text = reason;
-                buttonCopy.BackColor = Color.LightGray;
-                buttonCopy.ForeColor = Color.DimGray;
+                buttonCopy.BackColor = pal.IsDark ? pal.SofterBackground : Color.LightGray;
+                buttonCopy.ForeColor = pal.IsDark ? pal.DarkerText : Color.DimGray;
             }
         }
 
@@ -1058,6 +1081,8 @@ namespace NppDB.Core
         private void buttonCopy_Click(object sender, EventArgs e)
         {
             if (!buttonCopy.Enabled) return;
+            
+            var pal = UiThemeManager.Current;
 
             var textToCopy = promptTextBox.Text;
 
@@ -1070,7 +1095,8 @@ namespace NppDB.Core
             if (!string.IsNullOrEmpty(textToCopy))
             {
                 Clipboard.SetText(textToCopy);
-                buttonCopy.BackColor = Color.LightGreen;
+                buttonCopy.BackColor = pal.IsDark ? pal.SofterBackground : Color.LightGreen;
+                buttonCopy.ForeColor = pal.IsDark ? pal.Text : buttonCopy.ForeColor;
                 buttonCopy.Text = "Copied!";
                 var timer = new Timer { Interval = 1000 };
                 timer.Tick += (s, args) =>

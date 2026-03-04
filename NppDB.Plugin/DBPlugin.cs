@@ -183,6 +183,8 @@ namespace NppDB
                 case (uint)SciMsg.SCN_DWELLSTART: ShowTip(nc.Position); break;
                 case (uint)SciMsg.SCN_DWELLEND: CloseTip(); break;
                 case (uint)NppMsg.NPPN_READY: _menuBuilder.TryRebuildOnce(nppData._nppHandle, _funcItems); break;
+                case (uint)NppMsg.NPPN_DARKMODECHANGED: UiThemeSync.RefreshAndApply(); break;
+                case (uint)NppMsg.NPPN_WORDSTYLESUPDATED: UiThemeSync.RefreshAndApply(); break;
             }
         }
         #endregion
@@ -252,6 +254,7 @@ namespace NppDB
              
              _staticSettingsPath = Path.Combine(_nppDbConfigDir, "settings.json");
              NppDbSettingsStore.Initialize(_staticSettingsPath, _nppDbConfigDir);
+             UiThemeSync.Initialize(nppData._nppHandle);
              
              _promptLibraryPath = Path.Combine(_nppDbConfigDir, "promptLibrary.xml");
              _tutorialPath = Path.Combine(_nppDbConfigDir, "tutorial.md");
@@ -1806,7 +1809,10 @@ namespace NppDB
         {
             LoadLanguageDoc();
             var dlg = new FrmSettings(_staticSettingsPath, tab);
-            dlg.ShowDialog();
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                UiThemeSync.RefreshAndApply();
+            }
         }
 
         private static void SetPlaceholders(Dictionary<string, string> placeholders)

@@ -24,6 +24,7 @@ namespace NppDB.Core
         public SqlResult(IDbConnect connect, ISqlExecutor sqlExecutor)
         {
             InitializeComponent();
+            UiThemeManager.Register(this);
             Init();
             SetConnect(connect, sqlExecutor);
 
@@ -123,8 +124,19 @@ namespace NppDB.Core
                 }
             };
 
-            tclSqlResult.SizeMode = TabSizeMode.Fixed;
-            tclSqlResult.DrawMode = TabDrawMode.OwnerDrawFixed;
+            tclSqlResult.BackColor = UiThemeManager.Current.Background;
+
+            tclSqlResult.Paint += (s, e) => // tab strip area
+            {
+                var pal = UiThemeManager.Current;
+                var stripHeight = tclSqlResult.DisplayRectangle.Y;
+                if (stripHeight <= 0) return;
+
+                using (var b = new SolidBrush(pal.Background))
+                {
+                    e.Graphics.FillRectangle(b, new Rectangle(0, 0, tclSqlResult.Width, stripHeight));
+                }
+            };
 
             int initialWidth;
             int initialHeight;
@@ -154,14 +166,20 @@ namespace NppDB.Core
 
                 using (new Font(e.Font, FontStyle.Bold))
                 {
+                    var pal = UiThemeManager.Current;
+
                     Color backColor;
                     Color textColor;
-                    if (isSelected) {
-                        backColor = SystemColors.Highlight;
-                        textColor = SystemColors.HighlightText;
-                    } else {
-                        backColor = SystemColors.Control;
-                        textColor = SystemColors.ControlText;
+
+                    if (pal.IsDark)
+                    {
+                        backColor = isSelected ? pal.HotBackground : pal.Background;
+                        textColor = pal.Text;
+                    }
+                    else
+                    {
+                        backColor = isSelected ? SystemColors.Highlight : SystemColors.Control;
+                        textColor = isSelected ? SystemColors.HighlightText : SystemColors.ControlText;
                     }
 
                     using (var backBrush = new SolidBrush(backColor)) {
@@ -442,7 +460,7 @@ namespace NppDB.Core
             else
             {
                 lblError.Text = message;
-                lblError.ForeColor = Color.Brown;
+                lblError.ForeColor = UiThemeManager.IsDark ? Color.IndianRed : Color.Brown;
                 lblError.Visible = true;
                 tspMain.Visible = false;
                 tclSqlResult.Visible = false;
@@ -475,6 +493,8 @@ namespace NppDB.Core
 
             var tp = new TabPage();
             var dgv = new DataGridView();
+            
+            var pal = UiThemeManager.Current;
 
             tp.SuspendLayout();
             ((ISupportInitialize)dgv).BeginInit();
@@ -494,7 +514,7 @@ namespace NppDB.Core
             dgv.AllowUserToDeleteRows = false;
             dgv.AllowUserToResizeRows = false;
             dgv.AutoSize = false;
-            dgv.BackgroundColor = Color.White;
+            dgv.BackgroundColor = pal.PureBackground;
             dgv.BorderStyle = BorderStyle.None;
             dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgv.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
@@ -511,7 +531,7 @@ namespace NppDB.Core
             dgv.DefaultCellStyle = dataGridViewCellStyle2;
             dgv.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dgv.Dock = DockStyle.Fill;
-            dgv.GridColor = SystemColors.Control;
+            dgv.GridColor = pal.Edge;
             dgv.Location = new Point(0, 0);
             dgv.Margin = new Padding(0, 3, 0, 0);
             dgv.Name = $"grdResult{index}";
@@ -530,6 +550,7 @@ namespace NppDB.Core
 
             ((ISupportInitialize)dgv).EndInit();
             tp.ResumeLayout(true);
+            UiThemeManager.Apply(tp);
 
             tclSqlResult.PerformLayout();
             tclSqlResult.Invalidate(true);
