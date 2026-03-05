@@ -486,7 +486,7 @@ namespace NppDB.Core
             this.Padding = new System.Windows.Forms.Padding(10);
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Prompt Manager";
+            this.Text = "Prompt Library";
             this.splitContainerMain.Panel1.ResumeLayout(false);
             this.splitContainerMain.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).EndInit();
