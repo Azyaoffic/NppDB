@@ -69,7 +69,7 @@ namespace NppDB.Core
                 case "Prompt Library Prompt":
                     type = "LlmPrompt";
                     break;
-                case "Table Prompt":
+                case "Schema-Aware Prompt":
                     type = "TablePrompt";
                     break;
                 default:
@@ -126,7 +126,7 @@ namespace NppDB.Core
         {
             comboBoxType.Items.Clear();
             comboBoxType.Items.Add("Prompt Library Prompt");
-            comboBoxType.Items.Add("Table Prompt");
+            comboBoxType.Items.Add("Schema-Aware Prompt");
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
