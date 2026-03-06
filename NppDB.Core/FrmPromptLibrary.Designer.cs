@@ -53,9 +53,12 @@ namespace NppDB.Core
             this.txtTags = new System.Windows.Forms.TextBox();
             this.lblTags = new System.Windows.Forms.Label();
             this.panelPromptMeta = new System.Windows.Forms.Panel();
-            this.lblEditingBadge = new System.Windows.Forms.Label();
+            this.panelMetaRight = new System.Windows.Forms.Panel();
+            this.buttonAiStudio = new System.Windows.Forms.Button();
+            this.editingModeCheckbox = new System.Windows.Forms.CheckBox();
             this.lblPromptCapabilities = new System.Windows.Forms.Label();
             this.lblPromptType = new System.Windows.Forms.Label();
+            this.lblEditingBadge = new System.Windows.Forms.Label();
             this.panelSchemaBanner = new System.Windows.Forms.Panel();
             this.lblSchemaBannerText = new System.Windows.Forms.Label();
             this.lblSchemaBannerTitle = new System.Windows.Forms.Label();
@@ -65,9 +68,6 @@ namespace NppDB.Core
             this.lblPlaceholders = new System.Windows.Forms.Label();
             this.panelRightActions = new System.Windows.Forms.Panel();
             this.buttonCopy = new System.Windows.Forms.Button();
-            this.buttonAiStudio = new System.Windows.Forms.Button();
-            this.panelMetaRight = new System.Windows.Forms.Panel();
-            this.editingModeCheckbox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).BeginInit();
             this.splitContainerMain.Panel1.SuspendLayout();
             this.splitContainerMain.Panel2.SuspendLayout();
@@ -78,10 +78,10 @@ namespace NppDB.Core
             this.grpPreview.SuspendLayout();
             this.panelPromptTags.SuspendLayout();
             this.panelPromptMeta.SuspendLayout();
+            this.panelMetaRight.SuspendLayout();
             this.panelSchemaBanner.SuspendLayout();
             this.panelPreviewBottom.SuspendLayout();
             this.panelRightActions.SuspendLayout();
-            this.panelMetaRight.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainerMain
@@ -117,7 +117,10 @@ namespace NppDB.Core
             this.promptsGridView.BackgroundColor = System.Drawing.SystemColors.Window;
             this.promptsGridView.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
             this.promptsGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.promptsGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { this.colPromptName, this.colPromptDesc, this.colPromptType });
+            this.promptsGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colPromptName,
+            this.colPromptDesc,
+            this.colPromptType});
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -174,7 +177,8 @@ namespace NppDB.Core
             // 
             // cmbPromptSource
             // 
-            this.cmbPromptSource.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbPromptSource.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbPromptSource.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbPromptSource.FormattingEnabled = true;
             this.cmbPromptSource.Location = new System.Drawing.Point(55, 38);
@@ -194,7 +198,8 @@ namespace NppDB.Core
             // 
             // txtSearch
             // 
-            this.txtSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtSearch.Location = new System.Drawing.Point(55, 7);
             this.txtSearch.MinimumSize = new System.Drawing.Size(100, 22);
             this.txtSearch.Name = "txtSearch";
@@ -297,7 +302,8 @@ namespace NppDB.Core
             // 
             // txtTags
             // 
-            this.txtTags.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtTags.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtTags.BackColor = System.Drawing.SystemColors.ControlLight;
             this.txtTags.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtTags.Location = new System.Drawing.Point(47, 4);
@@ -317,50 +323,63 @@ namespace NppDB.Core
             // 
             // panelPromptMeta
             // 
-            this.panelPromptMeta.Controls.Add(this.buttonAiStudio);
+            this.panelPromptMeta.Controls.Add(this.panelMetaRight);
             this.panelPromptMeta.Controls.Add(this.lblPromptCapabilities);
             this.panelPromptMeta.Controls.Add(this.lblPromptType);
-            this.panelPromptMeta.Controls.Add(this.lblEditingBadge);
-            this.panelPromptMeta.Controls.SetChildIndex(this.lblEditingBadge, 0);
             this.panelPromptMeta.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelPromptMeta.Location = new System.Drawing.Point(3, 68);
             this.panelPromptMeta.Name = "panelPromptMeta";
             this.panelPromptMeta.Size = new System.Drawing.Size(626, 24);
             this.panelPromptMeta.TabIndex = 5;
             // 
+            // panelMetaRight
+            // 
+            this.panelMetaRight.Controls.Add(this.buttonAiStudio);
+            this.panelMetaRight.Controls.Add(this.lblEditingBadge);
+            this.panelMetaRight.Controls.Add(this.editingModeCheckbox);
+            this.panelMetaRight.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panelMetaRight.Location = new System.Drawing.Point(326, 0);
+            this.panelMetaRight.Name = "panelMetaRight";
+            this.panelMetaRight.Size = new System.Drawing.Size(300, 24);
+            this.panelMetaRight.TabIndex = 10;
+            this.panelMetaRight.Controls.SetChildIndex(this.editingModeCheckbox, 0);
+            this.panelMetaRight.Controls.SetChildIndex(this.lblEditingBadge, 1);
+            this.panelMetaRight.Controls.SetChildIndex(this.buttonAiStudio, 2);
+            // 
             // buttonAiStudio
             // 
             this.buttonAiStudio.Dock = System.Windows.Forms.DockStyle.Right;
-            this.buttonAiStudio.Location = new System.Drawing.Point(506, 0);
+            this.buttonAiStudio.Location = new System.Drawing.Point(100, 0);
             this.buttonAiStudio.Name = "buttonAiStudio";
             this.buttonAiStudio.Size = new System.Drawing.Size(120, 24);
             this.buttonAiStudio.TabIndex = 2;
-            this.buttonAiStudio.Text = "Open LLM\r\n";
+            this.buttonAiStudio.Text = "Open LLM";
             this.buttonAiStudio.UseVisualStyleBackColor = true;
             this.buttonAiStudio.Click += new System.EventHandler(this.buttonAiStudio_Click);
             // 
-            // lblEditingBadge
+            // editingModeCheckbox
             // 
-            this.lblEditingBadge.Dock = System.Windows.Forms.DockStyle.Left;
-            this.lblEditingBadge.AutoSize = false;
-            this.lblEditingBadge.Name = "lblEditingBadge";
-            this.lblEditingBadge.Size = new System.Drawing.Size(78, 24);
-            this.lblEditingBadge.Margin = new System.Windows.Forms.Padding(0);
-            this.lblEditingBadge.Padding = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.lblEditingBadge.Text = "EDITING";
-            this.lblEditingBadge.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblEditingBadge.BackColor = System.Drawing.SystemColors.Highlight;
-            this.lblEditingBadge.ForeColor = System.Drawing.SystemColors.HighlightText;
-            this.lblEditingBadge.Visible = false;
+            this.editingModeCheckbox.Appearance = System.Windows.Forms.Appearance.Button;
+            this.editingModeCheckbox.AutoEllipsis = true;
+            this.editingModeCheckbox.Dock = System.Windows.Forms.DockStyle.Left;
+            this.editingModeCheckbox.Location = new System.Drawing.Point(0, 0);
+            this.editingModeCheckbox.Margin = new System.Windows.Forms.Padding(0);
+            this.editingModeCheckbox.Name = "editingModeCheckbox";
+            this.editingModeCheckbox.Size = new System.Drawing.Size(90, 24);
+            this.editingModeCheckbox.TabIndex = 3;
+            this.editingModeCheckbox.Text = "Edit";
+            this.editingModeCheckbox.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.editingModeCheckbox.UseVisualStyleBackColor = true;
+            this.editingModeCheckbox.CheckedChanged += new System.EventHandler(this.editingModeCheckbox_CheckedChanged);
             // 
             // lblPromptCapabilities
             // 
             this.lblPromptCapabilities.AutoEllipsis = true;
             this.lblPromptCapabilities.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblPromptCapabilities.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.lblPromptCapabilities.Location = new System.Drawing.Point(138, 0);
+            this.lblPromptCapabilities.Location = new System.Drawing.Point(216, 0);
             this.lblPromptCapabilities.Name = "lblPromptCapabilities";
-            this.lblPromptCapabilities.Size = new System.Drawing.Size(488, 24);
+            this.lblPromptCapabilities.Size = new System.Drawing.Size(190, 24);
             this.lblPromptCapabilities.TabIndex = 1;
             this.lblPromptCapabilities.Text = "Capabilities: —";
             this.lblPromptCapabilities.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -369,13 +388,29 @@ namespace NppDB.Core
             // 
             this.lblPromptType.Dock = System.Windows.Forms.DockStyle.Left;
             this.lblPromptType.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblPromptType.Location = new System.Drawing.Point(0, 0);
+            this.lblPromptType.Location = new System.Drawing.Point(78, 0);
             this.lblPromptType.Name = "lblPromptType";
             this.lblPromptType.Padding = new System.Windows.Forms.Padding(0, 0, 6, 0);
             this.lblPromptType.Size = new System.Drawing.Size(138, 24);
             this.lblPromptType.TabIndex = 0;
             this.lblPromptType.Text = "Type: —";
             this.lblPromptType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lblEditingBadge
+            // 
+            this.lblEditingBadge.AutoSize = false;
+            this.lblEditingBadge.BackColor = System.Drawing.SystemColors.Highlight;
+            this.lblEditingBadge.Dock = System.Windows.Forms.DockStyle.Left;
+            this.lblEditingBadge.ForeColor = System.Drawing.SystemColors.HighlightText;
+            this.lblEditingBadge.Location = new System.Drawing.Point(90, 0);
+            this.lblEditingBadge.Margin = new System.Windows.Forms.Padding(0);
+            this.lblEditingBadge.Name = "lblEditingBadge";
+            this.lblEditingBadge.Padding = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.lblEditingBadge.Size = new System.Drawing.Size(78, 24);
+            this.lblEditingBadge.Visible = true;
+            this.lblEditingBadge.Text = "VIEW";
+            this.lblEditingBadge.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblEditingBadge.TabIndex = 999;
             // 
             // panelSchemaBanner
             // 
@@ -399,7 +434,7 @@ namespace NppDB.Core
             this.lblSchemaBannerText.Padding = new System.Windows.Forms.Padding(8, 0, 8, 0);
             this.lblSchemaBannerText.Size = new System.Drawing.Size(624, 26);
             this.lblSchemaBannerText.TabIndex = 1;
-            this.lblSchemaBannerText.Text = "This template is meant to be run from Database Manager by Right-Clicking onto a T" + "able.\r\n";
+            this.lblSchemaBannerText.Text = "This template is meant to be run from Database Manager by Right-Clicking onto a Table.";
             // 
             // lblSchemaBannerTitle
             // 
@@ -436,7 +471,9 @@ namespace NppDB.Core
             // 
             // flowLayoutPanelPlaceholders
             // 
-            this.flowLayoutPanelPlaceholders.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.flowLayoutPanelPlaceholders.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.flowLayoutPanelPlaceholders.AutoScroll = true;
             this.flowLayoutPanelPlaceholders.BackColor = System.Drawing.SystemColors.Window;
             this.flowLayoutPanelPlaceholders.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -457,9 +494,9 @@ namespace NppDB.Core
             this.lblPlaceholders.ForeColor = System.Drawing.SystemColors.ControlText;
             this.lblPlaceholders.Location = new System.Drawing.Point(3, 3);
             this.lblPlaceholders.Name = "lblPlaceholders";
-            this.lblPlaceholders.Size = new System.Drawing.Size(113, 17);
+            this.lblPlaceholders.Size = new System.Drawing.Size(270, 17);
             this.lblPlaceholders.TabIndex = 5;
-            this.lblPlaceholders.Text = "Fill Placeholders:";
+            this.lblPlaceholders.Text = "Fill placeholders (* required) — scroll";
             // 
             // panelRightActions
             // 
@@ -487,42 +524,6 @@ namespace NppDB.Core
             this.buttonCopy.UseVisualStyleBackColor = false;
             this.buttonCopy.Click += new System.EventHandler(this.buttonCopy_Click);
             // 
-            // buttonAiStudio
-            // 
-            this.buttonAiStudio.Dock = System.Windows.Forms.DockStyle.Right;
-            this.buttonAiStudio.Location = new System.Drawing.Point(118, 0);
-            this.buttonAiStudio.Name = "buttonAiStudio";
-            this.buttonAiStudio.Size = new System.Drawing.Size(120, 24);
-            this.buttonAiStudio.TabIndex = 2;
-            this.buttonAiStudio.Text = "Open LLM";
-            this.buttonAiStudio.UseVisualStyleBackColor = true;
-            this.buttonAiStudio.Click += new System.EventHandler(this.buttonAiStudio_Click);
-            // 
-            // panelMetaRight
-            // 
-            this.panelMetaRight.Controls.Add(this.buttonAiStudio);
-            this.panelMetaRight.Controls.Add(this.editingModeCheckbox);
-            this.panelMetaRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panelMetaRight.Location = new System.Drawing.Point(388, 0);
-            this.panelMetaRight.Name = "panelMetaRight";
-            this.panelMetaRight.Size = new System.Drawing.Size(238, 24);
-            this.panelMetaRight.TabIndex = 10;
-            // 
-            // editingModeCheckbox
-            // 
-            this.editingModeCheckbox.Appearance = System.Windows.Forms.Appearance.Button;
-            this.editingModeCheckbox.AutoEllipsis = true;
-            this.editingModeCheckbox.Dock = System.Windows.Forms.DockStyle.Left;
-            this.editingModeCheckbox.Location = new System.Drawing.Point(0, 0);
-            this.editingModeCheckbox.Margin = new System.Windows.Forms.Padding(0);
-            this.editingModeCheckbox.Name = "editingModeCheckbox";
-            this.editingModeCheckbox.Size = new System.Drawing.Size(90, 24);
-            this.editingModeCheckbox.TabIndex = 3;
-            this.editingModeCheckbox.Text = "Edit";
-            this.editingModeCheckbox.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.editingModeCheckbox.UseVisualStyleBackColor = true;
-            this.editingModeCheckbox.CheckedChanged += new System.EventHandler(this.editingModeCheckbox_CheckedChanged);
-            // 
             // FrmPromptLibrary
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -537,6 +538,7 @@ namespace NppDB.Core
             this.Padding = new System.Windows.Forms.Padding(10);
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "Prompt Library";
             this.splitContainerMain.Panel1.ResumeLayout(false);
             this.splitContainerMain.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMain)).EndInit();
@@ -549,16 +551,13 @@ namespace NppDB.Core
             this.panelPromptTags.ResumeLayout(false);
             this.panelPromptTags.PerformLayout();
             this.panelPromptMeta.ResumeLayout(false);
-            this.panelPromptMeta.PerformLayout();
+            this.panelMetaRight.ResumeLayout(false);
             this.panelSchemaBanner.ResumeLayout(false);
             this.panelPreviewBottom.ResumeLayout(false);
             this.panelPreviewBottom.PerformLayout();
             this.panelRightActions.ResumeLayout(false);
-            this.panelMetaRight.ResumeLayout(false);
             this.ResumeLayout(false);
         }
-
-        private System.Windows.Forms.Button buttonDuplicate;
 
         private System.Windows.Forms.Label lblSource;
         private System.Windows.Forms.ComboBox cmbPromptSource;
@@ -572,31 +571,36 @@ namespace NppDB.Core
         private System.Windows.Forms.DataGridViewTextBoxColumn colPromptType;
         private System.Windows.Forms.FlowLayoutPanel panelLeftActions;
         private System.Windows.Forms.Button buttonAdd;
+        private System.Windows.Forms.Button buttonDuplicate;
         private System.Windows.Forms.Button buttonDelete;
 
         private System.Windows.Forms.GroupBox grpPreview;
         private System.Windows.Forms.Panel panelSchemaBanner;
         private System.Windows.Forms.Label lblSchemaBannerText;
         private System.Windows.Forms.Label lblSchemaBannerTitle;
+
         private System.Windows.Forms.Panel panelPromptMeta;
+        private System.Windows.Forms.Panel panelMetaRight;
+        private System.Windows.Forms.Button buttonAiStudio;
+        private System.Windows.Forms.CheckBox editingModeCheckbox;
+
         private System.Windows.Forms.Label lblPromptCapabilities;
         private System.Windows.Forms.Label lblPromptType;
         private System.Windows.Forms.Label lblEditingBadge;
-        private System.Windows.Forms.RichTextBox promptTextBox;
-        private System.Windows.Forms.Splitter splitterPreview;
-        private System.Windows.Forms.Panel panelPreviewBottom;
-        private System.Windows.Forms.Label lblPlaceholders;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelPlaceholders;
-        private System.Windows.Forms.Panel panelMetaRight;
-
-        private System.Windows.Forms.Panel panelRightActions;
-        private System.Windows.Forms.CheckBox editingModeCheckbox;
-        private System.Windows.Forms.Button buttonCopy;
-        private System.Windows.Forms.Button buttonAiStudio;
 
         private System.Windows.Forms.Panel panelPromptTags;
         private System.Windows.Forms.TextBox txtTags;
         private System.Windows.Forms.Label lblTags;
+
+        private System.Windows.Forms.RichTextBox promptTextBox;
+
+        private System.Windows.Forms.Splitter splitterPreview;
+        private System.Windows.Forms.Panel panelPreviewBottom;
+        private System.Windows.Forms.Label lblPlaceholders;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelPlaceholders;
+
+        private System.Windows.Forms.Panel panelRightActions;
+        private System.Windows.Forms.Button buttonCopy;
 
         private System.Windows.Forms.Panel panelSearch;
         private System.Windows.Forms.TextBox txtSearch;

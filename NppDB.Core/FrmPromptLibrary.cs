@@ -91,6 +91,7 @@ namespace NppDB.Core
             _templateAutoSaveTimer = new Timer { Interval = TemplateAutoSaveDebounceMs };
             _templateAutoSaveTimer.Tick += TemplateAutoSaveTimer_Tick;
 
+            SetEditingMode(false);
             ConfigureSourceFilter();
             RefreshPromptList();
         }
@@ -726,8 +727,14 @@ namespace NppDB.Core
             promptTextBox.BorderStyle = BorderStyle.FixedSingle;
             txtTags.BorderStyle = BorderStyle.FixedSingle;
             
+            promptTextBox.ReadOnly = !isEditing;
+            txtTags.ReadOnly = !isEditing;
             promptsGridView.ReadOnly = !isEditing;
-            lblEditingBadge.Visible = isEditing;
+            
+            promptTextBox.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
+            txtTags.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
+
+            lblEditingBadge.Text = _isEditingTemplate ? "EDITING" : "VIEW";
 
             colPromptType.ReadOnly = true;
             colPromptName.ReadOnly = !isEditing;
