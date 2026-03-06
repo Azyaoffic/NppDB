@@ -56,6 +56,8 @@ namespace NppDB.Core
         private Timer _templateAutoSaveTimer;
         private PromptItem? _pendingAutoSavePrompt;
         private bool _autoSaveErrorShown;
+        private bool _canCopy;
+        private string _copyDisabledReason;
 
         private const int TemplateAutoSaveDebounceMs = 650;
 
@@ -83,6 +85,8 @@ namespace NppDB.Core
             promptsGridView.RowPostPaint += promptsGridView_RowPostPaint;
             promptTextBox.TextChanged += promptTextBox_TextChanged;
             txtTags.TextChanged += txtTags_TextChanged;
+            promptsGridView.CellEndEdit += promptsGridView_CellEndEdit;
+            promptsGridView.EditingControlShowing += promptsGridView_EditingControlShowing;
 
             _templateAutoSaveTimer = new Timer { Interval = TemplateAutoSaveDebounceMs };
             _templateAutoSaveTimer.Tick += TemplateAutoSaveTimer_Tick;
@@ -411,6 +415,7 @@ namespace NppDB.Core
         private void promptsGridView_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
+            if (_isEditingTemplate) return;
 
             promptsGridView.ClearSelection();
             var row = promptsGridView.Rows[e.RowIndex];
@@ -718,16 +723,90 @@ namespace NppDB.Core
             _isEditingTemplate = isEditing;
 
             grpPreview.Text = _isEditingTemplate ? "Edit Template (Auto-Save)" : "Prompt Preview";
-            promptTextBox.ReadOnly = !_isEditingTemplate;
-            promptTextBox.BorderStyle = _isEditingTemplate ? BorderStyle.FixedSingle : BorderStyle.None;
+            promptTextBox.BorderStyle = BorderStyle.FixedSingle;
+            txtTags.BorderStyle = BorderStyle.FixedSingle;
+            
+            promptsGridView.ReadOnly = !isEditing;
+            lblEditingBadge.Visible = isEditing;
 
-            txtTags.ReadOnly = !_isEditingTemplate;
-            txtTags.BorderStyle = _isEditingTemplate ? BorderStyle.FixedSingle : BorderStyle.None;
+            colPromptType.ReadOnly = true;
+            colPromptName.ReadOnly = !isEditing;
+            colPromptDesc.ReadOnly = !isEditing;
+
+            var pal = UiThemeManager.Current;
+
+            if (pal.IsDark)
+            {
+                promptTextBox.BackColor = isEditing ? pal.HotBackground : pal.SofterBackground;
+                txtTags.BackColor = isEditing ? pal.HotBackground : pal.SofterBackground;
+            }
+            else
+            {
+                promptTextBox.BackColor = isEditing ? Color.White : SystemColors.ControlLight;
+                txtTags.BackColor = isEditing ? Color.White : SystemColors.ControlLight;
+            }
 
             if (promptsGridView.SelectedRows.Count > 0)
             {
                 var prompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
                 UpdatePromptTextBoxForCurrentMode(prompt);
+            }
+        }
+        
+        private void promptsGridView_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            if (!_isEditingTemplate) return;
+            if (e.RowIndex < 0) return;
+
+            var row = promptsGridView.Rows[e.RowIndex];
+            if (!(row.Tag is PromptItem prompt)) return;
+
+            bool changed = false;
+
+            if (e.ColumnIndex == colPromptName.Index)
+            {
+                var v = Convert.ToString(row.Cells[colPromptName.Index].Value) ?? "";
+                v = v.Trim();
+                if (!string.IsNullOrWhiteSpace(v) && v != prompt.Title)
+                {
+                    prompt.Title = v;
+                    changed = true;
+                }
+                else
+                {
+                    row.Cells[colPromptName.Index].Value = prompt.Title;
+                }
+            }
+            else if (e.ColumnIndex == colPromptDesc.Index)
+            {
+                var v = Convert.ToString(row.Cells[colPromptDesc.Index].Value) ?? "";
+                v = v.Trim();
+                if (v != (prompt.Description ?? ""))
+                {
+                    prompt.Description = v;
+                    changed = true;
+                }
+            }
+
+            if (!changed) return;
+
+            row.Tag = prompt;
+            ReplacePromptInCollections(prompt);
+
+            _pendingAutoSavePrompt = prompt;
+            _templateAutoSaveTimer.Stop();
+            _templateAutoSaveTimer.Start();
+        }
+        
+        private void promptsGridView_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
+        {
+            if (e.Control is DataGridViewTextBoxEditingControl tb)
+            {
+                var pal = UiThemeManager.Current;
+
+                tb.BorderStyle = BorderStyle.FixedSingle;
+                tb.BackColor = pal.IsDark ? pal.HotBackground : Color.White;
+                tb.ForeColor = pal.IsDark ? pal.Text : SystemColors.ControlText;
             }
         }
 
@@ -927,18 +1006,23 @@ namespace NppDB.Core
         {
             var pal = UiThemeManager.Current;
 
-            buttonCopy.Enabled = enabled;
+            _canCopy = enabled;
+            _copyDisabledReason = reason ?? string.Empty;
+
+            buttonCopy.Enabled = true;
+            buttonCopy.Text = "Copy Prompt";
+
             if (enabled)
             {
-                buttonCopy.Text = "Copy Prompt";
                 buttonCopy.BackColor = pal.IsDark ? pal.HotBackground : SystemColors.Highlight;
                 buttonCopy.ForeColor = pal.IsDark ? pal.Text : SystemColors.HighlightText;
+                _actionToolTip.SetToolTip(buttonCopy, "Copy prompt to clipboard");
             }
             else
             {
-                buttonCopy.Text = reason;
-                buttonCopy.BackColor = pal.IsDark ? pal.SofterBackground : Color.LightGray;
+                buttonCopy.BackColor = pal.IsDark ? pal.SofterBackground : Color.Gainsboro;
                 buttonCopy.ForeColor = pal.IsDark ? pal.DarkerText : Color.DimGray;
+                _actionToolTip.SetToolTip(buttonCopy, _copyDisabledReason);
             }
         }
 
@@ -1080,8 +1164,13 @@ namespace NppDB.Core
 
         private void buttonCopy_Click(object sender, EventArgs e)
         {
-            if (!buttonCopy.Enabled) return;
-            
+            if (!_canCopy)
+            {
+                if (!string.IsNullOrWhiteSpace(_copyDisabledReason))
+                    _actionToolTip.Show(_copyDisabledReason, buttonCopy, buttonCopy.Width / 2, -18, 2000);
+                return;
+            }
+
             var pal = UiThemeManager.Current;
 
             var textToCopy = promptTextBox.Text;
