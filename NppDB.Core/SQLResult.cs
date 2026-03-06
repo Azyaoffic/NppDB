@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Text;
 using System.Windows.Forms;
 using NppDB.Comm;
 using NppDB.Core.Properties;
@@ -548,6 +549,8 @@ namespace NppDB.Core
             dgv.Sorted += (s, e) => { Numbering(dgv); dgv.AutoResizeRowHeadersWidth(DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders); };
             dgv.DataBindingComplete += (s, e) => { Numbering(dgv); dgv.AutoResizeRowHeadersWidth(DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders); };
 
+            AttachCopySupport(dgv);
+
             ((ISupportInitialize)dgv).EndInit();
             tp.ResumeLayout(true);
             UiThemeManager.Apply(tp);
@@ -565,6 +568,115 @@ namespace NppDB.Core
                 }
                 catch {}
             }));
+        }
+
+        private static void AttachCopySupport(DataGridView dgv)
+        {
+            dgv.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
+            dgv.KeyDown += (s, e) =>
+            {
+                if (!e.Control || e.KeyCode != Keys.C) return;
+
+                if (!TryCopySelectedCells(dgv))
+                {
+                    TryCopyCurrentCell(dgv);
+                }
+
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            };
+
+            dgv.MouseDown += (s, e) =>
+            {
+                if (e.Button != MouseButtons.Right) return;
+
+                var hit = dgv.HitTest(e.X, e.Y);
+                if (hit.Type == DataGridViewHitTestType.Cell)
+                {
+                    var clickedCell = dgv[hit.ColumnIndex, hit.RowIndex];
+                    if (!clickedCell.Selected)
+                    {
+                        dgv.ClearSelection();
+                        clickedCell.Selected = true;
+                        dgv.CurrentCell = clickedCell;
+                    }
+                }
+            };
+
+            dgv.MouseUp += (s, e) =>
+            {
+                if (e.Button != MouseButtons.Right) return;
+
+                var menu = new ContextMenu();
+                menu.MenuItems.Add("Copy cell value", (ss, ee) => { TryCopyCurrentCell(dgv); });
+                menu.MenuItems.Add("Copy selection", (ss, ee) =>
+                {
+                    if (!TryCopySelectedCells(dgv))
+                    {
+                        TryCopyCurrentCell(dgv);
+                    }
+                });
+                menu.Show(dgv, new Point(e.X, e.Y));
+            };
+        }
+
+        private static bool TryCopyCurrentCell(DataGridView dgv)
+        {
+            if (dgv?.CurrentCell == null) return false;
+
+            var value = dgv.CurrentCell.Value;
+            Clipboard.SetText(value == null ? string.Empty : Convert.ToString(value));
+            return true;
+        }
+
+        private static bool TryCopySelectedCells(DataGridView dgv)
+        {
+            if (dgv == null || dgv.SelectedCells.Count == 0) return false;
+
+            var minRow = int.MaxValue;
+            var maxRow = int.MinValue;
+            var minCol = int.MaxValue;
+            var maxCol = int.MinValue;
+
+            foreach (DataGridViewCell cell in dgv.SelectedCells)
+            {
+                if (cell.RowIndex < minRow) minRow = cell.RowIndex;
+                if (cell.RowIndex > maxRow) maxRow = cell.RowIndex;
+                if (cell.ColumnIndex < minCol) minCol = cell.ColumnIndex;
+                if (cell.ColumnIndex > maxCol) maxCol = cell.ColumnIndex;
+            }
+
+            if (minRow == int.MaxValue || minCol == int.MaxValue) return false;
+
+            var buffer = new StringBuilder();
+
+            for (var row = minRow; row <= maxRow; row++)
+            {
+                if (row > minRow)
+                {
+                    buffer.AppendLine();
+                }
+
+                for (var col = minCol; col <= maxCol; col++)
+                {
+                    if (col > minCol)
+                    {
+                        buffer.Append('	');
+                    }
+
+                    var cell = dgv[col, row];
+                    if (!cell.Selected) continue;
+
+                    var value = cell.Value;
+                    if (value != null)
+                    {
+                        buffer.Append(Convert.ToString(value));
+                    }
+                }
+            }
+
+            Clipboard.SetText(buffer.ToString());
+            return true;
         }
 
         public void Execute(IList<string> sqlQueries)
