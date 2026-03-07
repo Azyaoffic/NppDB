@@ -1553,6 +1553,9 @@ namespace NppDB
                 );
 
                 if (!control.Visible) control.Visible = true;
+                
+                control.Invalidate(true);
+                control.Update();
             }
             catch (Exception ex)
             {
@@ -1683,6 +1686,9 @@ namespace NppDB
                 {
                     _frmDbExplorer = new FrmDatabaseExplore(this);
                     _staticFrmDbExplorer = _frmDbExplorer;
+
+                    _frmDbExplorer.SizeChanged += (s, e) => ScheduleSqlResultRefresh();
+                    _frmDbExplorer.VisibleChanged += (s, e) => ScheduleSqlResultRefresh();
 
                     _frmDbExplorer.AddNotifyHandler((ref Message msg) =>
                     {
