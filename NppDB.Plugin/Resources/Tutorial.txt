@@ -1,77 +1,225 @@
-﻿# NppDB Quick Tutorial
+﻿# NppDB Tutorial
+
+## Part 1 - Quick tutorial
 
 ## What NppDB does
 - Connect to MS Access or PostgreSQL inside Notepad++
 - Run SQL from the editor and view results
 - Analyze SQL (warnings/errors + highlights)
 - Generate copy-paste AI prompts from analysis
-- Use schema-aware table prompts from the DB tree
+- Use reusable prompts from Prompt Library
+- Use schema-aware prompts from the DB tree
 
 ## Most useful shortcuts
-- Ctrl + F11 - See this tutorial again
-- F10 - Database Connect Manager  
-- F9 - Execute SQL  
-- Shift + F9 - Analyze SQL  
-- Ctrl + Shift + F9 - Clear analysis highlights/messages  
-- Ctrl + F9 - Analyze + AI prompt (all issues)  
-- Alt + F9 - Analyze + AI prompt (issue at caret)  
-- Ctrl + F10 - Prompt Library
+- `Ctrl + F11` - Open this tutorial again
+- `F10` - Database Connect Manager
+- `F9` - Execute SQL
+- `Shift + F9` - Analyze SQL
+- `Ctrl + Shift + F9` - Clear analysis highlights/messages
+- `Ctrl + F9` - Analyze + AI prompt (all queries)
+- `Alt + F9` - Analyze + AI prompt (query at caret (text mouse cursor))
+- `Ctrl + F10` - Prompt Library
 
-You can also find buttons on the right side of toolbar for:
-- Executing SQL (Green Arrow)
-- Analyzing SQL (Blue Magnifying Glass)
-- Opening Prompt Library (Black Stack of Books)
-- Opening DB Manager (Yellow Cylinders)
+You can also find toolbar buttons for:
+- Executing SQL (green triangle)
+- Analyzing SQL (blue magnifying glass)
+- Opening Prompt Library (book stack)
+- Opening DB Manager (database icon)
 
-## First launch setup (1 minute)
-1. Open Database Connect Manager (F10)
-2. Add connection  
-   - MS Access: choose `.accdb` / `.mdb`  
-   - PostgreSQL: host / port / database / user / password
-3. Connect and expand nodes to browse schemas/tables/views
+## First launch setup
+1. Open Database Connect Manager (`F10`)
+2. Add connection
+   - MS Access: choose `.accdb` / `.mdb`
+   - PostgreSQL: enter host / port / database / user / password
+3. Connect and expand nodes to browse schemas, tables, views, and columns
+4. Important: try right-clicking tables and columns in DB Manager. Many useful actions are there.
 
-## Settings/Preferences
-There are two windows for preferences:
-- "LLM Response Preferences", which contains settings for how AI responses are formatted and what info they include. This includes:
-    - Response language
-    - Custom instructions for a model (appended at the end of every prompt)
-    - Option to change the URL pointed by "Open LLM" button in prompt library
-- "Behavior Settings", which control some specific aspects of behavior, such as:
-    - Opening new tab on query append, creating connection, etc.
-    - Enabling destructive SELECT INTO statements for MS Access (parity with Access's own behavior)
-
-## Run SQL (F9)
+## Run SQL (`F9`)
 - If text is selected: executes statements inside the selection
-- If nothing selected: executes the statement your caret is currently inside
+- If nothing is selected: executes the statement your caret is currently inside
+- If you want to run multiple statements, select all of them first
 
-Results appear in NppDB’s result/messages panel (at the bottom of Notepad++ window).
+Results appear in NppDB's result/messages panel at the bottom of Notepad++.
 
-## Analyze SQL (Shift + F9)
+## Analyze SQL (`Shift + F9`)
 - If text is selected: analyzes the selection
-- If nothing selected: analyzes the whole document
+- If nothing is selected: analyzes the whole document
+- Issues show as highlights as well as in the analysis output
 
-Issues show as highlights as well as in the analysis output.  
-Clear analysis with Ctrl + Shift + F9.
+Clear analysis with `Ctrl + Shift + F9`.
 
-## AI prompts from analysis
-- Ctrl + F9: create one prompt from all detected issues (copied to clipboard)
-- Alt + F9: create a prompt for the issue at your caret (copied to clipboard)
-
-Paste the prompt into your LLM to get explanations/fixes.  
-You can edit the template used for these prompts via the AI Prompt Template editor.
-
-## Prompt Library (reusable prompts)
-- Open via plugin menu or Ctrl + F10
-- Pick a prompt -> fill missing placeholders (if needed) -> press blue button to copy to clipboard
-- You can add and edit prompts
+## Prompt Library
+- Open via plugin menu or `Ctrl + F10`
+- Pick a prompt, fill missing placeholders, then press copy
+- Required fields are marked with `*`
+- Tags help describe prompts and make them easier to find
 
 ## Schema-aware table prompts (DB tree)
-1. Open DB Manager (F10) and connect
+1. Open DB Manager (`F10`) and connect
 2. Expand the table once so columns load
-3. Right-click table -> AI Prompts -> choose a prompt
+3. Right-click the table or column
+4. Choose a prompt or other action from the menu
 
-NppDB builds a prompt including table name + columns and copies it to clipboard.
+
+## Part 2 - Detailed tutorial
+
+## Settings / Preferences
+There are three tabs for settings:
+
+- `Behavior`, which control specific aspects of plugin behavior, such as:
+  - Opening new tab on query append and other contextual actions
+  - Enabling destructive `SELECT INTO` statements for MS Access
+  - Setting scale of text in Database Manager
+  - Picking the color theme
+
+- `LLM`, which contains settings for how AI responses are formatted and what info they include. This includes:
+  - Response language
+  - Custom instructions for a model (appended at the end of every prompt)
+  - Option to change the URL pointed to by the `Open LLM` button in Prompt Library
+  
+- `AI Prompt Template`, where you can modify the template for 'Analyze + AI Prompt' feature
+
+## DB Manager right-click actions
+Do not treat DB Manager as only a tree view.
+
+Right-click is important on:
+- Connections
+- Schemas
+- Tables
+- Columns
+
+Depending on context, the right-click menu can contain things like:
+- Viewing rows
+- Selecting random rows
+- Table-level quick actions
+- Schema-aware AI prompts
+- Connection actions
+
+If you are not sure whether something has a menu, try right-clicking it.
+
+## SQL execution behavior
+When you press `F9`:
+- If text is selected: NppDB runs the selected text
+- If nothing is selected: NppDB runs the statement at the caret
+
+Important!
+- If you want to run multiple statements, select the whole block first
+
+## SQL analysis behavior
+When you press `Shift + F9`, the entire tab is analyzed.
+If you wish to analyze only the issue at caret, use `Alt + F9`, or `Analyze and create prompt (issue at caret)` option in the menu. 
+
+Useful related shortcuts:
+- `Ctrl + Shift + F9`: clear analysis highlights and messages
+- `Ctrl + F9`: create one AI prompt from all detected issues
+
+Generated prompts are copied to the clipboard automatically.
+
+## Prompt Library - what it is for
+Prompt Library contains reusable prompts such as:
+- Explaining a query
+- Optimizing a query
+- Debugging wrong results
+- Converting SQL dialects
+- Generating documentation
+
+The library can contain both:
+- Library prompts: general prompts used directly in the Prompt Library window
+- Schema-aware prompts: prompts meant for DB/table context
+
+## Prompt Library - basic use
+1. Open Prompt Library with `Ctrl + F10`
+2. Select a prompt from the list
+3. Read the description and tags
+4. Fill required fields marked with `*`
+5. Press the copy button
+6. Paste the result into your preferred LLM
+
+Important behavior:
+- If no SQL is selected, prompts using selected SQL use the whole current editor text
+- Some fields may be auto-filled and read-only
+- Copy stays disabled until required fields are filled
+
+## Prompt Library - tags and search
+Tags are keywords attached to prompts.
+
+They are useful because:
+- They describe what a prompt is for
+- They make prompts easier to find
+- They are shown under prompts in the list
+
+Search checks:
+- Prompt name
+- Description
+- Tags
+
+You can search with:
+- Normal words, for example `performance` or `documentation`
+- Tag search, for example `#performance` or `tag:analytics`
+
+Good tag examples:
+- `performance, optimization, indexing`
+- `schema, explain, onboarding`
+- `api, rest, specification`
+
+## Prompt Library - source filter
+At the top of Prompt Library there is a `Source` filter:
+- `Library`: only general prompts
+- `Schema-Aware`: only prompts intended for DB Manager / table context
+- `All`: both types together
+
+This is useful when the list gets longer.
+
+## Prompt Library - editing
+Prompt Library also supports editing.
+
+You can:
+- Add a new prompt
+- Duplicate an existing prompt
+- Delete a prompt
+- Edit prompt name
+- Edit prompt description
+- Edit prompt tags
+- Edit prompt text/template
+
+Notes:
+- Turn on editing mode to modify prompts
+- Changes are auto-saved
+- Placeholders use `{{placeholder_name}}` syntax
+- Tags should be short keywords separated by commas
+
+## Library prompts vs schema-aware prompts
+This is an important distinction.
+
+- Library prompts are used directly in the Prompt Library window
+- Schema-aware prompts depend on table context, such as table name and columns
+
+Because of that:
+- Schema-aware prompts are usually not meant to be copied directly from Prompt Library
+- They should normally be opened from DB Manager by right-clicking a table
 
 ## Common problems
-- “No database connection attached”: open F10 and connect, then retry F9.
-- Table prompts missing columns: expand the table node so columns load, then retry.
+- "No database connection attached"
+  - Open `F10`, connect to a database, then retry `F9`
+
+- Schema-Aware prompt complaining about missing columns
+  - Expand the table node once so columns load, then retry
+
+- Copy button in Prompt Library looks unavailable
+  - Usually no prompt is selected, required `*` placeholder fields are empty, or the chosen prompt is schema-aware and should be used from DB Manager instead
+
+- Several statements did not all run
+  - Select the whole block first, then press `F9`
+  
+- Tab colors are all messed up! I can't read tutorial like this!
+  - Connecting to database or performing analysis changes tab language to SQL. Change it back in Notepad++ in "Language -> Markdown"
+
+## Fast workflow
+1. Connect with `F10`
+2. Browse tables in DB Manager
+3. Right-click a table if you want quick actions or schema-aware prompts
+4. Write or paste SQL in the editor
+5. Select the exact block you want to run
+6. Press `F9` to execute
+7. Press `Shift + F9` to analyze if needed
+8. Open `Ctrl + F10` when you want reusable prompts
