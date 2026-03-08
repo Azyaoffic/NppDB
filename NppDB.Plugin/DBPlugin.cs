@@ -193,6 +193,10 @@ namespace NppDB
                     break;
                 case (uint)SciMsg.SCN_UPDATEUI:
                     ReadTranslations();
+                    RefreshSqlAutocomplete();
+                    break;
+                case (uint)SciMsg.SCN_CHARADDED:
+                    HandleSqlAutocomplete(nc);
                     break;
                 case (uint)SciMsg.SCN_DWELLSTART: ShowTip(nc.Position); break;
                 case (uint)SciMsg.SCN_DWELLEND: CloseTip(); break;
@@ -1047,6 +1051,86 @@ namespace NppDB
             }
         }
 
+        private void HandleSqlAutocomplete(ScNotification notification)
+        {
+            try
+            {
+                var expectedBufferId = GetCurrentBufferId();
+                if (expectedBufferId == IntPtr.Zero)
+                {
+                    return;
+                }
+
+                var invoker = _currentCtr;
+                if (invoker == null || invoker.IsDisposed || !invoker.IsHandleCreated)
+                {
+                    invoker = _frmDbExplorer;
+                }
+
+                if (invoker == null || invoker.IsDisposed || !invoker.IsHandleCreated)
+                {
+                    return;
+                }
+
+                var typedChar = notification.character;
+
+                invoker.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        var currentBufferId = GetCurrentBufferId();
+                        if (currentBufferId == IntPtr.Zero || currentBufferId != expectedBufferId)
+                        {
+                            return;
+                        }
+
+                        var result = SQLResultManager.Instance.GetSQLResult(currentBufferId);
+                        if (result == null || result.LinkedDbConnect == null || !result.LinkedDbConnect.IsOpened)
+                        {
+                            return;
+                        }
+
+                        var editor = _getCurrentEditor();
+                        if (editor == null)
+                        {
+                            return;
+                        }
+
+                        SqlAutocompleteService.TryShowForTypedChar(result.LinkedDbConnect, editor, currentBufferId, typedChar);
+                    }
+                    catch {}
+                }));
+            }
+            catch {}
+        }
+        
+        private void RefreshSqlAutocomplete()
+        {
+            try
+            {
+                var bufferId = GetCurrentBufferId();
+                if (bufferId == IntPtr.Zero)
+                {
+                    return;
+                }
+
+                var result = SQLResultManager.Instance.GetSQLResult(bufferId);
+                if (result == null || result.LinkedDbConnect == null || !result.LinkedDbConnect.IsOpened)
+                {
+                    return;
+                }
+
+                var editor = _getCurrentEditor();
+                if (editor == null)
+                {
+                    return;
+                }
+
+                SqlAutocompleteService.RefreshOrCancel(result.LinkedDbConnect, editor, bufferId);
+            }
+            catch {}
+        }
+
         private static CaretPosition GetCaretPosition(IScintillaGateway editor)
         {
             if (editor == null)
@@ -1687,20 +1771,22 @@ namespace NppDB
                 result.Dispose();
         }
 
-         private void Disconnect(IDbConnect connection)
-         {
-             connection.Disconnect(); 
-             CloseCurrentSqlResult(); 
-             SQLResultManager.Instance.RemoveSQLResults(connection);
-         }
+        private void Disconnect(IDbConnect connection)
+        {
+            SqlAutocompleteService.Invalidate(connection);
+            connection.Disconnect(); 
+            CloseCurrentSqlResult(); 
+            SQLResultManager.Instance.RemoveSQLResults(connection);
+        }
 
-         private void Unregister(IDbConnect connection)
-         {
-             DbServerManager.Instance.Unregister(connection); 
-             connection.Disconnect(); 
-             CloseCurrentSqlResult(); 
-             SQLResultManager.Instance.RemoveSQLResults(connection);
-         }
+        private void Unregister(IDbConnect connection)
+        {
+            SqlAutocompleteService.Invalidate(connection);
+            DbServerManager.Instance.Unregister(connection);
+            connection.Disconnect();
+            CloseCurrentSqlResult();
+            SQLResultManager.Instance.RemoveSQLResults(connection);
+        }
 
          private void ToggleDbManager()
         {
