@@ -56,6 +56,9 @@ namespace NppDB
         private const int DEFAULT_SQL_RESULT_HEIGHT = 200;
         private const int MIN_SQL_RESULT_HEIGHT = 80;
         private const int MIN_EDITOR_HEIGHT = 50;
+        private const int SIZE_RESTORED = 0;
+        private const int SIZE_MINIMIZED = 1;
+        private const int SIZE_MAXIMIZED = 2;
         private int _sqlResultHeight = DEFAULT_SQL_RESULT_HEIGHT;
         private bool _isUpdatingResultPos;
         private bool _uiScaleInitialized;
@@ -136,13 +139,24 @@ namespace NppDB
             {
                 switch ((Win32.Wm)message)
                 {
+                    case Win32.Wm.SIZE:
+                    {
+                        var sizeType = wParam.ToInt32();
+                        if (sizeType == SIZE_MINIMIZED)
+                        {
+                            return 0;
+                        }
+
+                        ScheduleSqlResultRefresh();
+                        break;
+                    }
+
                     case Win32.Wm.MOVE:
                     case Win32.Wm.MOVING:
-                    case Win32.Wm.SIZE:
                     case Win32.Wm.SIZING:
                     case Win32.Wm.ENTER_SIZE_MOVE:
                     case Win32.Wm.EXIT_SIZE_MOVE:
-                        UpdateCurrentSqlResult();
+                        ScheduleSqlResultRefresh();
                         break;
                     case Win32.Wm.NOTIFY:
                         break;
@@ -1496,8 +1510,14 @@ namespace NppDB
 
                 if (hndScin == IntPtr.Zero || nppHwnd == IntPtr.Zero) return;
 
+                if (Win32.IsIconic(nppHwnd)) return;
+
                 if (!Win32.GetClientRect(nppHwnd, out var nppClientRect)) return;
+
+                var nppClientWidth = nppClientRect.Right - nppClientRect.Left;
                 var nppClientHeight = nppClientRect.Bottom - nppClientRect.Top;
+
+                if (nppClientWidth <= 0 || nppClientHeight <= 0) return;
 
                 var hStatusBar = Win32.FindWindowEx(nppHwnd, IntPtr.Zero, "msctls_statusbar32", null);
                 var statusBarHeight = 0;
@@ -1510,14 +1530,19 @@ namespace NppDB
                 }
 
                 var availableHeight = nppClientHeight - statusBarHeight;
+                if (availableHeight <= 0) return;
 
                 if (!Win32.GetWindowRect(hndScin, out var scinScreenRect)) return;
 
                 var scinWidth = scinScreenRect.Right - scinScreenRect.Left;
+                if (scinWidth <= 0) return;
+
                 var scinTopLeftScreen = new Point(scinScreenRect.Left, scinScreenRect.Top);
                 Win32.ScreenToClient(nppHwnd, ref scinTopLeftScreen);
                 var scinLeft = scinTopLeftScreen.X;
                 var scinTop = scinTopLeftScreen.Y;
+
+                if (scinTop < 0) return;
 
                 var minEditorHeightPx = (int)Math.Round(MIN_EDITOR_HEIGHT * _uiScale);
                 var minSqlResultHeightPx = (int)Math.Round(MIN_SQL_RESULT_HEIGHT * _uiScale);
@@ -2102,7 +2127,7 @@ namespace NppDB
 
             if (controlToHide == controlToShow)
             {
-                if (controlToShow != null && controlToShow.IsHandleCreated && !controlToShow.IsDisposed && controlToShow.Visible)
+                if (controlToShow != null && controlToShow.IsHandleCreated && !controlToShow.IsDisposed)
                 {
                     SetResultPos(controlToShow);
                 }
