@@ -53,6 +53,7 @@ namespace NppDB.Core
             this.btnRestoreDefaultTemplate = new System.Windows.Forms.Button();
             this.txtAiTemplate = new System.Windows.Forms.TextBox();
             this.panelButtons = new System.Windows.Forms.FlowLayoutPanel();
+            this.chkEnableSqlAutocomplete = new System.Windows.Forms.CheckBox();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.tableRoot.SuspendLayout();
@@ -129,18 +130,20 @@ namespace NppDB.Core
             this.layoutBehaviorOptions.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.layoutBehaviorOptions.Controls.Add(this.chkEnableDestructiveSelectInto, 0, 0);
             this.layoutBehaviorOptions.Controls.Add(this.chkEnableNewTabCreation, 0, 1);
-            this.layoutBehaviorOptions.Controls.Add(this.pnlDbManagerFont, 0, 2);
-            this.layoutBehaviorOptions.Controls.Add(this.pnlThemeMode, 0, 3);
+            this.layoutBehaviorOptions.Controls.Add(this.chkEnableSqlAutocomplete, 0, 2);
+            this.layoutBehaviorOptions.Controls.Add(this.pnlDbManagerFont, 0, 3);
+            this.layoutBehaviorOptions.Controls.Add(this.pnlThemeMode, 0, 4);
             this.layoutBehaviorOptions.Dock = System.Windows.Forms.DockStyle.Top;
             this.layoutBehaviorOptions.Location = new System.Drawing.Point(10, 25);
             this.layoutBehaviorOptions.Name = "layoutBehaviorOptions";
-            this.layoutBehaviorOptions.RowCount = 5;
+            this.layoutBehaviorOptions.RowCount = 6;
+            this.layoutBehaviorOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.layoutBehaviorOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.layoutBehaviorOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.layoutBehaviorOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.layoutBehaviorOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.layoutBehaviorOptions.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.layoutBehaviorOptions.Size = new System.Drawing.Size(726, 140);
+            this.layoutBehaviorOptions.Size = new System.Drawing.Size(726, 180);
             this.layoutBehaviorOptions.TabIndex = 0;
             // 
             // chkEnableDestructiveSelectInto
@@ -167,6 +170,18 @@ namespace NppDB.Core
             this.chkEnableNewTabCreation.Text = "Create new tab every time for queries";
             this.chkEnableNewTabCreation.UseVisualStyleBackColor = true;
             // 
+            // chkEnableSqlAutocomplete
+            // 
+            this.chkEnableSqlAutocomplete.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkEnableSqlAutocomplete.AutoEllipsis = true;
+            this.chkEnableSqlAutocomplete.Location = new System.Drawing.Point(3, 83);
+            this.chkEnableSqlAutocomplete.MinimumSize = new System.Drawing.Size(0, 28);
+            this.chkEnableSqlAutocomplete.Name = "chkEnableSqlAutocomplete";
+            this.chkEnableSqlAutocomplete.Size = new System.Drawing.Size(720, 34);
+            this.chkEnableSqlAutocomplete.TabIndex = 2;
+            this.chkEnableSqlAutocomplete.Text = "Enable SQL schema autocomplete (tables and columns)";
+            this.chkEnableSqlAutocomplete.UseVisualStyleBackColor = true;
+            // 
             // pnlDbManagerFont
             // 
             this.pnlDbManagerFont.AutoSize = true;
@@ -174,10 +189,10 @@ namespace NppDB.Core
             this.pnlDbManagerFont.Controls.Add(this.lblDbManagerFontScale);
             this.pnlDbManagerFont.Controls.Add(this.numDbManagerFontScale);
             this.pnlDbManagerFont.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlDbManagerFont.Location = new System.Drawing.Point(3, 83);
+            this.pnlDbManagerFont.Location = new System.Drawing.Point(3, 123);
             this.pnlDbManagerFont.Name = "pnlDbManagerFont";
             this.pnlDbManagerFont.Size = new System.Drawing.Size(720, 28);
-            this.pnlDbManagerFont.TabIndex = 2;
+            this.pnlDbManagerFont.TabIndex = 3;
             this.pnlDbManagerFont.WrapContents = false;
             // 
             // lblDbManagerFontScale
@@ -209,10 +224,10 @@ namespace NppDB.Core
             this.pnlThemeMode.Controls.Add(this.lblThemeMode);
             this.pnlThemeMode.Controls.Add(this.comboThemeMode);
             this.pnlThemeMode.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlThemeMode.Location = new System.Drawing.Point(3, 117);
+            this.pnlThemeMode.Location = new System.Drawing.Point(3, 157);
             this.pnlThemeMode.Name = "pnlThemeMode";
             this.pnlThemeMode.Size = new System.Drawing.Size(720, 28);
-            this.pnlThemeMode.TabIndex = 3;
+            this.pnlThemeMode.TabIndex = 4;
             this.pnlThemeMode.WrapContents = false;
             // 
             // lblThemeMode
@@ -534,6 +549,7 @@ namespace NppDB.Core
         private System.Windows.Forms.TableLayoutPanel layoutBehaviorOptions;
         private System.Windows.Forms.CheckBox chkEnableDestructiveSelectInto;
         private System.Windows.Forms.CheckBox chkEnableNewTabCreation;
+        private System.Windows.Forms.CheckBox chkEnableSqlAutocomplete;
         private System.Windows.Forms.FlowLayoutPanel pnlDbManagerFont;
         private System.Windows.Forms.Label lblDbManagerFontScale;
         private System.Windows.Forms.NumericUpDown numDbManagerFontScale;

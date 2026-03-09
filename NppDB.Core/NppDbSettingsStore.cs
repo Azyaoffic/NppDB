@@ -62,6 +62,7 @@ For each issue (in the same order as provided), output:
                 {
                     EnableDestructiveSelectInto = false,
                     EnableNewTabCreation = false,
+                    EnableSqlAutocomplete = true,
                     DbManagerFontScale = 1.0f,
                     ThemeMode = "FollowNotepadPlusPlus"
                 },

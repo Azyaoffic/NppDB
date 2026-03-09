@@ -1061,6 +1061,17 @@ namespace NppDB
                     return;
                 }
 
+                if (!IsSqlAutocompleteEnabled())
+                {
+                    var currentEditor = _getCurrentEditor();
+                    if (currentEditor != null)
+                    {
+                        SqlAutocompleteService.CancelOwnedAutocomplete(currentEditor, expectedBufferId);
+                    }
+
+                    return;
+                }
+
                 var invoker = _currentCtr;
                 if (invoker == null || invoker.IsDisposed || !invoker.IsHandleCreated)
                 {
@@ -1114,21 +1125,41 @@ namespace NppDB
                     return;
                 }
 
-                var result = SQLResultManager.Instance.GetSQLResult(bufferId);
-                if (result == null || result.LinkedDbConnect == null || !result.LinkedDbConnect.IsOpened)
-                {
-                    return;
-                }
-
                 var editor = _getCurrentEditor();
                 if (editor == null)
                 {
                     return;
                 }
 
+                if (!IsSqlAutocompleteEnabled())
+                {
+                    SqlAutocompleteService.CancelOwnedAutocomplete(editor, bufferId);
+                    return;
+                }
+
+                var result = SQLResultManager.Instance.GetSQLResult(bufferId);
+                if (result == null || result.LinkedDbConnect == null || !result.LinkedDbConnect.IsOpened)
+                {
+                    SqlAutocompleteService.CancelOwnedAutocomplete(editor, bufferId);
+                    return;
+                }
+
                 SqlAutocompleteService.RefreshOrCancel(result.LinkedDbConnect, editor, bufferId);
             }
             catch {}
+        }
+
+        private bool IsSqlAutocompleteEnabled()
+        {
+            try
+            {
+                var settings = NppDbSettingsStore.Get();
+                return settings == null || settings.Behavior == null || settings.Behavior.EnableSqlAutocomplete;
+            }
+            catch
+            {
+                return true;
+            }
         }
 
         private static CaretPosition GetCaretPosition(IScintillaGateway editor)
@@ -1929,6 +1960,16 @@ namespace NppDB
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 UiThemeSync.RefreshAndApply();
+
+                if (!IsSqlAutocompleteEnabled())
+                {
+                    var bufferId = GetCurrentBufferId();
+                    var editor = _getCurrentEditor();
+                    if (bufferId != IntPtr.Zero && editor != null)
+                    {
+                        SqlAutocompleteService.CancelOwnedAutocomplete(editor, bufferId);
+                    }
+                }
             }
         }
 

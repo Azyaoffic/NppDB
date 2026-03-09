@@ -21,6 +21,7 @@ namespace NppDB.Core
         {
             public bool EnableDestructiveSelectInto { get; set; }
             public bool EnableNewTabCreation { get; set; }
+            public bool EnableSqlAutocomplete { get; set; } = true;
             public float DbManagerFontScale { get; set; } = 1.0f;
             public string ThemeMode { get; set; } = "FollowNotepadPlusPlus";
         }
@@ -69,6 +70,7 @@ namespace NppDB.Core
             // behavior settings
             chkEnableDestructiveSelectInto.Checked = _settings.Behavior != null && _settings.Behavior.EnableDestructiveSelectInto;
             chkEnableNewTabCreation.Checked = _settings.Behavior != null && _settings.Behavior.EnableNewTabCreation;
+            chkEnableSqlAutocomplete.Checked = _settings.Behavior == null || _settings.Behavior.EnableSqlAutocomplete;
 
             var scale = (_settings.Behavior != null) ? _settings.Behavior.DbManagerFontScale : 1.0f;
             if (scale < 0.75f || scale > 2.5f) scale = 1.0f;
@@ -174,6 +176,7 @@ namespace NppDB.Core
             _settings.Behavior.EnableDestructiveSelectInto = chkEnableDestructiveSelectInto.Checked;
             _settings.Behavior.EnableNewTabCreation = chkEnableNewTabCreation.Checked;
             _settings.Behavior.DbManagerFontScale = (float)numDbManagerFontScale.Value;
+            _settings.Behavior.EnableSqlAutocomplete = chkEnableSqlAutocomplete.Checked;
             
             var selectedTheme = comboThemeMode.SelectedItem as string;
             if (string.IsNullOrWhiteSpace(selectedTheme))

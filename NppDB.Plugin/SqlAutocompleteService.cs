@@ -167,6 +167,11 @@ namespace NppDB
             SetPluginAutocompleteActive(bufferId, true);
         }
         
+        public static void CancelOwnedAutocomplete(IScintillaGateway editor, IntPtr bufferId)
+        {
+            CancelIfOwned(editor, bufferId);
+        }
+        
         private static void CancelIfOwned(IScintillaGateway editor, IntPtr bufferId)
         {
             if (!IsPluginAutocompleteActive(bufferId))
