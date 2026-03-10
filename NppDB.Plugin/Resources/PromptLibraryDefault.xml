@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Prompts>
 
-    <Prompt type="LlmPrompt">
+    <Prompt>
         <Id>DefaultPrompt1</Id>
         <Title>Explain Selected Query</Title>
         <Description>Explains complex logic. Breaks down the query execution flow.</Description>
@@ -39,7 +39,7 @@ You are an expert SQL instructor.
         </Metadata>
     </Prompt>
 
-    <Prompt type="LlmPrompt">
+    <Prompt>
         <Id>DefaultPrompt2</Id>
         <Title>Optimize and Analyze Performance</Title>
         <Description>Detailed performance suggestions</Description>
@@ -79,7 +79,7 @@ subqueries, N+1-like patterns in SQL).
         </Metadata>
     </Prompt>
 
-    <Prompt type="LlmPrompt">
+    <Prompt>
         <Id>DefaultPrompt3</Id>
         <Title>Diagnose wrong / unexpected result</Title>
         <Description>Finds logical issues when the query runs but returns unexpected results (based on user
@@ -129,7 +129,7 @@ still provide the best-effort fix.
         </Metadata>
     </Prompt>
 
-    <Prompt type="LlmPrompt">
+    <Prompt>
         <Id>DefaultPrompt4</Id>
         <Title>Convert SQL dialect</Title>
         <Description>Migrates code between systems (e.g. Access to PostgreSQL)</Description>
@@ -167,7 +167,7 @@ TOP).
         </Metadata>
     </Prompt>
 
-    <Prompt type="LlmPrompt">
+    <Prompt>
         <Id>DefaultPrompt5</Id>
         <Title>Generate documentation</Title>
         <Description>Creates technical docs</Description>
@@ -203,7 +203,7 @@ involved.
         </Metadata>
     </Prompt>
 
-    <Prompt type="LlmPrompt">
+    <Prompt>
         <Id>DefaultPrompt6</Id>
         <Title>Generate Table from description</Title>
         <Description>Writes CREATE TABLE SQL based on natural language requirements</Description>
@@ -240,7 +240,7 @@ You are a Database Architect.
         </Metadata>
     </Prompt>
 
-    <Prompt type="LlmPrompt">
+    <Prompt>
         <Id>DefaultPrompt7</Id>
         <Title>Generate SQL Query from description</Title>
         <Description>Translates a natural-language requirement into a SQL query</Description>
@@ -283,7 +283,7 @@ query.
         </Metadata>
     </Prompt>
 
-    <Prompt type="LlmPrompt">
+    <Prompt>
         <Id>DefaultPrompt8</Id>
         <Title>Compare two SQL queries</Title>
         <Description>Compares logic, result equivalence, and performance characteristics</Description>
@@ -332,12 +332,12 @@ distributions).
         </Metadata>
     </Prompt>
 
-    <Prompt type="TablePrompt">
+    <Prompt>
         <Id>TablePrompt1</Id>
         <Title>Explain table in plain language</Title>
         <Description>Explains what the table likely represents and what each column likely means</Description>
         <Tags>schema, explain, onboarding</Tags>
-    <Text>**Role**
+        <Text>**Role**
 You are a Business Analyst.
 
 **Task**
@@ -376,7 +376,7 @@ You are a Business Analyst.
         </Metadata>
     </Prompt>
 
-    <Prompt type="TablePrompt">
+    <Prompt>
         <Id>TablePrompt2</Id>
         <Title>Generate GROUP BY aggregation query</Title>
         <Description>Creates 3 useful aggregation queries (single-table) based on the columns</Description>
@@ -419,7 +419,7 @@ You are an expert SQL developer.
         </Metadata>
     </Prompt>
 
-    <Prompt type="TablePrompt">
+    <Prompt>
         <Id>TablePrompt3</Id>
         <Title>Generate INSERT test data</Title>
         <Description>Generates 10 realistic INSERT statements for the table</Description>
@@ -460,7 +460,7 @@ You are an expert SQL developer.
         </Metadata>
     </Prompt>
 
-    <Prompt type="TablePrompt">
+    <Prompt>
         <Id>TablePrompt4</Id>
         <Title>Propose data validation rules</Title>
         <Description>Suggests practical column- and table-level validation/constraint rules</Description>
@@ -499,7 +499,7 @@ You are a database designer.
         </Metadata>
     </Prompt>
 
-    <Prompt type="TablePrompt">
+    <Prompt>
         <Id>TablePrompt5</Id>
         <Title>Generate data model class (Python)</Title>
         <Description>Creates a Python @dataclass model from the table columns</Description>
@@ -540,7 +540,7 @@ You are a software engineer.
         </Metadata>
     </Prompt>
 
-    <Prompt type="TablePrompt">
+    <Prompt>
         <Id>TablePrompt6</Id>
         <Title>Generate data model class (Java)</Title>
         <Description>Creates a Java POJO model from the table columns</Description>
@@ -580,7 +580,7 @@ You are a software engineer.
         </Metadata>
     </Prompt>
 
-    <Prompt type="TablePrompt">
+    <Prompt>
         <Id>TablePrompt7</Id>
         <Title>Generate data model class (C#)</Title>
         <Description>Creates a C# model class from the table columns</Description>
@@ -619,7 +619,7 @@ You are a software engineer.
         </Metadata>
     </Prompt>
 
-    <Prompt type="TablePrompt">
+    <Prompt>
         <Id>TablePrompt8</Id>
         <Title>Create REST API endpoints specification</Title>
         <Description>Drafts CRUD endpoints, filtering/pagination, validation errors, and example payloads</Description>
@@ -663,7 +663,7 @@ You are a backend architect.
         </Metadata>
     </Prompt>
 
-    <Prompt type="TablePrompt">
+    <Prompt>
         <Id>TablePrompt9</Id>
         <Title>Suggest visualizations for the data</Title>
         <Description>Suggests charts/KPIs, required fields, grain, and business questions</Description>

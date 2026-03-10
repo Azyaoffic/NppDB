@@ -2044,8 +2044,6 @@ namespace NppDB
                     if (promptNode.NodeType != XmlNodeType.Element)
                         continue;
 
-                    var typeAttr = (promptNode as XmlElement)?.GetAttribute("type") ?? string.Empty;
-
                     var id = promptNode.SelectSingleNode("Id")?.InnerText.Trim() ?? string.Empty;
                     var title = promptNode.SelectSingleNode("Title")?.InnerText.Trim() ?? string.Empty;
                     var description = promptNode.SelectSingleNode("Description")?.InnerText.Trim() ?? string.Empty;
@@ -2099,7 +2097,6 @@ namespace NppDB
                         Id = id,
                         Title = title,
                         Description = description,
-                        Type = typeAttr,
                         Tags = ParseTags(tagsRaw),
                         Text = text,
                         Placeholders = placeholderList.ToArray()

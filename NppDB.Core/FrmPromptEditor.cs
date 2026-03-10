@@ -13,13 +13,10 @@ namespace NppDB.Core
     {
         public PromptItem SelectedPromptItem { get; private set; }
         
-        private string _selectedTypePretty;
-
         public FrmPromptEditor()
         {
             InitializeComponent();
             UiThemeManager.Register(this);
-            LoadPromptTypes();
         }
 
         private void buttonDiscard_Click(object sender, EventArgs e)
@@ -60,29 +57,12 @@ namespace NppDB.Core
                     placeholders.Add(new PromptPlaceholder { Name = placeholderName, IsEditable = true });
                 }
             }
-            
-            string type;
-            
-            var selectedPretty = _selectedTypePretty ?? comboBoxType.SelectedItem?.ToString();
-            switch (selectedPretty)
-            {
-                case "Prompt Library Prompt":
-                    type = "LlmPrompt";
-                    break;
-                case "Schema-Aware Prompt":
-                    type = "TablePrompt";
-                    break;
-                default:
-                    MessageBox.Show("Please select a valid prompt type.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return default;
-            }
 
             return new PromptItem
             {
                 Id = string.IsNullOrEmpty(id) ? Guid.NewGuid().ToString() : id,
                 Title = name,
                 Description = description,
-                Type = type,
                 Tags = ParseTags(tagsRaw),
                 Text = promptText,
                 Placeholders = placeholders.ToArray()
@@ -120,13 +100,6 @@ namespace NppDB.Core
             StringBuilder sb = new StringBuilder("System Placeholders: ");
             sb.Append(string.Join(", ", placeholders.Select(p => $"{{{{{p}}}}}")));
             lblPlaceholders.Text = sb.ToString();
-        }
-        
-        private void LoadPromptTypes()
-        {
-            comboBoxType.Items.Clear();
-            comboBoxType.Items.Add("Prompt Library Prompt");
-            comboBoxType.Items.Add("Schema-Aware Prompt");
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
@@ -185,7 +158,7 @@ namespace NppDB.Core
                     prompt.SetElementValue("Tags", tagsValue);
                 }
                 
-                prompt.SetAttributeValue("type", promptItem.Type);
+                prompt.Attribute("type")?.Remove();
                 
                 var existingPlaceholders = prompt.Element("Placeholders");
                 // check whether existing placeholders are editable
@@ -234,7 +207,6 @@ namespace NppDB.Core
                 var tagsValue = string.Join(",", normalizedTags.Where(t => !string.IsNullOrWhiteSpace(t)).Select(t => t.Trim()));
 
                 XElement promptElement = new XElement("Prompt",
-                    new XAttribute("type", promptItem.Type),
                     new XElement("Id", promptItem.Id),
                     new XElement("Title", promptItem.Title),
                     new XElement("Description", promptItem.Description),
@@ -251,11 +223,6 @@ namespace NppDB.Core
                 root.Add(promptElement);
                 doc.Save(promptLibraryPath);
             }
-        }
-
-        private void comboBoxType_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            _selectedTypePretty = comboBoxType.SelectedItem?.ToString();
         }
     }
 }

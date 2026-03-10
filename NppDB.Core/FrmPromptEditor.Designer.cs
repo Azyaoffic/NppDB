@@ -46,8 +46,6 @@ namespace NppDB.Core
             this.lblPrompt = new System.Windows.Forms.Label();
             this.txtPrompt = new System.Windows.Forms.RichTextBox();
             this.lblPlaceholders = new System.Windows.Forms.Label();
-            this.lblType = new System.Windows.Forms.Label();
-            this.comboBoxType = new System.Windows.Forms.ComboBox();
             this.panelBottom.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -121,7 +119,7 @@ namespace NppDB.Core
             this.txtName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.txtName.Location = new System.Drawing.Point(15, 33);
             this.txtName.Name = "txtName";
-            this.txtName.Size = new System.Drawing.Size(481, 23);
+            this.txtName.Size = new System.Drawing.Size(657, 23);
             this.txtName.TabIndex = 0;
             // 
             // lblDescription
@@ -192,25 +190,6 @@ namespace NppDB.Core
             this.lblPlaceholders.Size = new System.Drawing.Size(0, 15);
             this.lblPlaceholders.TabIndex = 6;
             // 
-            // lblType
-            // 
-            this.lblType.AutoSize = true;
-            this.lblType.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblType.Location = new System.Drawing.Point(535, 15);
-            this.lblType.Name = "lblType";
-            this.lblType.Size = new System.Drawing.Size(36, 15);
-            this.lblType.TabIndex = 8;
-            this.lblType.Text = "Type:";
-            // 
-            // comboBoxType
-            // 
-            this.comboBoxType.FormattingEnabled = true;
-            this.comboBoxType.Location = new System.Drawing.Point(535, 33);
-            this.comboBoxType.Name = "comboBoxType";
-            this.comboBoxType.Size = new System.Drawing.Size(137, 23);
-            this.comboBoxType.TabIndex = 9;
-            this.comboBoxType.SelectedIndexChanged += new System.EventHandler(this.comboBoxType_SelectedIndexChanged);
-            // 
             // FrmPromptEditor
             // 
             this.AcceptButton = this.buttonSave;
@@ -218,8 +197,6 @@ namespace NppDB.Core
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.buttonDiscard;
             this.ClientSize = new System.Drawing.Size(684, 545);
-            this.Controls.Add(this.comboBoxType);
-            this.Controls.Add(this.lblType);
             this.Controls.Add(this.lblPlaceholders);
             this.Controls.Add(this.txtPrompt);
             this.Controls.Add(this.lblPrompt);
@@ -244,9 +221,6 @@ namespace NppDB.Core
             this.PerformLayout();
         }
 
-        private System.Windows.Forms.ComboBox comboBoxType;
-
-        private System.Windows.Forms.Label lblType;
 
         private System.Windows.Forms.Panel panelBottom;
         private System.Windows.Forms.Button buttonDiscard;

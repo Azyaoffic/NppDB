@@ -21,7 +21,6 @@ namespace NppDB.Core
         public string Id;
         public string Title;
         public string Description;
-        public string Type; // "TablePrompt", "LlmPrompt"
         public string[] Tags;
         public string Text;
         public PromptPlaceholder[] Placeholders;
@@ -29,12 +28,6 @@ namespace NppDB.Core
 
     public partial class FrmPromptLibrary : Form
     {
-        private enum PromptSourceFilter
-        {
-            Library = 0,
-            SchemaAware = 1,
-            All = 2
-        }
 
         private static List<PromptItem> _prompts;
         private List<PromptItem> _filteredPrompts;
@@ -43,8 +36,6 @@ namespace NppDB.Core
         
         private const int MinPlaceholdersHeight = 80;
         private const int MinPreviewTextHeight = 120;
-
-        private PromptSourceFilter _currentSourceFilter = PromptSourceFilter.Library;
 
         private bool _suppressPromptGridSelectionChanged;
 
@@ -101,15 +92,15 @@ namespace NppDB.Core
 
         private void ConfigureSourceFilter()
         {
-            cmbPromptSource.Items.Clear();
-            cmbPromptSource.Items.Add("Library");
-            cmbPromptSource.Items.Add("Schema-Aware");
-            cmbPromptSource.Items.Add("All");
-            cmbPromptSource.SelectedIndex = (int)PromptSourceFilter.Library;
+            cmbPromptSource.Visible = false;
+            lblSource.Visible = false;
+            panelSearch.Height = 34;
 
+            colPromptType.Visible = false;
+            lblPromptType.Visible = false;
+            lblPromptCapabilities.Visible = false;
             panelSchemaBanner.Visible = false;
-            lblPromptType.Text = "Type: -";
-            lblPromptCapabilities.Text = "Capabilities: -";
+
             _actionToolTip.SetToolTip(buttonDuplicate, "Select a prompt to duplicate.");
         }
 
@@ -150,7 +141,6 @@ namespace NppDB.Core
             panelPreviewBottom.Height = Math.Max(MinPlaceholdersHeight, Math.Min(savedPlaceholdersHeight, maxBottom));
         }
 
-
         private void SaveLayoutToSettings()
         {
             if (WindowState == FormWindowState.Normal)
@@ -171,11 +161,6 @@ namespace NppDB.Core
         public static void SetPrompts(List<PromptItem> promptItems)
         {
             _prompts = promptItems;
-        }
-
-        private bool IsSchemaAwarePrompt(PromptItem prompt)
-        {
-            return string.Equals(prompt.Type, "TablePrompt", StringComparison.OrdinalIgnoreCase);
         }
 
         private static string[] ParseTags(string raw)
@@ -267,18 +252,6 @@ namespace NppDB.Core
 
             query = query.Where(p => PromptMatchesSearch(p, rawSearchText));
 
-            switch (_currentSourceFilter)
-            {
-                case PromptSourceFilter.Library:
-                    query = query.Where(p => !IsSchemaAwarePrompt(p));
-                    break;
-                case PromptSourceFilter.SchemaAware:
-                    query = query.Where(IsSchemaAwarePrompt);
-                    break;
-                case PromptSourceFilter.All:
-                    break;
-            }
-
             return query.ToList();
         }
 
@@ -290,33 +263,19 @@ namespace NppDB.Core
 
         private void ApplyRowStyling(DataGridViewRow row, PromptItem prompt)
         {
-            var isSchemaAware = IsSchemaAwarePrompt(prompt);
             var pal = UiThemeManager.Current;
 
             if (pal.IsDark)
             {
-                row.DefaultCellStyle.BackColor = isSchemaAware ? pal.SofterBackground : pal.PureBackground;
+                row.DefaultCellStyle.BackColor = pal.PureBackground;
                 row.DefaultCellStyle.SelectionBackColor = pal.HotBackground;
                 row.DefaultCellStyle.SelectionForeColor = pal.Text;
-                row.Cells[colPromptType.Index].Style.ForeColor = isSchemaAware ? pal.LinkText : pal.Text;
                 return;
             }
 
-            // old light behavior
-            if (isSchemaAware)
-            {
-                row.DefaultCellStyle.BackColor = Color.FromArgb(246, 241, 255);
-                row.DefaultCellStyle.SelectionBackColor = Color.FromArgb(86, 55, 141);
-                row.DefaultCellStyle.SelectionForeColor = Color.White;
-                row.Cells[colPromptType.Index].Style.ForeColor = Color.FromArgb(86, 55, 141);
-            }
-            else
-            {
-                row.DefaultCellStyle.BackColor = SystemColors.Window;
-                row.DefaultCellStyle.SelectionBackColor = SystemColors.Highlight;
-                row.DefaultCellStyle.SelectionForeColor = SystemColors.HighlightText;
-                row.Cells[colPromptType.Index].Style.ForeColor = Color.FromArgb(18, 111, 49);
-            }
+            row.DefaultCellStyle.BackColor = SystemColors.Window;
+            row.DefaultCellStyle.SelectionBackColor = SystemColors.Highlight;
+            row.DefaultCellStyle.SelectionForeColor = SystemColors.HighlightText;
         }
 
         private void PopulatePromptList()
@@ -328,8 +287,7 @@ namespace NppDB.Core
 
                 foreach (var prompt in _filteredPrompts)
                 {
-                    var promptKind = IsSchemaAwarePrompt(prompt) ? "SCHEMA-AWARE" : "LIBRARY";
-                    var rowIndex = promptsGridView.Rows.Add(prompt.Title, prompt.Description, promptKind);
+                    var rowIndex = promptsGridView.Rows.Add(prompt.Title, prompt.Description, string.Empty);
                     var row = promptsGridView.Rows[rowIndex];
                     row.Tag = prompt;
                     row.DividerHeight = (prompt.Tags != null && prompt.Tags.Length > 0) ? 16 : 0; // “mini row” height
@@ -412,7 +370,6 @@ namespace NppDB.Core
         private void cmbPromptSource_SelectedIndexChanged(object sender, EventArgs e)
         {
             FlushPendingAutoSave();
-            _currentSourceFilter = (PromptSourceFilter)cmbPromptSource.SelectedIndex;
             RefreshPromptList();
         }
         
@@ -432,33 +389,10 @@ namespace NppDB.Core
             promptTextBox.Focus();
         }
 
-
         private void UpdatePromptMeta(PromptItem? prompt)
         {
-            var pal = UiThemeManager.Current;
-
-            if (!prompt.HasValue)
-            {
-                lblPromptType.Text = "Type: —";
-                lblPromptType.ForeColor = pal.IsDark ? pal.DarkerText : SystemColors.GrayText;
-                lblPromptCapabilities.Text = "Capabilities: —";
-                panelSchemaBanner.Visible = false;
-                _actionToolTip.SetToolTip(buttonDuplicate, "Select a prompt to duplicate.");
-                return;
-            }
-
-            var selectedPrompt = prompt.Value;
-            var isSchemaAware = IsSchemaAwarePrompt(selectedPrompt);
-
-            lblPromptType.Text = isSchemaAware ? "Type: SCHEMA-AWARE" : "Type: LIBRARY";
-            lblPromptType.ForeColor = pal.IsDark
-                ? isSchemaAware ? pal.LinkText : pal.Text
-                : isSchemaAware ? Color.FromArgb(86, 55, 141) : Color.FromArgb(18, 111, 49);
-            lblPromptCapabilities.Text = isSchemaAware
-                ? "Uses Database Manager context (selected table + loaded columns). Can contain DB schema placeholders."
-                : "Uses general editor context. Can contain non-schema placeholders.";
-
-            panelSchemaBanner.Visible = isSchemaAware;
+            panelSchemaBanner.Visible = false;
+            _actionToolTip.SetToolTip(buttonDuplicate, "Select a prompt to duplicate.");
         }
 
         private void promptsListView_SelectedIndexChanged(object sender, EventArgs e)
@@ -706,7 +640,6 @@ namespace NppDB.Core
                 promptTextBox.ResumeLayout();
             }
         }
-
 
         private void UpdatePreviewText(PromptItem prompt)
         {
@@ -1002,7 +935,8 @@ namespace NppDB.Core
                     {
                         disabledReason = "Fill required fields (*) to Copy";
                     }
-                    else if (string.Equals(prompt.Type, "TablePrompt", StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(ph.Name, "table_name", StringComparison.OrdinalIgnoreCase)
+                             || string.Equals(ph.Name, "columns_with_types", StringComparison.OrdinalIgnoreCase))
                     {
                         disabledReason = "Select a table in Database Manager and expand it once to load columns";
                     }
