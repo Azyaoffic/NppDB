@@ -65,7 +65,7 @@ namespace NppDB.Core
             "selected_sql",
             "dialect",
             "table_name",
-            "columns_with_types"
+            "table"
         };
 
         public FrmPromptLibrary(Dictionary<string, string> placeholders)
@@ -552,7 +552,7 @@ namespace NppDB.Core
                         var lblValue = new RichTextBox
                         {
                             Width = container.Width,
-                            Text = string.IsNullOrEmpty(initialValue) ? "<No context available>" : initialValue,
+                            Text = string.IsNullOrEmpty(initialValue) ? GetAutoFilledPlaceholderHint(placeholder.Name) : initialValue,
                             ReadOnly = true,
                             BackColor = pal.IsDark ? pal.Background : SystemColors.Control,
                             ForeColor = pal.IsDark ? pal.Text : SystemColors.WindowText
@@ -910,6 +910,45 @@ namespace NppDB.Core
             return extracted.ToArray();
         }
 
+        private string GetAutoFilledPlaceholderHint(string placeholderName)
+        {
+            if (string.Equals(placeholderName, "selected_sql", StringComparison.OrdinalIgnoreCase))
+                return "Tab contents are missing. Please input some SQL or select a portion of SQL in the editor to auto-fill this placeholder.";
+
+            if (string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase))
+                return "Connect to a database to auto-fill the SQL dialect.";
+
+            if (string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase))
+                return "Select a table in DB Manager.";
+
+            if (string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(placeholderName, "columns_with_types", StringComparison.OrdinalIgnoreCase))
+                return "Please expand table in DB Manager.";
+
+            return "<No context available>";
+        }
+
+        private string GetMissingPlaceholderMessage(PromptPlaceholder placeholder)
+        {
+            if (placeholder.IsEditable)
+                return "Fill {{" + placeholder.Name + "}}";
+
+            if (string.Equals(placeholder.Name, "selected_sql", StringComparison.OrdinalIgnoreCase))
+                return "Tab contents are missing. Please input some SQL or select a portion of SQL in the editor to auto-fill this placeholder.";
+
+            if (string.Equals(placeholder.Name, "dialect", StringComparison.OrdinalIgnoreCase))
+                return "Connect to a database to auto-fill {{dialect}}";
+
+            if (string.Equals(placeholder.Name, "table_name", StringComparison.OrdinalIgnoreCase))
+                return "Select a table in DB Manager";
+
+            if (string.Equals(placeholder.Name, "table", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(placeholder.Name, "columns_with_types", StringComparison.OrdinalIgnoreCase))
+                return "Please expand table in DB Manager";
+
+            return "Missing auto-filled value for {{" + placeholder.Name + "}}";
+        }
+
         private void ValidateInputs()
         {
             if (promptsGridView.SelectedRows.Count == 0)
@@ -930,21 +969,7 @@ namespace NppDB.Core
                         continue;
 
                     isValid = false;
-
-                    if (ph.IsEditable)
-                    {
-                        disabledReason = "Fill required fields (*) to Copy";
-                    }
-                    else if (string.Equals(ph.Name, "table_name", StringComparison.OrdinalIgnoreCase)
-                             || string.Equals(ph.Name, "columns_with_types", StringComparison.OrdinalIgnoreCase))
-                    {
-                        disabledReason = "Select a table in Database Manager and expand it once to load columns";
-                    }
-                    else
-                    {
-                        disabledReason = "Missing auto-filled context for {{" + ph.Name + "}}";
-                    }
-
+                    disabledReason = GetMissingPlaceholderMessage(ph);
                     break;
                 }
             }

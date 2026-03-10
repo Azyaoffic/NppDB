@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml.Linq;
@@ -97,9 +96,25 @@ namespace NppDB.Core
                 return;
             }
 
-            StringBuilder sb = new StringBuilder("System Placeholders: ");
-            sb.Append(string.Join(", ", placeholders.Select(p => $"{{{{{p}}}}}")));
-            lblPlaceholders.Text = sb.ToString();
+            var lines = new List<string> { "System placeholders:" };
+
+            foreach (var placeholder in placeholders)
+            {
+                var description = string.Empty;
+
+                if (string.Equals(placeholder, "selected_sql", StringComparison.OrdinalIgnoreCase))
+                    description = "selected SQL, or the whole current file if nothing is selected";
+                else if (string.Equals(placeholder, "dialect", StringComparison.OrdinalIgnoreCase))
+                    description = "current database dialect";
+                else if (string.Equals(placeholder, "table_name", StringComparison.OrdinalIgnoreCase))
+                    description = "selected table name from DB Manager";
+                else if (string.Equals(placeholder, "table", StringComparison.OrdinalIgnoreCase))
+                    description = "selected table metadata; expand the table in DB Manager first";
+
+                lines.Add($"{{{{{placeholder}}}}} - {description}");
+            }
+
+            lblPlaceholders.Text = string.Join(Environment.NewLine, lines);
         }
 
         private void buttonSave_Click(object sender, EventArgs e)

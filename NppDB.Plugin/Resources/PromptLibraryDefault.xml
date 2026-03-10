@@ -364,12 +364,12 @@ You are a Business Analyst.
 
 **Columns**
 ```text
-{{columns_with_types}}
+{{table}}
 ```</Text>
         <Placeholders>
             <Placeholder name="dialect"/>
             <Placeholder name="table_name"/>
-            <Placeholder name="columns_with_types"/>
+            <Placeholder name="table"/>
         </Placeholders>
         <Metadata>
             <Category>Analyze</Category>
@@ -407,12 +407,12 @@ You are an expert SQL developer.
 
 **Columns**
 ```text
-{{columns_with_types}}
+{{table}}
 ```</Text>
         <Placeholders>
             <Placeholder name="dialect"/>
             <Placeholder name="table_name"/>
-            <Placeholder name="columns_with_types"/>
+            <Placeholder name="table"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -448,12 +448,12 @@ You are an expert SQL developer.
 
 **Columns**
 ```text
-{{columns_with_types}}
+{{table}}
 ```</Text>
         <Placeholders>
             <Placeholder name="dialect"/>
             <Placeholder name="table_name"/>
-            <Placeholder name="columns_with_types"/>
+            <Placeholder name="table"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -487,12 +487,12 @@ You are a database designer.
 
 **Columns**
 ```text
-{{columns_with_types}}
+{{table}}
 ```</Text>
         <Placeholders>
             <Placeholder name="dialect"/>
             <Placeholder name="table_name"/>
-            <Placeholder name="columns_with_types"/>
+            <Placeholder name="table"/>
         </Placeholders>
         <Metadata>
             <Category>Analyze</Category>
@@ -529,11 +529,11 @@ You are a software engineer.
 
 **Columns**
 ```text
-{{columns_with_types}}
+{{table}}
 ```</Text>
         <Placeholders>
             <Placeholder name="table_name"/>
-            <Placeholder name="columns_with_types"/>
+            <Placeholder name="table"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -569,11 +569,11 @@ You are a software engineer.
 
 **Columns**
 ```text
-{{columns_with_types}}
+{{table}}
 ```</Text>
         <Placeholders>
             <Placeholder name="table_name"/>
-            <Placeholder name="columns_with_types"/>
+            <Placeholder name="table"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -608,11 +608,11 @@ You are a software engineer.
 
 **Columns**
 ```text
-{{columns_with_types}}
+{{table}}
 ```</Text>
         <Placeholders>
             <Placeholder name="table_name"/>
-            <Placeholder name="columns_with_types"/>
+            <Placeholder name="table"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -652,11 +652,11 @@ You are a backend architect.
 
 **Columns**
 ```text
-{{columns_with_types}}
+{{table}}
 ```</Text>
         <Placeholders>
             <Placeholder name="table_name"/>
-            <Placeholder name="columns_with_types"/>
+            <Placeholder name="table"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -695,11 +695,11 @@ You are a data analyst.
 
 **Columns**
 ```text
-{{columns_with_types}}
+{{table}}
 ```</Text>
         <Placeholders>
             <Placeholder name="table_name"/>
-            <Placeholder name="columns_with_types"/>
+            <Placeholder name="table"/>
         </Placeholders>
         <Metadata>
             <Category>Analyze</Category>

@@ -1985,7 +1985,10 @@ namespace NppDB
                     placeholders["table_name"] = dbContext.TableName;
 
                 if (!string.IsNullOrWhiteSpace(dbContext.ColumnsWithTypes))
+                {
+                    placeholders["table"] = dbContext.ColumnsWithTypes;
                     placeholders["columns_with_types"] = dbContext.ColumnsWithTypes;
+                }
             }
         }
         

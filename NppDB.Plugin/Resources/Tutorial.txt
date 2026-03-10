@@ -8,7 +8,6 @@
 - Analyze SQL (warnings/errors + highlights)
 - Generate copy-paste AI prompts from analysis
 - Use reusable prompts from Prompt Library
-- Use schema-aware prompts from the DB tree
 
 ## Most useful shortcuts
 - `Ctrl + F11` - Open this tutorial again
@@ -54,13 +53,6 @@ Clear analysis with `Ctrl + Shift + F9`.
 - Required fields are marked with `*`
 - Tags help describe prompts and make them easier to find
 
-## Schema-aware table prompts (DB tree)
-1. Open DB Manager (`F10`) and connect
-2. Expand the table once so columns load
-3. Right-click the table or column
-4. Choose a prompt or other action from the menu
-
-
 ## Part 2 - Detailed tutorial
 
 ## Settings / Preferences
@@ -92,7 +84,6 @@ Depending on context, the right-click menu can contain things like:
 - Viewing rows
 - Selecting random rows
 - Table-level quick actions
-- Schema-aware AI prompts
 - Connection actions
 
 If you are not sure whether something has a menu, try right-clicking it.
@@ -123,9 +114,10 @@ Prompt Library contains reusable prompts such as:
 - Converting SQL dialects
 - Generating documentation
 
-The library can contain both:
-- Library prompts: general prompts used directly in the Prompt Library window
-- Schema-aware prompts: prompts meant for DB/table context
+Prompt Library prompts can use:
+- selected SQL from the editor
+- table metadata from DB Manager
+- additional user-filled placeholders
 
 ## Prompt Library - basic use
 1. Open Prompt Library with `Ctrl + F10`
@@ -138,6 +130,8 @@ The library can contain both:
 Important behavior:
 - If no SQL is selected, prompts using selected SQL use the whole current editor text
 - Some fields may be auto-filled and read-only
+- `{{table_name}}` is filled from the selected table in DB Manager
+- `{{table}}` is filled from table metadata; expand the table once in DB Manager first
 - Copy stays disabled until required fields are filled
 
 ## Prompt Library - tags and search
@@ -162,14 +156,6 @@ Good tag examples:
 - `schema, explain, onboarding`
 - `api, rest, specification`
 
-## Prompt Library - source filter
-At the top of Prompt Library there is a `Source` filter:
-- `Library`: only general prompts
-- `Schema-Aware`: only prompts intended for DB Manager / table context
-- `All`: both types together
-
-This is useful when the list gets longer.
-
 ## Prompt Library - editing
 Prompt Library also supports editing.
 
@@ -186,27 +172,22 @@ Notes:
 - Turn on editing mode to modify prompts
 - Changes are auto-saved
 - Placeholders use `{{placeholder_name}}` syntax
+- Useful built-in placeholders:
+  - `{{selected_sql}}` - selected SQL, or the whole current file if nothing is selected
+  - `{{dialect}}` - current database dialect
+  - `{{table_name}}` - selected table name from DB Manager
+  - `{{table}}` - selected table metadata; expand the table in DB Manager first
 - Tags should be short keywords separated by commas
-
-## Library prompts vs schema-aware prompts
-This is an important distinction.
-
-- Library prompts are used directly in the Prompt Library window
-- Schema-aware prompts depend on table context, such as table name and columns
-
-Because of that:
-- Schema-aware prompts are usually not meant to be copied directly from Prompt Library
-- They should normally be opened from DB Manager by right-clicking a table
 
 ## Common problems
 - "No database connection attached"
   - Open `F10`, connect to a database, then retry `F9`
 
-- Schema-Aware prompt complaining about missing columns
-  - Expand the table node once so columns load, then retry
+- Prompt says `Please expand table in DB Manager`
+  - Expand the table node once so column metadata loads, then retry
 
 - Copy button in Prompt Library looks unavailable
-  - Usually no prompt is selected, required `*` placeholder fields are empty, or the chosen prompt is schema-aware and should be used from DB Manager instead
+  - Usually no prompt is selected, an editable placeholder like `{{user_request}}` is empty, or required auto-filled context is missing
 
 - Several statements did not all run
   - Select the whole block first, then press `F9`
@@ -217,7 +198,9 @@ Because of that:
 ## Fast workflow
 1. Connect with `F10`
 2. Browse tables in DB Manager
-3. Right-click a table if you want quick actions or schema-aware prompts
+3. Expand the table you need to so metadata loads
+4. Open Prompt Library with `Ctrl + F10`
+5. Pick a prompt, fill any extra placeholders, then copy it
 4. Write or paste SQL in the editor
 5. Select the exact block you want to run
 6. Press `F9` to execute
