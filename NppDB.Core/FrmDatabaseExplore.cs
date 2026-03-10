@@ -5,9 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using Newtonsoft.Json;
 using NppDB.Comm;
 using NppDB.Core.Properties;
+using NppDB.MSAccess;
 using NppDB.PostgreSQL;
 
 namespace NppDB.Core
@@ -16,6 +16,7 @@ namespace NppDB.Core
     {
         public string TableName { get; set; }
         public string Dialect { get; set; }
+        public string ColumnsWithTypes { get; set; }
     }
 
     public partial class FrmDatabaseExplore : Form
@@ -485,7 +486,7 @@ namespace NppDB.Core
                             context.Dialect = "PostgreSQL";
                             break;
                         case SqlDialect.MS_ACCESS:
-                            context.Dialect = "MSAccess";
+                            context.Dialect = "MS Access";
                             break;
                         default:
                             context.Dialect = $"Dialect_{dialectRaw}";
@@ -497,18 +498,67 @@ namespace NppDB.Core
                     context.Dialect = string.Empty;
                 }
             }
-        
-            // table or function node
-            if (node is PostgreSqlTable tableNode)
+
+            var postgreSqlTableNode = GetParentPostgreSqlTableNode(node);
+            if (postgreSqlTableNode != null)
             {
-                var tableName = tableNode.Text;
-        
-                context.TableName = tableName;
+                context.TableName = postgreSqlTableNode.Text;
+                context.ColumnsWithTypes = GetColumnsWithTypesFromTree(postgreSqlTableNode);
+                return context;
             }
-            
-            
-        
+
+            var msAccessTableNode = GetParentMsAccessTableNode(node);
+            if (msAccessTableNode != null)
+            {
+                context.TableName = msAccessTableNode.Text;
+                context.ColumnsWithTypes = GetColumnsWithTypesFromTree(msAccessTableNode);
+            }
+
             return context;
+        }
+
+        private static PostgreSqlTable GetParentPostgreSqlTableNode(TreeNode node)
+        {
+            while (node != null)
+            {
+                if (node is PostgreSqlTable tableNode)
+                    return tableNode;
+
+                node = node.Parent;
+            }
+
+            return null;
+        }
+
+        private static MsAccessTable GetParentMsAccessTableNode(TreeNode node)
+        {
+            while (node != null)
+            {
+                if (node is MsAccessTable tableNode)
+                    return tableNode;
+
+                node = node.Parent;
+            }
+
+            return null;
+        }
+
+        private static string GetColumnsWithTypesFromTree(TreeNode tableNode)
+        {
+            if (tableNode == null || tableNode.Nodes == null || tableNode.Nodes.Count == 0)
+                return string.Empty;
+
+            var sb = new StringBuilder();
+
+            foreach (TreeNode childNode in tableNode.Nodes)
+            {
+                if (childNode == null)
+                    continue;
+
+                sb.AppendLine(childNode.Text);
+            }
+
+            return sb.ToString().TrimEnd('\r', '\n');
         }
     }
 }

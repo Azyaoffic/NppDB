@@ -71,7 +71,10 @@ namespace NppDB.Core
         // TODO: Maybe there is a better way to manage supported placeholders?
         public static readonly List<string> SupportedPlaceholders = new List<string>
         {
-            "selected_sql"
+            "selected_sql",
+            "dialect",
+            "table_name",
+            "columns_with_types"
         };
 
         public FrmPromptLibrary(Dictionary<string, string> placeholders)
@@ -452,8 +455,8 @@ namespace NppDB.Core
                 ? isSchemaAware ? pal.LinkText : pal.Text
                 : isSchemaAware ? Color.FromArgb(86, 55, 141) : Color.FromArgb(18, 111, 49);
             lblPromptCapabilities.Text = isSchemaAware
-                ? "Cannot be used outside of Database Manager context. Can contain DB Schema placeholders."
-                : "Cannot contain DB Schema placeholders. Can contain general placeholders.";
+                ? "Uses Database Manager context (selected table + loaded columns). Can contain DB schema placeholders."
+                : "Uses general editor context. Can contain non-schema placeholders.";
 
             panelSchemaBanner.Visible = isSchemaAware;
         }
@@ -983,30 +986,36 @@ namespace NppDB.Core
             }
 
             var prompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
-            if (prompt.Type == "TablePrompt")
-            {
-                UpdateCopyButtonState(false, "Schema-Aware prompt: use it from Database Manager (F10), not via copy");
-                return;
-            }
-            
             var isValid = true;
+            var disabledReason = "Fill required fields (*) to Copy";
 
             if (prompt.Placeholders != null)
             {
                 foreach (var ph in prompt.Placeholders)
                 {
+                    if (Placeholders.TryGetValue(ph.Name, out var val) && !string.IsNullOrWhiteSpace(val))
+                        continue;
+
+                    isValid = false;
+
                     if (ph.IsEditable)
                     {
-                        if (!Placeholders.TryGetValue(ph.Name, out var val) || string.IsNullOrWhiteSpace(val))
-                        {
-                            isValid = false;
-                            break;
-                        }
+                        disabledReason = "Fill required fields (*) to Copy";
                     }
+                    else if (string.Equals(prompt.Type, "TablePrompt", StringComparison.OrdinalIgnoreCase))
+                    {
+                        disabledReason = "Select a table in Database Manager and expand it once to load columns";
+                    }
+                    else
+                    {
+                        disabledReason = "Missing auto-filled context for {{" + ph.Name + "}}";
+                    }
+
+                    break;
                 }
             }
 
-            UpdateCopyButtonState(isValid, "Fill required fields (*) to Copy");
+            UpdateCopyButtonState(isValid, disabledReason);
         }
 
         private void UpdateCopyButtonState(bool enabled, string reason)

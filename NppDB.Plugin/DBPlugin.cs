@@ -1981,7 +1981,11 @@ namespace NppDB
             var dbContext = _staticFrmDbExplorer?.GetCurrentTemplateContext();
             if (dbContext != null)
             {
-                placeholders["table_name"] = dbContext.TableName;
+                if (!string.IsNullOrWhiteSpace(dbContext.TableName))
+                    placeholders["table_name"] = dbContext.TableName;
+
+                if (!string.IsNullOrWhiteSpace(dbContext.ColumnsWithTypes))
+                    placeholders["columns_with_types"] = dbContext.ColumnsWithTypes;
             }
         }
         
