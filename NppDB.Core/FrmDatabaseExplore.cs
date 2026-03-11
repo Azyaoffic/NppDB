@@ -414,50 +414,65 @@ namespace NppDB.Core
 
         private void shortcuts_Click(object sender, EventArgs e)
         {
-            var shortcutText = new StringBuilder();
-            shortcutText.AppendLine("NppDB Shortcuts:");
-            shortcutText.AppendLine("--------------------------------------------");
-            shortcutText.AppendLine("Execute SQL:                                 F9");
-            shortcutText.AppendLine("");
-            shortcutText.AppendLine("Analyze SQL:                       Shift+F9");
-            shortcutText.AppendLine("");
-            shortcutText.AppendLine("Generate AI prompt:            Ctrl+F9");
-            shortcutText.AppendLine("");
-            shortcutText.AppendLine("Clear Analysis:           Ctrl+Shift+F9");
-            shortcutText.AppendLine("");
-            shortcutText.AppendLine("DB Connect Manager:               F10");
+            var rows = new[]
+            {
+                new[] { "Execute SQL", "F9" },
+                new[] { "Analyze SQL", "Shift+F9" },
+                new[] { "Analyze and Create Prompt", "Ctrl+F9" },
+                new[] { "Analyze and Create Prompt (Issue at Caret)", "Alt+F9" },
+                new[] { "Clear Analysis", "Ctrl+Shift+F9" },
+                new[] { "DB Connect Manager", "F10" },
+                new[] { "Show Prompt Library", "Ctrl+F10" },
+                new[] { "Show Tutorial", "Ctrl+F11" }
+            };
 
-            MessageBox.Show(
-                this, shortcutText.ToString(), @"NppDB Shortcuts", MessageBoxButtons.OK, MessageBoxIcon.None);
+            var leftWidth = rows.Max(r => r[0].Length) + 2;
+
+            var sb = new StringBuilder();
+            sb.AppendLine("NppDB Shortcuts");
+            sb.AppendLine(new string('-', leftWidth + 16));
+
+            foreach (var row in rows)
+            {
+                sb.AppendLine(row[0].PadRight(leftWidth) + row[1]);
+            }
+
+            using (var dlg = new Form())
+            using (var txt = new TextBox())
+            using (var btnOk = new Button())
+            {
+                dlg.Text = @"NppDB Shortcuts";
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+                dlg.MinimizeBox = false;
+                dlg.MaximizeBox = false;
+                dlg.ShowInTaskbar = false;
+                dlg.ClientSize = new Size(500, 300);
+
+                txt.ReadOnly = true;
+                txt.Multiline = true;
+                txt.ScrollBars = ScrollBars.Vertical;
+                txt.WordWrap = false;
+                txt.BorderStyle = BorderStyle.None;
+                txt.Font = new Font("Consolas", 10F);
+                txt.Text = sb.ToString();
+                txt.Location = new Point(12, 12);
+                txt.Size = new Size(dlg.ClientSize.Width - 24, dlg.ClientSize.Height - 60);
+                txt.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+
+                btnOk.Text = @"OK";
+                btnOk.DialogResult = DialogResult.OK;
+                btnOk.Size = new Size(90, 28);
+                btnOk.Location = new Point(dlg.ClientSize.Width - btnOk.Width - 12, dlg.ClientSize.Height - btnOk.Height - 12);
+                btnOk.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+
+                dlg.AcceptButton = btnOk;
+                dlg.Controls.Add(txt);
+                dlg.Controls.Add(btnOk);
+
+                dlg.ShowDialog(this);
+            }
         }
-
-        private void btnEditAiPromptTemplate_Click(object sender, EventArgs e)
-        {
-            if (_commandHostInstance == null)
-            {
-                MessageBox.Show("Plugin command host is not available.",
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            var pluginDirObj = _commandHostInstance.Execute(NppDbCommandType.GET_PLUGIN_DIRECTORY, null);
-            if (!(pluginDirObj is string pluginDirectoryPath) || string.IsNullOrEmpty(pluginDirectoryPath))
-            {
-                MessageBox.Show("Could not retrieve plugin directory path from the command host.",
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-            var templateFilePath = Path.Combine(pluginDirectoryPath, "AIPromptTemplate.txt");
-
-            if (!File.Exists(templateFilePath))
-            {
-                MessageBox.Show($"AI prompt template file not found at:\n{templateFilePath}\n\nA new empty file will be created if you save.",
-                    "Template Not Found", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-
-            _commandHostInstance.Execute(NppDbCommandType.OPEN_FILE_IN_NPP, new object[] { templateFilePath });
-        }
-    
     
         public DbTemplateContext GetCurrentTemplateContext()
         {

@@ -40,8 +40,6 @@ namespace NppDB.Core
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnRefresh = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.btnEditAiPromptTemplate = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.shortcuts = new System.Windows.Forms.ToolStripButton();
             this.trvDBList = new System.Windows.Forms.TreeView();
             this.toolStrip1.SuspendLayout();
@@ -50,7 +48,7 @@ namespace NppDB.Core
             // toolStrip1
             // 
             this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.btnRegister, this.btnUnregister, this.toolStripSeparator2, this.btnConnect, this.btnDisconnect, this.toolStripSeparator1, this.btnRefresh, this.toolStripSeparator3, this.btnEditAiPromptTemplate, this.toolStripSeparator4, this.shortcuts });
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.btnRegister, this.btnUnregister, this.toolStripSeparator2, this.btnConnect, this.btnDisconnect, this.toolStripSeparator1, this.btnRefresh, this.toolStripSeparator3, this.shortcuts });
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(415, 25);
@@ -122,21 +120,6 @@ namespace NppDB.Core
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
             // 
-            // btnEditAiPromptTemplate
-            // 
-            this.btnEditAiPromptTemplate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.btnEditAiPromptTemplate.Image = global::NppDB.Core.Properties.Resources.page_file;
-            this.btnEditAiPromptTemplate.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnEditAiPromptTemplate.Name = "btnEditAiPromptTemplate";
-            this.btnEditAiPromptTemplate.Size = new System.Drawing.Size(23, 22);
-            this.btnEditAiPromptTemplate.Text = "Edit AI prompt template";
-            this.btnEditAiPromptTemplate.Click += new System.EventHandler(this.btnEditAiPromptTemplate_Click);
-            // 
-            // toolStripSeparator4
-            // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
-            // 
             // shortcuts
             // 
             this.shortcuts.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -173,9 +156,6 @@ namespace NppDB.Core
             this.ResumeLayout(false);
             this.PerformLayout();
         }
-
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
-        private System.Windows.Forms.ToolStripButton btnEditAiPromptTemplate;
 
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
 
