@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Prompts>
-
     <Prompt>
         <Id>DefaultPrompt1</Id>
         <Title>Explain Selected Query</Title>
@@ -8,127 +7,124 @@
         <Tags>explain, analysis, learning</Tags>
         <Text>**Role**
 You are an expert SQL instructor.
-
 **Task**
 - Explain the SQL query step-by-step for dialect `{{dialect}}`.
 - Break down joins, filters, and aggregations.
 - Infer the business intent (what question the query answers).
-
 **Constraints**
 - Use simple, non-technical language where possible.
 - Do not invent schema details; if something is ambiguous, state assumptions.
 - Keep the explanation accurate to the query as written.
-
 **Response**
 - Provide, in order:
 1) One-paragraph plain-English summary
 2) Step-by-step explanation (bullets or numbered list)
 3) Business intent (1–2 sentences)
 4) Notes on joins/filters/aggregations
-
 **Query**
 ```sql
 {{selected_sql}}
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
-            <Placeholder name="dialect" />
+            <Placeholder name="dialect"/>
         </Placeholders>
         <Metadata>
             <Category>Refactor</Category>
         </Metadata>
     </Prompt>
-
     <Prompt>
         <Id>DefaultPrompt2</Id>
         <Title>Optimize and Analyze Performance</Title>
-        <Description>Detailed performance suggestions</Description>
+        <Description>Detailed performance suggestions with selected table context for better index recommendations</Description>
         <Tags>performance, optimization, indexing</Tags>
         <Text>**Role**
 You are a Senior Database Performance Engineer.
-
 **Task**
 - Analyze the SQL query for performance bottlenecks in dialect `{{dialect}}`.
-- Identify inefficient operations (e.g., full scans, non-sargable predicates, excessive sorting, correlated
-subqueries, N+1-like patterns in SQL).
+- Use the selected table metadata when it helps with access path, indexing, filtering, or projection advice.
+- Identify inefficient operations (e.g., full scans, non-sargable predicates, excessive sorting, correlated subqueries, repeated work, wide row movement).
 - Suggest specific indexes that could improve performance.
 - Provide a refactored query that is more efficient.
-
 **Constraints**
 - Preserve semantics: the refactored query must return the same results.
 - If schema/statistics are missing, clearly state assumptions and give conditional recommendations.
+- If the query references tables that are not included in the selected metadata, call out that limitation explicitly.
 - Prefer safe, broadly applicable optimizations for the given dialect.
-
 **Response**
 - Provide, in order:
 1) Bottlenecks found (bullets)
 2) Recommendations (bullets, tied to specific query parts)
 3) Refactored SQL
-4) Short explanation of why the refactor is faster
-
+4) Suggested indexes
+5) Short explanation of why the refactor is faster
+**Selected Table Context**
+`{{table_name}}`
+```text
+{{table}}
+```
 **Query**
 ```sql
 {{selected_sql}}
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
-            <Placeholder name="dialect" />
+            <Placeholder name="dialect"/>
+            <Placeholder name="table_name"/>
+            <Placeholder name="table"/>
         </Placeholders>
         <Metadata>
             <Category>Refactor</Category>
         </Metadata>
     </Prompt>
-
     <Prompt>
         <Id>DefaultPrompt3</Id>
         <Title>Diagnose wrong / unexpected result</Title>
-        <Description>Finds logical issues when the query runs but returns unexpected results (based on user
-            description)
-        </Description>
+        <Description>Finds logical issues when the query runs but returns unexpected results, using the user description and selected table metadata</Description>
         <Tags>debugging, correctness, logic</Tags>
         <Text>**Role**
 You are a Senior Database Administrator focused on query correctness.
-
 **Task**
-- Read the SQL query (dialect `{{dialect}}`) and the user's plain-language description of what seems wrong.
+- Read the SQL query (dialect `{{dialect}}`), the selected table metadata, and the user's plain-language description of what seems wrong.
 - Infer the most likely expected vs. actual behavior from the description.
-- Identify likely logical causes in the SQL (joins, filters, grouping, NULL handling, DISTINCT, date
-boundaries, aggregation levels, predicate placement, etc.).
+- Identify likely logical causes in the SQL (joins, filters, grouping, NULL handling, DISTINCT, date boundaries, aggregation levels, predicate placement, and mismatched keys/types).
 - Propose a corrected version of the query that matches the likely intent.
-
 **Constraints**
-- Do not invent schema details. If the logic depends on unknown columns/keys/relationships, state
-assumptions explicitly.
+- Do not invent schema details beyond the provided table metadata. If the logic depends on unknown columns, keys, or relationships, state assumptions explicitly.
 - Prefer minimal changes that preserve intent.
 - If multiple interpretations are plausible, pick the best default and list 1–2 alternatives.
-- If critical information is missing (e.g., “expected result”), ask up to 3 short clarifying questions, but
-still provide the best-effort fix.
-
+- If critical information is missing, ask up to 3 short clarifying questions, but still provide the best-effort fix.
 **Response**
 - Provide, in order:
-1) Your understanding: expected vs. actual (based on the description)
+1) Your understanding: expected vs. actual
 2) Likely cause(s) (bullets, tied to specific parts of the query)
 3) Recommended fix (bullets)
 4) Corrected SQL (single code block)
 5) How to validate (2–5 quick checks / test queries)
-
+**Selected Table Context**
+`{{table_name}}`
+```text
+{{table}}
+```
 **Query**
 ```sql
 {{selected_sql}}
-
-**Error Description**
+```
+**Problem Description**
+```text
 {{error_message}}
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
-            <Placeholder name="dialect" />
-            <Placeholder name="error_message" />
+            <Placeholder name="dialect"/>
+            <Placeholder name="error_message"/>
+            <Placeholder name="table_name"/>
+            <Placeholder name="table"/>
         </Placeholders>
         <Metadata>
             <Category>Refactor</Category>
         </Metadata>
     </Prompt>
-
     <Prompt>
         <Id>DefaultPrompt4</Id>
         <Title>Convert SQL dialect</Title>
@@ -136,37 +132,32 @@ still provide the best-effort fix.
         <Tags>migration, dialect, portability</Tags>
         <Text>**Role**
 You are a SQL Migration Specialist.
-
 **Task**
 - Convert the SQL query from `{{source_dialect}}` to `{{target_dialect}}`.
 - Adapt functions, quoting, date/time syntax, NULL handling, and dialect-specific clauses (e.g., LIMIT vs
 TOP).
 - Keep semantics equivalent.
-
 **Constraints**
 - The converted query must return the same results (as closely as the dialect allows).
 - Avoid non-standard extensions unless needed for `{{target_dialect}}`.
 - If something cannot be converted cleanly, explain the limitation and provide the closest workaround.
-
 **Response**
 - Provide, in order:
 1) Converted SQL (single code block)
 2) Key changes and compatibility notes (bullets)
-
 **Original SQL**
 ```sql
 {{selected_sql}}
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
-            <Placeholder name="source_dialect" />
-            <Placeholder name="target_dialect" />
+            <Placeholder name="source_dialect"/>
+            <Placeholder name="target_dialect"/>
         </Placeholders>
         <Metadata>
             <Category>Refactor</Category>
         </Metadata>
     </Prompt>
-
     <Prompt>
         <Id>DefaultPrompt5</Id>
         <Title>Generate documentation</Title>
@@ -174,35 +165,30 @@ TOP).
         <Tags>documentation, explain, maintainability</Tags>
         <Text>**Role**
 You are a Technical Writer specializing in databases.
-
 **Task**
 - Generate technical documentation for the SQL query in `{{format}}` format.
 - Assume SQL dialect `{{dialect}}`.
-
 **Constraints**
 - Include: a title, description of the logic, list of input parameters, and a summary of the tables
 involved.
 - Do not invent unknown schema details; if something is unclear, note assumptions.
 - Keep the documentation focused on what can be inferred from the query text.
-
 **Response**
 - Output strictly in `{{format}}` format (no extra commentary outside the requested format).
 - Include the required sections and keep them clearly labeled.
-
 **Query**
 ```sql
 {{selected_sql}}
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
-            <Placeholder name="dialect" />
-            <Placeholder name="format" />
+            <Placeholder name="dialect"/>
+            <Placeholder name="format"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
         </Metadata>
     </Prompt>
-
     <Prompt>
         <Id>DefaultPrompt6</Id>
         <Title>Generate Table from description</Title>
@@ -210,79 +196,73 @@ involved.
         <Tags>ddl, schema, design</Tags>
         <Text>**Role**
 You are a Database Architect.
-
 **Task**
 - Write a valid `CREATE TABLE` statement that fulfills the requirement below.
 - Target SQL dialect: `{{target_dialect}}`.
-
 **Constraints**
 - Include a primary key.
 - Choose appropriate data types for the target dialect.
 - Include constraints where reasonable (NOT NULL, UNIQUE, CHECK, FK if specified).
 - If requirements are incomplete, make conservative defaults and list assumptions.
-
 **Response**
 - Provide, in order:
 1) `CREATE TABLE` SQL (single code block)
 2) Assumptions (bullets)
 3) Optional: follow-up questions if critical details are missing
-
 **Requirement**
 ```text
 {{user_input}}
 ```</Text>
         <Placeholders>
-            <Placeholder name="target_dialect" />
-            <Placeholder name="user_input" />
+            <Placeholder name="target_dialect"/>
+            <Placeholder name="user_input"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
         </Metadata>
     </Prompt>
-
     <Prompt>
         <Id>DefaultPrompt7</Id>
         <Title>Generate SQL Query from description</Title>
-        <Description>Translates a natural-language requirement into a SQL query</Description>
+        <Description>Translates a natural-language requirement into a SQL query, grounded in the selected table metadata</Description>
         <Tags>generation, query, requirements</Tags>
         <Text>**Role**
 You are a SQL Query Generator.
-
 **Task**
 - Translate the user’s requirement into a SQL query for dialect `{{dialect}}`.
-- Include appropriate SELECT list, FROM sources, JOINs, WHERE filters, GROUP BY / HAVING (if needed), ORDER
-BY, and LIMIT/TOP (if requested).
-- If the requirement implies parameters (date range, customer id, etc.), represent them as named parameters
-(e.g., `:start_date`) or clearly marked placeholders.
-
+- Use the selected table metadata as the primary schema context.
+- Include appropriate SELECT list, FROM sources, JOINs, WHERE filters, GROUP BY / HAVING (if needed), ORDER BY, and LIMIT/TOP (if requested).
+- If the requirement implies parameters (date range, customer id, etc.), represent them as named parameters (e.g., `:start_date`) or clearly marked placeholders.
 **Constraints**
-- Infer schema minimally. Do not invent tables/columns unless the user provides them.
-- If the schema is missing, choose a reasonable generic schema *only* as an example, and clearly label it as
-an assumption.
-- Ask up to 5 clarifying questions *only if* the requirement is ambiguous in ways that materially change the
-query.
-- Prefer simple, correct SQL over clever/engine-specific tricks unless the dialect requires it.
-
+- Prefer the provided table metadata over invented schema.
+- Do not invent extra tables or columns unless the user explicitly asks for an example; if you must assume anything, label it clearly.
+- Ask up to 5 clarifying questions only if the requirement is ambiguous in ways that materially change the query.
+- Prefer simple, correct SQL over engine-specific tricks unless the dialect requires them.
 **Response**
 - Provide, in order:
 1) Generated SQL (single code block)
 2) Explanation of how the query satisfies the requirement (bullets)
 3) Assumptions (bullets)
 4) Clarifying questions (only if needed)
-
+**Selected Table Context**
+`{{table_name}}`
+```text
+{{table}}
+```
 **User Requirement**
 ```text
 {{user_input}}
 ```</Text>
         <Placeholders>
-            <Placeholder name="dialect" />
-            <Placeholder name="user_input" />
+            <Placeholder name="dialect"/>
+            <Placeholder name="table_name"/>
+            <Placeholder name="table"/>
+            <Placeholder name="user_input"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
         </Metadata>
     </Prompt>
-
     <Prompt>
         <Id>DefaultPrompt8</Id>
         <Title>Compare two SQL queries</Title>
@@ -290,7 +270,6 @@ query.
         <Tags>comparison, correctness, performance</Tags>
         <Text>**Role**
 You are a SQL Comparator.
-
 **Task**
 - Compare Query A and Query B for dialect `{{target_dialect}}`.
 - Analyze differences in:
@@ -298,14 +277,10 @@ You are a SQL Comparator.
 - Result set shape (columns, row counts, duplicates)
 - Edge cases (NULLs, empty sets, date boundaries, join cardinality)
 - Performance characteristics (sargability, indexes, join order risks, sorts, scans)
-
 **Constraints**
-- Assume both queries target the same SQL dialect unless the text indicates otherwise; default dialect is
-`{{target_dialect}}`.
+- Assume both queries target the same SQL dialect unless the text indicates otherwise; default dialect is `{{target_dialect}}`.
 - Do not assume schema details beyond what is implied in the queries; note uncertainties as assumptions.
-- If you cannot prove equivalence, state what would be required to prove it (keys, constraints, data
-distributions).
-
+- If you cannot prove equivalence, state what would be required to prove it (keys, constraints, data distributions).
 **Response**
 - Provide, in order:
 1) Key differences (bullets)
@@ -313,25 +288,23 @@ distributions).
 3) Example scenarios where results diverge (if any)
 4) Performance/optimization notes (bullets)
 5) Suggested “best” version (optional) with rationale, if one is clearly preferable
-
 **Query A**
 ```sql
 {{query_a}}
-
+```
 **Query B**
 ```sql
 {{query_b}}
 ```</Text>
         <Placeholders>
-            <Placeholder name="target_dialect" />
-            <Placeholder name="query_a" />
-            <Placeholder name="query_b" />
+            <Placeholder name="target_dialect"/>
+            <Placeholder name="query_a"/>
+            <Placeholder name="query_b"/>
         </Placeholders>
         <Metadata>
             <Category>Analyze</Category>
         </Metadata>
     </Prompt>
-
     <Prompt>
         <Id>TablePrompt1</Id>
         <Title>Explain table in plain language</Title>
@@ -339,29 +312,23 @@ distributions).
         <Tags>schema, explain, onboarding</Tags>
         <Text>**Role**
 You are a Business Analyst.
-
 **Task**
 - Explain the purpose and content of this database table in plain, non-technical English.
 - Infer what the table represents and what a single row means (grain).
 - Call out likely identifiers, dates, amounts, statuses, and any suspicious/unclear columns.
-
 **Constraints**
 - Base your reasoning only on the provided table name and column names/types.
 - Do not invent extra columns/tables.
 - If something is uncertain, state assumptions explicitly and keep them conservative.
-
 **Response**
 - Provide, in order:
 1) 1 paragraph plain-language summary
 2) Bullet list: what each column likely means
 3) 5 example business questions this table can answer
-
 **Table Dialect**
 `{{dialect}}`
-
 **Table**
 `{{table_name}}`
-
 **Columns**
 ```text
 {{table}}
@@ -375,7 +342,6 @@ You are a Business Analyst.
             <Category>Analyze</Category>
         </Metadata>
     </Prompt>
-
     <Prompt>
         <Id>TablePrompt2</Id>
         <Title>Generate GROUP BY aggregation query</Title>
@@ -383,28 +349,22 @@ You are a Business Analyst.
         <Tags>aggregation, analytics, group-by</Tags>
         <Text>**Role**
 You are an expert SQL developer.
-
 **Task**
 - Create 3 useful `GROUP BY` aggregation queries for the given table using SQL dialect `{{dialect}}`.
 - Each query must answer a practical business question.
-
 **Constraints**
 - Use only the provided table and columns (no joins).
 - Quote identifiers using the dialect’s conventions (for Microsoft Access, use brackets like `[Order Date]`).
 - If date bucketing is needed, use dialect-appropriate expressions.
 - If the table lacks obvious measure/dimension columns, make the best effort and state assumptions.
-
 **Response**
 - For each query, provide:
 1) The business question it answers (1 sentence)
 2) Final SQL only (single code block)
-
 **Table Dialect**
 `{{dialect}}`
-
 **Table**
 `{{table_name}}`
-
 **Columns**
 ```text
 {{table}}
@@ -418,7 +378,6 @@ You are an expert SQL developer.
             <Category>Generate</Category>
         </Metadata>
     </Prompt>
-
     <Prompt>
         <Id>TablePrompt3</Id>
         <Title>Generate INSERT test data</Title>
@@ -426,26 +385,20 @@ You are an expert SQL developer.
         <Tags>test-data, inserts, seeding</Tags>
         <Text>**Role**
 You are an expert SQL developer.
-
 **Task**
 - Generate realistic test data for this table.
 - Return 10 `INSERT` statements in SQL dialect `{{dialect}}`.
-
 **Constraints**
 - Use only the provided columns.
 - Keep values internally consistent (e.g., statuses, amounts, dates).
 - If there is an AutoNumber/identity key, omit it from `INSERT`.
 - Use dialect-friendly literals (for Microsoft Access: single quotes for text, `#...#` for dates).
-
 **Response**
 - Output only the 10 `INSERT` statements (no prose).
-
 **Table Dialect**
 `{{dialect}}`
-
 **Table**
 `{{table_name}}`
-
 **Columns**
 ```text
 {{table}}
@@ -459,7 +412,6 @@ You are an expert SQL developer.
             <Category>Generate</Category>
         </Metadata>
     </Prompt>
-
     <Prompt>
         <Id>TablePrompt4</Id>
         <Title>Propose data validation rules</Title>
@@ -467,24 +419,18 @@ You are an expert SQL developer.
         <Tags>constraints, data-quality, validation</Tags>
         <Text>**Role**
 You are a database designer.
-
 **Task**
 - Propose practical data validation rules and constraints for this table.
-
 **Constraints**
 - Include: required/optional, allowed ranges, formats, uniqueness, cross-field rules, and referential integrity assumptions.
 - Prefer rules implementable in the target environment for dialect `{{dialect}}` (e.g., Access field validation rules, input masks, indexes, relationships).
 - Do not invent extra columns/tables; if a rule depends on missing context, state assumptions.
-
 **Response**
 - Output a concise list grouped by column, plus any table-level rules.
-
 **Table Dialect**
 `{{dialect}}`
-
 **Table**
 `{{table_name}}`
-
 **Columns**
 ```text
 {{table}}
@@ -498,7 +444,6 @@ You are a database designer.
             <Category>Analyze</Category>
         </Metadata>
     </Prompt>
-
     <Prompt>
         <Id>TablePrompt5</Id>
         <Title>Generate data model class (Python)</Title>
@@ -506,32 +451,27 @@ You are a database designer.
         <Tags>modeling, python, codegen</Tags>
         <Text>**Role**
 You are a software engineer.
-
 **Task**
 - Generate a Python data model for this table.
 - Use a `@dataclass` with type hints.
 - Choose reasonable Python types based on column names/types.
-
 **Constraints**
 - Use `Optional[...]` where appropriate (nullable/unknown).
 - Keep names readable (snake_case for fields is fine).
 - Do not add fields that are not in the table.
 - If a type is unclear, pick the safest general type and add a short inline comment.
-
 **Response**
 - Output only the Python code.
-
 **Table Dialect**
 `{{dialect}}`
-
 **Table**
 `{{table_name}}`
-
 **Columns**
 ```text
 {{table}}
 ```</Text>
         <Placeholders>
+            <Placeholder name="dialect"/>
             <Placeholder name="table_name"/>
             <Placeholder name="table"/>
         </Placeholders>
@@ -539,7 +479,6 @@ You are a software engineer.
             <Category>Generate</Category>
         </Metadata>
     </Prompt>
-
     <Prompt>
         <Id>TablePrompt6</Id>
         <Title>Generate data model class (Java)</Title>
@@ -547,31 +486,26 @@ You are a software engineer.
         <Tags>modeling, java, codegen</Tags>
         <Text>**Role**
 You are a software engineer.
-
 **Task**
 - Generate a Java POJO data model for this table.
 - Include fields and getters/setters.
 - Choose sensible types (e.g., `String`, `Integer/Long`, `BigDecimal`, `LocalDate/LocalDateTime`, `Boolean`) based on column names/types.
-
 **Constraints**
 - Use boxed types (`Integer`, `Long`, etc.) when nulls are plausible.
 - Do not add fields that are not in the table.
 - If a type is unclear, use `String` and add a short comment.
-
 **Response**
 - Output only the Java code.
-
 **Table Dialect**
 `{{dialect}}`
-
 **Table**
 `{{table_name}}`
-
 **Columns**
 ```text
 {{table}}
 ```</Text>
         <Placeholders>
+            <Placeholder name="dialect"/>
             <Placeholder name="table_name"/>
             <Placeholder name="table"/>
         </Placeholders>
@@ -579,7 +513,6 @@ You are a software engineer.
             <Category>Generate</Category>
         </Metadata>
     </Prompt>
-
     <Prompt>
         <Id>TablePrompt7</Id>
         <Title>Generate data model class (C#)</Title>
@@ -587,30 +520,25 @@ You are a software engineer.
         <Tags>modeling, csharp, codegen</Tags>
         <Text>**Role**
 You are a software engineer.
-
 **Task**
 - Generate a C# data model class for this table.
 - Use properties with sensible .NET types based on column names/types.
-
 **Constraints**
 - Use nullable types where appropriate (`int?`, `long?`, `decimal?`, `DateTime?`, `bool?`).
 - Do not add properties not represented by the table.
 - If a type is unclear, default to `string` and add a short comment.
-
 **Response**
 - Output only the C# code.
-
 **Table Dialect**
 `{{dialect}}`
-
 **Table**
 `{{table_name}}`
-
 **Columns**
 ```text
 {{table}}
 ```</Text>
         <Placeholders>
+            <Placeholder name="dialect"/>
             <Placeholder name="table_name"/>
             <Placeholder name="table"/>
         </Placeholders>
@@ -618,7 +546,6 @@ You are a software engineer.
             <Category>Generate</Category>
         </Metadata>
     </Prompt>
-
     <Prompt>
         <Id>TablePrompt8</Id>
         <Title>Create REST API endpoints specification</Title>
@@ -626,16 +553,13 @@ You are a software engineer.
         <Tags>api, rest, specification</Tags>
         <Text>**Role**
 You are a backend architect.
-
 **Task**
 - Create a specification for HTTP REST API endpoints for this table/entity.
 - Include CRUD endpoints, filtering/sorting, pagination, common validation errors, and example request/response JSON.
-
 **Constraints**
 - If a primary key is not obvious, propose one and state assumptions.
 - Use only provided columns; do not invent extra attributes.
 - Keep the spec practical for implementation (clear paths, fields, and behaviors).
-
 **Response**
 - Provide, in order:
 1) Entity assumptions (PK, key fields) (bullets)
@@ -643,18 +567,16 @@ You are a backend architect.
 3) Filtering/sorting/pagination conventions
 4) Validation error patterns (bullets)
 5) Example JSON for: create request, update request, single response, list response
-
 **Table Dialect**
 `{{dialect}}`
-
 **Table**
 `{{table_name}}`
-
 **Columns**
 ```text
 {{table}}
 ```</Text>
         <Placeholders>
+            <Placeholder name="dialect"/>
             <Placeholder name="table_name"/>
             <Placeholder name="table"/>
         </Placeholders>
@@ -662,23 +584,19 @@ You are a backend architect.
             <Category>Generate</Category>
         </Metadata>
     </Prompt>
-
     <Prompt>
         <Id>TablePrompt9</Id>
         <Title>Suggest visualizations for the data</Title>
         <Description>Suggests charts/KPIs, required fields, grain, and business questions</Description>
         <Tags>visualization, analytics, kpi</Tags>
-        <Text>**Role**
+<Text>**Role**
 You are a data analyst.
-
 **Task**
 - Suggest useful visualizations and KPIs for this table.
-
 **Constraints**
 - Base suggestions only on the provided columns.
 - For each suggestion, name the fields needed and how to group (including time grain if relevant).
 - If key columns (date/measure/category) are missing, state what would be needed and suggest alternatives.
-
 **Response**
 - Provide a list where each item includes:
 - Chart/KPI name
@@ -686,18 +604,16 @@ You are a data analyst.
 - Required fields
 - Grouping/time grain
 - Business question it answers
-
 **Table Dialect**
 `{{dialect}}`
-
 **Table**
 `{{table_name}}`
-
 **Columns**
 ```text
 {{table}}
 ```</Text>
         <Placeholders>
+            <Placeholder name="dialect"/>
             <Placeholder name="table_name"/>
             <Placeholder name="table"/>
         </Placeholders>
@@ -705,5 +621,192 @@ You are a data analyst.
             <Category>Analyze</Category>
         </Metadata>
     </Prompt>
-
+    <Prompt>
+        <Id>DefaultPrompt9</Id>
+        <Title>Explain execution plan</Title>
+        <Description>Explains EXPLAIN / SHOWPLAN output and ties plan operators back to the SQL query</Description>
+        <Tags>execution-plan, performance, explain</Tags>
+        <Text>**Role**
+You are a Senior Database Performance Engineer.
+**Task**
+- Explain the provided execution plan for SQL dialect `{{dialect}}`.
+- Connect important plan operators, scans, joins, sorts, estimates, and warnings back to the SQL text.
+- Identify likely bottlenecks, missing or weak indexes, expensive lookups, misestimates, and join strategy issues.
+- Suggest the highest-impact next steps to validate or improve the query.
+**Constraints**
+- Use the plan text as the primary source of truth.
+- Distinguish between facts visible in the plan and hypotheses that require validation with statistics or runtime measurements.
+- Prefer practical, low-risk recommendations before engine-specific hints.
+- If the SQL text and plan appear inconsistent, call that out explicitly.
+**Response**
+- Provide, in order:
+1) Plain-English summary of what the plan is doing
+2) Operator-by-operator highlights (bullets)
+3) Bottlenecks / warnings (bullets)
+4) Recommended next steps
+5) Revised SQL or index suggestions only if justified by the plan
+**SQL**
+```sql
+{{selected_sql}}
+```
+**Execution Plan**
+```text
+{{execution_plan}}
+```</Text>
+        <Placeholders>
+            <Placeholder name="selected_sql"/>
+            <Placeholder name="dialect"/>
+            <Placeholder name="execution_plan"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Analyze</Category>
+        </Metadata>
+    </Prompt>
+    <Prompt>
+        <Id>DefaultPrompt10</Id>
+        <Title>Review SQL for security and maintainability</Title>
+        <Description>Checks SQL for injection risks, unsafe patterns, readability issues, and maintainability problems</Description>
+        <Tags>review, security, maintainability</Tags>
+        <Text>**Role**
+You are a senior SQL reviewer.
+**Task**
+- Review the SQL for security, maintainability, and correctness risks in dialect `{{dialect}}`.
+- Look for unsafe string interpolation, injection-prone patterns, over-broad permissions assumptions, brittle logic, duplicated expressions, unclear naming, and hard-to-maintain constructs.
+- Suggest safer and cleaner alternatives while preserving behavior.
+**Constraints**
+- Preserve semantics unless you clearly label a safer intentional behavior change.
+- Prioritize issues by severity and impact.
+- If a risk depends on application code or runtime context, state that explicitly.
+- Keep the rewrite practical rather than stylistic for its own sake.
+**Response**
+- Provide, in order:
+1) High-priority issues
+2) Medium / low-priority issues
+3) Safer or cleaner rewrite
+4) Short rationale for the main changes
+**SQL**
+```sql
+{{selected_sql}}
+```</Text>
+        <Placeholders>
+            <Placeholder name="selected_sql"/>
+            <Placeholder name="dialect"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Analyze</Category>
+        </Metadata>
+    </Prompt>
+    <Prompt>
+        <Id>TablePrompt10</Id>
+        <Title>Generate data quality audit queries</Title>
+        <Description>Creates SQL checks for nulls, duplicates, accepted values, ranges, suspicious dates, and likely orphan keys</Description>
+        <Tags>data-quality, validation, profiling</Tags>
+        <Text>**Role**
+You are a data quality engineer.
+**Task**
+- Generate practical SQL data quality checks for the selected table in dialect `{{dialect}}`.
+- Cover nulls, duplicates, invalid ranges or formats, suspicious date values, accepted-value checks for status-like columns, and likely key integrity issues where they can be inferred from the column names.
+**Constraints**
+- Use only the provided table and columns.
+- Do not invent extra tables; if a relationship check would need another table, mark it as an assumption and still show the pattern.
+- Prefer queries that help a user quickly spot bad rows, not just aggregate counts.
+- Make the checks realistic for the detected columns and data types.
+**Response**
+- Provide 8–10 checks.
+- For each check, include:
+1) What it validates
+2) SQL (single code block)
+**Table Dialect**
+`{{dialect}}`
+**Table**
+`{{table_name}}`
+**Columns**
+```text
+{{table}}
+```</Text>
+        <Placeholders>
+            <Placeholder name="dialect"/>
+            <Placeholder name="table_name"/>
+            <Placeholder name="table"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Analyze</Category>
+        </Metadata>
+    </Prompt>
+    <Prompt>
+        <Id>TablePrompt11</Id>
+        <Title>Generate ALTER TABLE migration from description</Title>
+        <Description>Drafts ALTER TABLE or migration SQL for the selected table from a natural-language requirement</Description>
+        <Tags>ddl, alter-table, migration</Tags>
+        <Text>**Role**
+You are a database migration engineer.
+**Task**
+- Modify the selected table to satisfy the requirement below.
+- Generate the necessary `ALTER TABLE` or migration SQL for dialect `{{dialect}}`.
+- Use the provided table metadata as the current source schema.
+**Constraints**
+- Prefer additive and low-risk changes where possible.
+- If a change could be destructive or requires a data backfill, call that out explicitly.
+- Do not invent columns unrelated to the requirement.
+- If the dialect has limitations, provide the closest practical workaround.
+**Response**
+- Provide, in order:
+1) Migration SQL (single code block)
+2) Assumptions
+3) Warnings / destructive-change notes
+4) Optional rollback idea if relevant
+**Current Table**
+`{{table_name}}`
+```text
+{{table}}
+```
+**Requirement**
+```text
+{{user_input}}
+```</Text>
+        <Placeholders>
+            <Placeholder name="dialect"/>
+            <Placeholder name="table_name"/>
+            <Placeholder name="table"/>
+            <Placeholder name="user_input"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Generate</Category>
+        </Metadata>
+    </Prompt>
+    <Prompt>
+        <Id>TablePrompt12</Id>
+        <Title>Generate exploratory profiling queries</Title>
+        <Description>Creates starter queries to understand distributions, nulls, duplicates, date ranges, and outliers in a table</Description>
+        <Tags>profiling, analysis, onboarding</Tags>
+        <Text>**Role**
+You are a data analyst.
+**Task**
+- Create a starter pack of exploratory SQL queries for the selected table in dialect `{{dialect}}`.
+- Help the user understand row counts, null patterns, distinct values, duplicates, date ranges, common groupings, and likely outliers.
+**Constraints**
+- Use only the provided table and columns.
+- Favor practical onboarding queries a human would actually run first.
+- Adapt the checks to the available column names and types.
+- If a certain analysis is not possible from the provided columns, replace it with the next best alternative.
+**Response**
+- Provide 8 concise queries.
+- For each query, include:
+1) What it reveals
+2) SQL (single code block)
+**Table**
+`{{table_name}}`
+**Columns**
+```text
+{{table}}
+```</Text>
+        <Placeholders>
+            <Placeholder name="dialect"/>
+            <Placeholder name="table_name"/>
+            <Placeholder name="table"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Analyze</Category>
+        </Metadata>
+    </Prompt>
 </Prompts>
