@@ -12,8 +12,6 @@ namespace NppDB.Core
     public struct PromptPlaceholder
     {
         public string Name;
-        public bool IsEditable;
-        public bool IsRichText;
     }
 
     public struct PromptItem
@@ -99,7 +97,6 @@ namespace NppDB.Core
             colPromptType.Visible = false;
             lblPromptType.Visible = false;
             lblPromptCapabilities.Visible = false;
-            panelSchemaBanner.Visible = false;
 
             _actionToolTip.SetToolTip(buttonDuplicate, "Select a prompt to duplicate.");
         }
@@ -391,7 +388,6 @@ namespace NppDB.Core
 
         private void UpdatePromptMeta(PromptItem? prompt)
         {
-            panelSchemaBanner.Visible = false;
             _actionToolTip.SetToolTip(buttonDuplicate, "Select a prompt to duplicate.");
         }
 
@@ -443,6 +439,14 @@ namespace NppDB.Core
             }
         }
 
+        private bool IsWarningOnlyPlaceholder(string placeholderName)
+        {
+            return string.Equals(placeholderName, "selected_sql", StringComparison.OrdinalIgnoreCase)
+                   || string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase)
+                   || string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase)
+                   || string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase);
+        }
+
         private void GeneratePlaceholderControls(PromptItem prompt)
         {
             var pal = UiThemeManager.Current;
@@ -475,64 +479,42 @@ namespace NppDB.Core
                         Margin = new Padding(0, 0, 0, 2)
                     };
 
-                    if (placeholder.IsEditable)
+                    var initialValue = string.Empty;
+                    var hasInitialValue = Placeholders.TryGetValue(placeholder.Name, out initialValue)
+                        && !string.IsNullOrWhiteSpace(initialValue);
+                    var showWarning = !hasInitialValue && IsWarningOnlyPlaceholder(placeholder.Name);
+
+                    if (showWarning)
+                    {
+                        label.Text = $"{placeholder.Name} (Warning!)";
+                        label.ForeColor = pal.IsDark ? pal.DarkerText : Color.DimGray;
+                    }
+                    else
                     {
                         label.Text = $"{placeholder.Name} *";
                         label.Font = new Font(label.Font, FontStyle.Bold);
                         label.ForeColor = pal.IsDark ? pal.Text : Color.Black;
-                        
+
                         var tip = new ToolTip();
                         tip.SetToolTip(label, "This field is required.");
-                    }
-                    else
-                    {
-                        label.Text = $"{placeholder.Name} (Auto-filled)";
-                        label.ForeColor = pal.IsDark ? pal.DarkerText : Color.DimGray;
                     }
 
                     container.Controls.Add(label);
 
-                    // input control
-                    var initialValue = "";
-                    if (Placeholders.ContainsKey(placeholder.Name))
+                    if (!showWarning)
                     {
-                        initialValue = Placeholders[placeholder.Name];
-                    }
-
-                    if (placeholder.IsEditable)
-                    {
-                        Control inputControl;
-                        if (placeholder.IsRichText)
+                        var inputControl = new RichTextBox
                         {
-                            var rtBox = new RichTextBox
-                            {
-                                Height = 80,
-                                Width = container.Width,
-                                Text = initialValue,
-                                Tag = placeholder.Name,
-                                BorderStyle = BorderStyle.FixedSingle,
-                                ScrollBars = RichTextBoxScrollBars.Vertical
-                            };
-                            rtBox.TextChanged += InputControl_TextChanged;
-                            inputControl = rtBox;
-                        }
-                        else
-                        {
-                            var txtBox = new TextBox
-                            {
-                                Width = container.Width,
-                                Text = initialValue,
-                                Tag = placeholder.Name,
-                                Multiline = true,
-                                Height = 60,
-                                ScrollBars = ScrollBars.Vertical
-                            };
-                            txtBox.TextChanged += InputControl_TextChanged;
-                            inputControl = txtBox;
-                        }
+                            Height = 80,
+                            Width = container.Width,
+                            Text = initialValue ?? string.Empty,
+                            Tag = placeholder.Name,
+                            BorderStyle = BorderStyle.FixedSingle,
+                            ScrollBars = RichTextBoxScrollBars.Vertical
+                        };
+                        inputControl.TextChanged += InputControl_TextChanged;
                         container.Controls.Add(inputControl);
 
-                        // vertical resize grip
                         var grip = new Panel
                         {
                             Height = 5,
@@ -548,11 +530,10 @@ namespace NppDB.Core
                     }
                     else
                     {
-                        // read-only placeholders
                         var lblValue = new RichTextBox
                         {
                             Width = container.Width,
-                            Text = string.IsNullOrEmpty(initialValue) ? GetAutoFilledPlaceholderHint(placeholder.Name) : initialValue,
+                            Text = GetAutoFilledPlaceholderHint(placeholder.Name),
                             ReadOnly = true,
                             BackColor = pal.IsDark ? pal.Background : SystemColors.Control,
                             ForeColor = pal.IsDark ? pal.Text : SystemColors.WindowText
@@ -889,7 +870,7 @@ namespace NppDB.Core
                 if (!seen.Add(name))
                     continue;
 
-                var placeholder = new PromptPlaceholder { Name = name, IsEditable = true, IsRichText = false };
+                var placeholder = new PromptPlaceholder { Name = name };
 
                 if (existingPlaceholders != null)
                 {
@@ -897,9 +878,6 @@ namespace NppDB.Core
                     {
                         if (!string.Equals(existingPlaceholders[i].Name, name, StringComparison.OrdinalIgnoreCase))
                             continue;
-
-                        placeholder.IsEditable = existingPlaceholders[i].IsEditable;
-                        placeholder.IsRichText = existingPlaceholders[i].IsRichText;
                         break;
                     }
                 }
@@ -921,8 +899,7 @@ namespace NppDB.Core
             if (string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase))
                 return "Select a table in DB Manager.";
 
-            if (string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(placeholderName, "columns_with_types", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
                 return "Please expand table in DB Manager.";
 
             return "<No context available>";
@@ -930,9 +907,6 @@ namespace NppDB.Core
 
         private string GetMissingPlaceholderMessage(PromptPlaceholder placeholder)
         {
-            if (placeholder.IsEditable)
-                return "Fill {{" + placeholder.Name + "}}";
-
             if (string.Equals(placeholder.Name, "selected_sql", StringComparison.OrdinalIgnoreCase))
                 return "Tab contents are missing. Please input some SQL or select a portion of SQL in the editor to auto-fill this placeholder.";
 
@@ -942,11 +916,10 @@ namespace NppDB.Core
             if (string.Equals(placeholder.Name, "table_name", StringComparison.OrdinalIgnoreCase))
                 return "Select a table in DB Manager";
 
-            if (string.Equals(placeholder.Name, "table", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(placeholder.Name, "columns_with_types", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(placeholder.Name, "table", StringComparison.OrdinalIgnoreCase))
                 return "Please expand table in DB Manager";
 
-            return "Missing auto-filled value for {{" + placeholder.Name + "}}";
+            return "Fill {{" + placeholder.Name + "}}";
         }
 
         private void ValidateInputs()

@@ -57,7 +57,7 @@ namespace NppDB.Core
             this.panelBottom.Controls.Add(this.buttonDiscard);
             this.panelBottom.Controls.Add(this.buttonSave);
             this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelBottom.Location = new System.Drawing.Point(0, 500);
+            this.panelBottom.Location = new System.Drawing.Point(0, 575);
             this.panelBottom.Name = "panelBottom";
             this.panelBottom.Size = new System.Drawing.Size(684, 45);
             this.panelBottom.TabIndex = 4;
@@ -176,18 +176,20 @@ namespace NppDB.Core
             this.txtPrompt.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtPrompt.Location = new System.Drawing.Point(15, 210);
             this.txtPrompt.Name = "txtPrompt";
-            this.txtPrompt.Size = new System.Drawing.Size(657, 266);
+            this.txtPrompt.Size = new System.Drawing.Size(657, 254);
             this.txtPrompt.TabIndex = 3;
             this.txtPrompt.Text = "";
             // 
             // lblPlaceholders
             // 
-            this.lblPlaceholders.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblPlaceholders.AutoSize = true;
+            this.lblPlaceholders.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblPlaceholders.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblPlaceholders.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.lblPlaceholders.Location = new System.Drawing.Point(15, 482);
+            this.lblPlaceholders.Location = new System.Drawing.Point(15, 473);
             this.lblPlaceholders.Name = "lblPlaceholders";
-            this.lblPlaceholders.Size = new System.Drawing.Size(0, 15);
+            this.lblPlaceholders.Padding = new System.Windows.Forms.Padding(6);
+            this.lblPlaceholders.Size = new System.Drawing.Size(657, 96);
             this.lblPlaceholders.TabIndex = 6;
             // 
             // FrmPromptEditor
@@ -196,7 +198,7 @@ namespace NppDB.Core
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.buttonDiscard;
-            this.ClientSize = new System.Drawing.Size(684, 545);
+            this.ClientSize = new System.Drawing.Size(684, 620);
             this.Controls.Add(this.lblPlaceholders);
             this.Controls.Add(this.txtPrompt);
             this.Controls.Add(this.lblPrompt);
@@ -209,7 +211,7 @@ namespace NppDB.Core
             this.Controls.Add(this.panelBottom);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(500, 400);
+            this.MinimumSize = new System.Drawing.Size(560, 500);
             this.Name = "FrmPromptEditor";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;

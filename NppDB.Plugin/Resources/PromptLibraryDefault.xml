@@ -32,7 +32,7 @@ You are an expert SQL instructor.
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
-            <Placeholder name="dialect" editable="true"/>
+            <Placeholder name="dialect" />
         </Placeholders>
         <Metadata>
             <Category>Refactor</Category>
@@ -72,7 +72,7 @@ subqueries, N+1-like patterns in SQL).
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
-            <Placeholder name="dialect" editable="true"/>
+            <Placeholder name="dialect" />
         </Placeholders>
         <Metadata>
             <Category>Refactor</Category>
@@ -121,8 +121,8 @@ still provide the best-effort fix.
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
-            <Placeholder name="dialect" editable="true"/>
-            <Placeholder name="error_message" editable="true" rich="true"/>
+            <Placeholder name="dialect" />
+            <Placeholder name="error_message" />
         </Placeholders>
         <Metadata>
             <Category>Refactor</Category>
@@ -159,8 +159,8 @@ TOP).
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
-            <Placeholder name="source_dialect" editable="true"/>
-            <Placeholder name="target_dialect" editable="true"/>
+            <Placeholder name="source_dialect" />
+            <Placeholder name="target_dialect" />
         </Placeholders>
         <Metadata>
             <Category>Refactor</Category>
@@ -195,8 +195,8 @@ involved.
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
-            <Placeholder name="dialect" editable="true"/>
-            <Placeholder name="format" editable="true"/>
+            <Placeholder name="dialect" />
+            <Placeholder name="format" />
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -232,8 +232,8 @@ You are a Database Architect.
 {{user_input}}
 ```</Text>
         <Placeholders>
-            <Placeholder name="target_dialect" editable="true"/>
-            <Placeholder name="user_input" editable="true" rich="true"/>
+            <Placeholder name="target_dialect" />
+            <Placeholder name="user_input" />
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -275,8 +275,8 @@ query.
 {{user_input}}
 ```</Text>
         <Placeholders>
-            <Placeholder name="dialect" editable="true"/>
-            <Placeholder name="user_input" editable="true" rich="true"/>
+            <Placeholder name="dialect" />
+            <Placeholder name="user_input" />
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -323,9 +323,9 @@ distributions).
 {{query_b}}
 ```</Text>
         <Placeholders>
-            <Placeholder name="target_dialect" editable="true"/>
-            <Placeholder name="query_a" editable="true" rich="true"/>
-            <Placeholder name="query_b" editable="true" rich="true"/>
+            <Placeholder name="target_dialect" />
+            <Placeholder name="query_a" />
+            <Placeholder name="query_b" />
         </Placeholders>
         <Metadata>
             <Category>Analyze</Category>

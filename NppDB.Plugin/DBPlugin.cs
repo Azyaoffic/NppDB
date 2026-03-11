@@ -1987,7 +1987,6 @@ namespace NppDB
                 if (!string.IsNullOrWhiteSpace(dbContext.ColumnsWithTypes))
                 {
                     placeholders["table"] = dbContext.ColumnsWithTypes;
-                    placeholders["columns_with_types"] = dbContext.ColumnsWithTypes;
                 }
             }
         }
@@ -2075,20 +2074,12 @@ namespace NppDB
                             if (phNode is XmlElement phElem)
                             {
                                 var name = phElem.GetAttribute("name");
-                                
-                                var isEditableRaw = phElem.GetAttribute("editable");
-                                var isEditable = !string.IsNullOrEmpty(isEditableRaw);
-                                
-                                var isRichRaw = phElem.GetAttribute("rich");
-                                var isRich = !string.IsNullOrEmpty(isRichRaw);
 
                                 if (!string.IsNullOrWhiteSpace(name))
                                 {
                                     placeholderList.Add(new PromptPlaceholder
                                     {
                                         Name = name,
-                                        IsEditable = isEditable,
-                                        IsRichText = isRich
                                     });
                                 }
                             }

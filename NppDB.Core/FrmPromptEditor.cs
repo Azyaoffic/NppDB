@@ -53,7 +53,7 @@ namespace NppDB.Core
                 var placeholderName = match.Groups[1].Value.Trim();
                 if (!string.IsNullOrEmpty(placeholderName))
                 {
-                    placeholders.Add(new PromptPlaceholder { Name = placeholderName, IsEditable = true });
+                    placeholders.Add(new PromptPlaceholder { Name = placeholderName });
                 }
             }
 
