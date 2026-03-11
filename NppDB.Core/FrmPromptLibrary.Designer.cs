@@ -92,16 +92,16 @@ namespace NppDB.Core
             this.splitContainerMain.Panel1.Controls.Add(this.promptsGridView);
             this.splitContainerMain.Panel1.Controls.Add(this.panelSearch);
             this.splitContainerMain.Panel1.Controls.Add(this.panelLeftActions);
-            this.splitContainerMain.Panel1MinSize = 250;
+            this.splitContainerMain.Panel1MinSize = 300;
             // 
             // splitContainerMain.Panel2
             // 
             this.splitContainerMain.Panel2.Controls.Add(this.grpPreview);
             this.splitContainerMain.Panel2.Controls.Add(this.panelRightActions);
             this.splitContainerMain.Panel2.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
-            this.splitContainerMain.Panel2MinSize = 430;
-            this.splitContainerMain.Size = new System.Drawing.Size(969, 500);
-            this.splitContainerMain.SplitterDistance = 328;
+            this.splitContainerMain.Panel2MinSize = 450;
+            this.splitContainerMain.Size = new System.Drawing.Size(1004, 540);
+            this.splitContainerMain.SplitterDistance = 380;
             this.splitContainerMain.TabIndex = 0;
             // 
             // promptsGridView
@@ -110,19 +110,22 @@ namespace NppDB.Core
             this.promptsGridView.AllowUserToDeleteRows = false;
             this.promptsGridView.AllowUserToResizeRows = false;
             this.promptsGridView.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCellsExceptHeaders;
+            this.promptsGridView.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.promptsGridView.BackgroundColor = System.Drawing.SystemColors.Window;
             this.promptsGridView.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
-            this.promptsGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.promptsGridView.ColumnHeadersHeight = 30;
+            this.promptsGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.promptsGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colPromptName,
             this.colPromptDesc,
             this.colPromptType});
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.Padding = new System.Windows.Forms.Padding(6, 6, 6, 4);
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.promptsGridView.DefaultCellStyle = dataGridViewCellStyle1;
             this.promptsGridView.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -134,7 +137,8 @@ namespace NppDB.Core
             this.promptsGridView.ReadOnly = true;
             this.promptsGridView.RowHeadersVisible = false;
             this.promptsGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.promptsGridView.Size = new System.Drawing.Size(328, 390);
+            this.promptsGridView.RowTemplate.Height = 44;
+            this.promptsGridView.Size = new System.Drawing.Size(380, 446);
             this.promptsGridView.TabIndex = 1;
             this.promptsGridView.SelectionChanged += new System.EventHandler(this.promptsListView_SelectedIndexChanged);
             // 
@@ -143,7 +147,8 @@ namespace NppDB.Core
             this.colPromptName.HeaderText = "Prompt Name";
             this.colPromptName.Name = "colPromptName";
             this.colPromptName.ReadOnly = true;
-            this.colPromptName.Width = 140;
+            this.colPromptName.MinimumWidth = 160;
+            this.colPromptName.Width = 170;
             // 
             // colPromptDesc
             // 
@@ -168,7 +173,8 @@ namespace NppDB.Core
             this.panelSearch.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelSearch.Location = new System.Drawing.Point(0, 0);
             this.panelSearch.Name = "panelSearch";
-            this.panelSearch.Size = new System.Drawing.Size(328, 70);
+            this.panelSearch.Padding = new System.Windows.Forms.Padding(0, 6, 0, 0);
+            this.panelSearch.Size = new System.Drawing.Size(380, 70);
             this.panelSearch.TabIndex = 0;
             // 
             // cmbPromptSource
@@ -177,16 +183,16 @@ namespace NppDB.Core
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbPromptSource.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbPromptSource.FormattingEnabled = true;
-            this.cmbPromptSource.Location = new System.Drawing.Point(55, 38);
+            this.cmbPromptSource.Location = new System.Drawing.Point(60, 40);
             this.cmbPromptSource.Name = "cmbPromptSource";
-            this.cmbPromptSource.Size = new System.Drawing.Size(270, 21);
+            this.cmbPromptSource.Size = new System.Drawing.Size(320, 21);
             this.cmbPromptSource.TabIndex = 3;
             this.cmbPromptSource.SelectedIndexChanged += new System.EventHandler(this.cmbPromptSource_SelectedIndexChanged);
             // 
             // lblSource
             // 
             this.lblSource.AutoSize = true;
-            this.lblSource.Location = new System.Drawing.Point(4, 42);
+            this.lblSource.Location = new System.Drawing.Point(4, 43);
             this.lblSource.Name = "lblSource";
             this.lblSource.Size = new System.Drawing.Size(45, 13);
             this.lblSource.TabIndex = 2;
@@ -196,17 +202,17 @@ namespace NppDB.Core
             // 
             this.txtSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtSearch.Location = new System.Drawing.Point(55, 7);
+            this.txtSearch.Location = new System.Drawing.Point(60, 10);
             this.txtSearch.MinimumSize = new System.Drawing.Size(100, 22);
             this.txtSearch.Name = "txtSearch";
-            this.txtSearch.Size = new System.Drawing.Size(270, 22);
+            this.txtSearch.Size = new System.Drawing.Size(320, 22);
             this.txtSearch.TabIndex = 1;
             this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
             // 
             // lblSearch
             // 
             this.lblSearch.AutoSize = true;
-            this.lblSearch.Location = new System.Drawing.Point(4, 10);
+            this.lblSearch.Location = new System.Drawing.Point(4, 13);
             this.lblSearch.Name = "lblSearch";
             this.lblSearch.Size = new System.Drawing.Size(44, 13);
             this.lblSearch.TabIndex = 0;
@@ -219,10 +225,10 @@ namespace NppDB.Core
             this.panelLeftActions.Controls.Add(this.buttonDelete);
             this.panelLeftActions.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.panelLeftActions.Location = new System.Drawing.Point(0, 460);
-            this.panelLeftActions.MinimumSize = new System.Drawing.Size(250, 40);
+            this.panelLeftActions.MinimumSize = new System.Drawing.Size(300, 48);
             this.panelLeftActions.Name = "panelLeftActions";
-            this.panelLeftActions.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
-            this.panelLeftActions.Size = new System.Drawing.Size(328, 40);
+            this.panelLeftActions.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
+            this.panelLeftActions.Size = new System.Drawing.Size(380, 48);
             this.panelLeftActions.TabIndex = 2;
             this.panelLeftActions.WrapContents = false;
             // 
@@ -230,7 +236,8 @@ namespace NppDB.Core
             // 
             this.buttonAdd.Location = new System.Drawing.Point(3, 8);
             this.buttonAdd.Name = "buttonAdd";
-            this.buttonAdd.Size = new System.Drawing.Size(75, 28);
+            this.buttonAdd.Margin = new System.Windows.Forms.Padding(0, 0, 8, 0);
+            this.buttonAdd.Size = new System.Drawing.Size(88, 30);
             this.buttonAdd.TabIndex = 1;
             this.buttonAdd.Text = "Add New";
             this.buttonAdd.UseVisualStyleBackColor = true;
@@ -238,9 +245,10 @@ namespace NppDB.Core
             // 
             // buttonDuplicate
             // 
-            this.buttonDuplicate.Location = new System.Drawing.Point(84, 8);
+            this.buttonDuplicate.Location = new System.Drawing.Point(96, 8);
             this.buttonDuplicate.Name = "buttonDuplicate";
-            this.buttonDuplicate.Size = new System.Drawing.Size(75, 28);
+            this.buttonDuplicate.Margin = new System.Windows.Forms.Padding(0, 0, 8, 0);
+            this.buttonDuplicate.Size = new System.Drawing.Size(88, 30);
             this.buttonDuplicate.TabIndex = 3;
             this.buttonDuplicate.Text = "Duplicate";
             this.buttonDuplicate.UseVisualStyleBackColor = true;
@@ -248,9 +256,9 @@ namespace NppDB.Core
             // 
             // buttonDelete
             // 
-            this.buttonDelete.Location = new System.Drawing.Point(165, 8);
+            this.buttonDelete.Location = new System.Drawing.Point(192, 8);
             this.buttonDelete.Name = "buttonDelete";
-            this.buttonDelete.Size = new System.Drawing.Size(75, 28);
+            this.buttonDelete.Size = new System.Drawing.Size(88, 30);
             this.buttonDelete.TabIndex = 2;
             this.buttonDelete.Text = "Delete";
             this.buttonDelete.UseVisualStyleBackColor = true;
@@ -488,11 +496,11 @@ namespace NppDB.Core
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(989, 520);
+            this.ClientSize = new System.Drawing.Size(1024, 560);
             this.Controls.Add(this.splitContainerMain);
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Location = new System.Drawing.Point(15, 15);
-            this.MinimumSize = new System.Drawing.Size(740, 460);
+            this.MinimumSize = new System.Drawing.Size(820, 520);
             this.Name = "FrmPromptLibrary";
             this.Padding = new System.Windows.Forms.Padding(10);
             this.ShowIcon = false;

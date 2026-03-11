@@ -92,7 +92,7 @@ namespace NppDB.Core
         {
             cmbPromptSource.Visible = false;
             lblSource.Visible = false;
-            panelSearch.Height = 34;
+            panelSearch.Height = 42;
 
             colPromptType.Visible = false;
             lblPromptType.Visible = false;
@@ -258,19 +258,35 @@ namespace NppDB.Core
             PopulatePromptList();
         }
 
+        private static Color BlendColor(Color baseColor, Color overlayColor, float amount)
+        {
+            amount = Math.Max(0f, Math.Min(1f, amount));
+
+            int r = (int)(baseColor.R + ((overlayColor.R - baseColor.R) * amount));
+            int g = (int)(baseColor.G + ((overlayColor.G - baseColor.G) * amount));
+            int b = (int)(baseColor.B + ((overlayColor.B - baseColor.B) * amount));
+
+            return Color.FromArgb(baseColor.A, r, g, b);
+        }
+
         private void ApplyRowStyling(DataGridViewRow row, PromptItem prompt)
         {
             var pal = UiThemeManager.Current;
+            var isAlternateRow = (row.Index % 2) == 1;
 
             if (pal.IsDark)
             {
-                row.DefaultCellStyle.BackColor = pal.PureBackground;
+                row.DefaultCellStyle.BackColor = isAlternateRow
+                    ? BlendColor(pal.PureBackground, Color.White, 0.05f)
+                    : pal.PureBackground;
                 row.DefaultCellStyle.SelectionBackColor = pal.HotBackground;
                 row.DefaultCellStyle.SelectionForeColor = pal.Text;
                 return;
             }
 
-            row.DefaultCellStyle.BackColor = SystemColors.Window;
+            row.DefaultCellStyle.BackColor = isAlternateRow
+                ? BlendColor(SystemColors.Window, Color.Black, 0.035f)
+                : SystemColors.Window;
             row.DefaultCellStyle.SelectionBackColor = SystemColors.Highlight;
             row.DefaultCellStyle.SelectionForeColor = SystemColors.HighlightText;
         }
@@ -287,7 +303,7 @@ namespace NppDB.Core
                     var rowIndex = promptsGridView.Rows.Add(prompt.Title, prompt.Description, string.Empty);
                     var row = promptsGridView.Rows[rowIndex];
                     row.Tag = prompt;
-                    row.DividerHeight = (prompt.Tags != null && prompt.Tags.Length > 0) ? 16 : 0; // “mini row” height
+                    row.DividerHeight = (prompt.Tags != null && prompt.Tags.Length > 0) ? 22 : 0;
                     ApplyRowStyling(row, prompt);
                 }
 
@@ -343,11 +359,11 @@ namespace NppDB.Core
                         e.Graphics.FillRectangle(bgBrush, rect);
                     }
 
-                    var fontSize = 8f;
+                    var fontSize = 8.25f;
                     using (var font = new Font(promptsGridView.Font.FontFamily, fontSize, FontStyle.Regular))
                     using (var textBrush = new SolidBrush(textColor))
                     {
-                        e.Graphics.DrawString("Tags: " + tagsText, font, textBrush, startX + 5, rect.Top + 1);
+                        e.Graphics.DrawString("Tags: " + tagsText, font, textBrush, startX + 7, rect.Top + 3);
                     }
 
                     using (var linePen = new Pen(promptsGridView.GridColor))
