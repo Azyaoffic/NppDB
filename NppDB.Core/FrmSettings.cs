@@ -54,7 +54,8 @@ namespace NppDB.Core
 
             if (LanguageCodeDict != null && LanguageCodeDict.Count > 0)
             {
-                foreach (var lang in LanguageCodeDict.Values)
+                var sortedLanguages = LanguageCodeDict.Values.OrderBy(l => l).ToList();
+                foreach (var lang in sortedLanguages)
                     comboResponseLanguage.Items.Add(lang);
             }
             else
