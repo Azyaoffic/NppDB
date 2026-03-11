@@ -14,7 +14,7 @@ namespace NppDB.Core
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start("https://github.com/gutkyu/NppDB");
+            Process.Start("https://github.com/azyaoffic/NppDB");
         }
 
         private void frmAbout_Load(object sender, EventArgs e)
