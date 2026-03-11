@@ -109,7 +109,7 @@ namespace NppDB.Core
             this.tabBehavior.Padding = new System.Windows.Forms.Padding(10);
             this.tabBehavior.Size = new System.Drawing.Size(766, 444);
             this.tabBehavior.TabIndex = 0;
-            this.tabBehavior.Text = "Behavior";
+            this.tabBehavior.Text = "Plugin Behavior Preferences";
             this.tabBehavior.UseVisualStyleBackColor = true;
             // 
             // grpBehavior
@@ -258,7 +258,7 @@ namespace NppDB.Core
             this.tabLlm.Padding = new System.Windows.Forms.Padding(10);
             this.tabLlm.Size = new System.Drawing.Size(766, 444);
             this.tabLlm.TabIndex = 1;
-            this.tabLlm.Text = "LLM";
+            this.tabLlm.Text = "LLM Response Preferences";
             this.tabLlm.UseVisualStyleBackColor = true;
             // 
             // grpLlm
