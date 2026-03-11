@@ -33,6 +33,17 @@ You can also find toolbar buttons for:
 3. Connect and expand nodes to browse schemas, tables, views, and columns
 4. Important: try right-clicking tables and columns in DB Manager. Many useful actions are there.
 
+## Fast workflow
+1. Connect with `F10`
+2. Browse tables in DB Manager
+3. Expand the table you need to so metadata loads
+4. Open Prompt Library with `Ctrl + F10`
+5. Pick a prompt, fill any extra placeholders, then copy it
+4. Write or paste SQL in the editor
+5. Select the exact block you want to run
+6. Press `F9` to execute
+7. Press `Shift + F9` to analyze if needed
+
 ## Run SQL (`F9`)
 - If text is selected: executes statements inside the selection
 - If nothing is selected: executes the statement your caret is currently inside
@@ -194,15 +205,3 @@ Notes:
   
 - Tab colors are all messed up! I can't read tutorial like this!
   - Connecting to database or performing analysis changes tab language to SQL. Change it back in Notepad++ in "Language -> Markdown"
-
-## Fast workflow
-1. Connect with `F10`
-2. Browse tables in DB Manager
-3. Expand the table you need to so metadata loads
-4. Open Prompt Library with `Ctrl + F10`
-5. Pick a prompt, fill any extra placeholders, then copy it
-4. Write or paste SQL in the editor
-5. Select the exact block you want to run
-6. Press `F9` to execute
-7. Press `Shift + F9` to analyze if needed
-8. Open `Ctrl + F10` when you want reusable prompts
