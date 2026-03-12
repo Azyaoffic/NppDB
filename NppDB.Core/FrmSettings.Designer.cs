@@ -42,6 +42,8 @@ namespace NppDB.Core
             this.lblOpenUrl = new System.Windows.Forms.Label();
             this.txtOpenLlmUrl = new System.Windows.Forms.TextBox();
             this.lblCustomInstructions = new System.Windows.Forms.Label();
+            this.pnlCustomInstructionsHeader = new System.Windows.Forms.FlowLayoutPanel();
+            this.btnCustomInstructionsInfo = new System.Windows.Forms.Button();
             this.txtCustomInstructions = new System.Windows.Forms.RichTextBox();
             this.tabAiTemplate = new System.Windows.Forms.TabPage();
             this.grpAiTemplate = new System.Windows.Forms.GroupBox();
@@ -282,7 +284,7 @@ namespace NppDB.Core
             this.tableLlm.Controls.Add(this.comboResponseLanguage, 1, 0);
             this.tableLlm.Controls.Add(this.lblOpenUrl, 0, 1);
             this.tableLlm.Controls.Add(this.txtOpenLlmUrl, 1, 1);
-            this.tableLlm.Controls.Add(this.lblCustomInstructions, 0, 2);
+            this.tableLlm.Controls.Add(this.pnlCustomInstructionsHeader, 0, 2);
             this.tableLlm.Controls.Add(this.txtCustomInstructions, 0, 3);
             this.tableLlm.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLlm.Location = new System.Drawing.Point(10, 25);
@@ -336,18 +338,42 @@ namespace NppDB.Core
             this.txtOpenLlmUrl.Name = "txtOpenLlmUrl";
             this.txtOpenLlmUrl.Size = new System.Drawing.Size(560, 22);
             this.txtOpenLlmUrl.TabIndex = 3;
-            // 
+            //
+            // pnlCustomInstructionsHeader
+            //
+            this.pnlCustomInstructionsHeader.AutoSize = true;
+            this.pnlCustomInstructionsHeader.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tableLlm.SetColumnSpan(this.pnlCustomInstructionsHeader, 2);
+            this.pnlCustomInstructionsHeader.Controls.Add(this.lblCustomInstructions);
+            this.pnlCustomInstructionsHeader.Controls.Add(this.btnCustomInstructionsInfo);
+            this.pnlCustomInstructionsHeader.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlCustomInstructionsHeader.Location = new System.Drawing.Point(3, 68);
+            this.pnlCustomInstructionsHeader.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.pnlCustomInstructionsHeader.Name = "pnlCustomInstructionsHeader";
+            this.pnlCustomInstructionsHeader.Size = new System.Drawing.Size(720, 26);
+            this.pnlCustomInstructionsHeader.TabIndex = 4;
+            this.pnlCustomInstructionsHeader.WrapContents = false;
+            //
             // lblCustomInstructions
-            // 
+            //
             this.lblCustomInstructions.AutoSize = true;
-            this.tableLlm.SetColumnSpan(this.lblCustomInstructions, 2);
-            this.lblCustomInstructions.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblCustomInstructions.Location = new System.Drawing.Point(3, 68);
+            this.lblCustomInstructions.Location = new System.Drawing.Point(0, 0);
+            this.lblCustomInstructions.Margin = new System.Windows.Forms.Padding(0, 8, 6, 0);
             this.lblCustomInstructions.Name = "lblCustomInstructions";
-            this.lblCustomInstructions.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
-            this.lblCustomInstructions.Size = new System.Drawing.Size(720, 26);
-            this.lblCustomInstructions.TabIndex = 4;
+            this.lblCustomInstructions.Size = new System.Drawing.Size(101, 13);
+            this.lblCustomInstructions.TabIndex = 0;
             this.lblCustomInstructions.Text = "Custom instructions";
+            //
+            // btnCustomInstructionsInfo
+            //
+            this.btnCustomInstructionsInfo.Location = new System.Drawing.Point(107, 3);
+            this.btnCustomInstructionsInfo.Margin = new System.Windows.Forms.Padding(0, 3, 0, 0);
+            this.btnCustomInstructionsInfo.Name = "btnCustomInstructionsInfo";
+            this.btnCustomInstructionsInfo.Size = new System.Drawing.Size(24, 22);
+            this.btnCustomInstructionsInfo.TabIndex = 1;
+            this.btnCustomInstructionsInfo.Text = "?";
+            this.btnCustomInstructionsInfo.UseVisualStyleBackColor = true;
+            this.btnCustomInstructionsInfo.Click += new System.EventHandler(this.btnCustomInstructionsInfo_Click);
             // 
             // txtCustomInstructions
             // 
@@ -566,6 +592,8 @@ namespace NppDB.Core
         private System.Windows.Forms.Label lblOpenUrl;
         private System.Windows.Forms.TextBox txtOpenLlmUrl;
         private System.Windows.Forms.Label lblCustomInstructions;
+        private System.Windows.Forms.FlowLayoutPanel pnlCustomInstructionsHeader;
+        private System.Windows.Forms.Button btnCustomInstructionsInfo;
         private System.Windows.Forms.RichTextBox txtCustomInstructions;
 
         private System.Windows.Forms.TabPage tabAiTemplate;

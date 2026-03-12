@@ -127,6 +127,29 @@ namespace NppDB.Core
             txtAiTemplate.SelectionStart = start + ph.Length;
             txtAiTemplate.Focus();
         }
+        
+        private void btnCustomInstructionsInfo_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(
+                this,
+                "Custom instructions let you guide how the AI responds in general.\n\n" +
+                "You can use them to control:\n" +
+                "- explanation length\n" +
+                "- tone\n" +
+                "- level of detail\n" +
+                "- formatting style\n" +
+                "- whether code should be minimal or more commented\n\n" +
+                "Examples:\n" +
+                "- Keep explanations concise and to the point.\n" +
+                "- Explain things step by step for a beginner.\n" +
+                "- Prefer practical examples over theory.\n" +
+                "- When giving code, keep changes minimal.\n" +
+                "- Use short answers unless more detail is requested.\n\n" +
+                "These instructions are applied generally, so they should describe how you usually want responses to look.",
+                "Custom instructions help",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
 
         private void btnRestoreDefaultTemplate_Click(object sender, EventArgs e)
         {
