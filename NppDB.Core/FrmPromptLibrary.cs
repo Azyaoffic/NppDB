@@ -469,7 +469,7 @@ namespace NppDB.Core
 
             flowLayoutPanelPlaceholders.Controls.Clear();
             flowLayoutPanelPlaceholders.SuspendLayout();
-            
+
             _placeholdersInCurrentView.Clear();
 
             if (prompt.Placeholders != null)
@@ -478,9 +478,9 @@ namespace NppDB.Core
                 {
                     if (string.IsNullOrEmpty(placeholder.Name) || _placeholdersInCurrentView.Contains(placeholder.Name))
                         continue;
-                    
+
                     _placeholdersInCurrentView.Add(placeholder.Name);
-                    
+
                     var container = new FlowLayoutPanel
                     {
                         FlowDirection = FlowDirection.TopDown,
@@ -492,83 +492,75 @@ namespace NppDB.Core
                     var label = new Label
                     {
                         AutoSize = true,
-                        Margin = new Padding(0, 0, 0, 2)
+                        Margin = new Padding(0, 0, 0, 2),
+                        Text = $"{placeholder.Name} *",
+                        Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold),
+                        ForeColor = pal.IsDark ? pal.Text : Color.Black
                     };
+
+                    var tip = new ToolTip();
+                    tip.SetToolTip(label, "This field is required.");
+                    container.Controls.Add(label);
 
                     var initialValue = string.Empty;
                     var hasInitialValue = Placeholders.TryGetValue(placeholder.Name, out initialValue)
                         && !string.IsNullOrWhiteSpace(initialValue);
-                    var showWarning = !hasInitialValue && IsWarningOnlyPlaceholder(placeholder.Name);
 
-                    if (showWarning)
+                    var inputControl = new RichTextBox
                     {
-                        label.Text = $"{placeholder.Name} (Warning!)";
-                        label.ForeColor = pal.IsDark ? pal.DarkerText : Color.DimGray;
+                        Height = 80,
+                        Width = container.Width,
+                        Tag = placeholder.Name,
+                        BorderStyle = BorderStyle.FixedSingle,
+                        ScrollBars = RichTextBoxScrollBars.Vertical
+                    };
+
+                    if (hasInitialValue)
+                    {
+                        SetPlaceholderAsValue(inputControl, initialValue);
                     }
                     else
                     {
-                        label.Text = $"{placeholder.Name} *";
-                        label.Font = new Font(label.Font, FontStyle.Bold);
-                        label.ForeColor = pal.IsDark ? pal.Text : Color.Black;
+                        var defaultText = GetDefaultPlaceholderText(placeholder.Name);
+                        if (!string.IsNullOrEmpty(defaultText))
+                            SetPlaceholderAsHint(inputControl);
+                        else
+                            SetPlaceholderAsValue(inputControl, string.Empty);
 
-                        var tip = new ToolTip();
-                        tip.SetToolTip(label, "This field is required.");
+                        Placeholders[placeholder.Name] = string.Empty;
                     }
 
-                    container.Controls.Add(label);
+                    inputControl.TextChanged += InputControl_TextChanged;
+                    inputControl.Enter += InputControl_Enter;
+                    inputControl.Leave += InputControl_Leave;
+                    container.Controls.Add(inputControl);
 
-                    if (!showWarning)
+                    var grip = new Panel
                     {
-                        var inputControl = new RichTextBox
-                        {
-                            Height = 80,
-                            Width = container.Width,
-                            Text = initialValue ?? string.Empty,
-                            Tag = placeholder.Name,
-                            BorderStyle = BorderStyle.FixedSingle,
-                            ScrollBars = RichTextBoxScrollBars.Vertical
-                        };
-                        inputControl.TextChanged += InputControl_TextChanged;
-                        container.Controls.Add(inputControl);
-
-                        var grip = new Panel
-                        {
-                            Height = 5,
-                            Dock = DockStyle.Bottom,
-                            Cursor = Cursors.SizeNS,
-                            BackColor = pal.IsDark ? pal.Edge : SystemColors.ControlDark
-                        };
-                        grip.MouseDown += Grip_MouseDown;
-                        grip.MouseMove += Grip_MouseMove;
-                        grip.MouseUp += Grip_MouseUp;
-                        grip.Tag = inputControl;
-                        container.Controls.Add(grip);
-                    }
-                    else
-                    {
-                        var lblValue = new RichTextBox
-                        {
-                            Width = container.Width,
-                            Text = GetAutoFilledPlaceholderHint(placeholder.Name),
-                            ReadOnly = true,
-                            BackColor = pal.IsDark ? pal.Background : SystemColors.Control,
-                            ForeColor = pal.IsDark ? pal.Text : SystemColors.WindowText
-                        };
-                        container.Controls.Add(lblValue);
-                    }
+                        Height = 5,
+                        Dock = DockStyle.Bottom,
+                        Cursor = Cursors.SizeNS,
+                        BackColor = pal.IsDark ? pal.Edge : SystemColors.ControlDark
+                    };
+                    grip.MouseDown += Grip_MouseDown;
+                    grip.MouseMove += Grip_MouseMove;
+                    grip.MouseUp += Grip_MouseUp;
+                    grip.Tag = inputControl;
+                    container.Controls.Add(grip);
 
                     flowLayoutPanelPlaceholders.Controls.Add(container);
                 }
             }
+
             UiThemeManager.Apply(flowLayoutPanelPlaceholders);
 
             flowLayoutPanelPlaceholders.ResumeLayout();
-            
+
             ResizePlaceholderControlWidths();
 
             ValidateInputs();
         }
-        
+
         private void Grip_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -598,16 +590,21 @@ namespace NppDB.Core
 
         private void InputControl_TextChanged(object sender, EventArgs e)
         {
-            var control = (Control)sender;
-            var key = (string)control.Tag;
-            var value = control.Text;
+            var control = sender as RichTextBox;
+            if (control == null)
+                return;
 
-            Placeholders[key] = value;
+            var key = control.Tag as string;
+            if (string.IsNullOrEmpty(key))
+                return;
+
+            Placeholders[key] = IsPlaceholderHint(control) ? string.Empty : control.Text;
 
             if (promptsGridView.SelectedRows.Count > 0)
             {
                 var prompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
-                if (!_isEditingTemplate) UpdatePreviewText(prompt);
+                if (!_isEditingTemplate)
+                    UpdatePreviewText(prompt);
             }
 
             ValidateInputs();
@@ -904,36 +901,100 @@ namespace NppDB.Core
             return extracted.ToArray();
         }
 
-        private string GetAutoFilledPlaceholderHint(string placeholderName)
+        private string GetDefaultPlaceholderText(string placeholderName)
         {
             if (string.Equals(placeholderName, "selected_sql", StringComparison.OrdinalIgnoreCase))
-                return "Tab contents are missing. Please input some SQL or select a portion of SQL in the editor to auto-fill this placeholder.";
+                return string.Empty;
 
             if (string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase))
-                return "Connect to a database to auto-fill the SQL dialect.";
+                return "Database dialect (connect to a database to auto-fill)";
 
             if (string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase))
-                return "Select a table in DB Manager.";
+                return "Table name (select table in DB Manager to auto-fill)";
 
             if (string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
-                return "Please expand table in DB Manager.";
+                return "Expanded table metadata (expand a table in DB Manager to auto-fill)";
 
-            return "<No context available>";
+            return string.Empty;
+        }
+        
+        private bool IsPlaceholderHint(RichTextBox inputControl)
+        {
+            var key = inputControl.Tag as string;
+            if (string.IsNullOrEmpty(key))
+                return false;
+
+            var hint = GetDefaultPlaceholderText(key);
+            if (string.IsNullOrEmpty(hint))
+                return false;
+
+            var hintColor = UiThemeManager.Current.IsDark ? UiThemeManager.Current.DarkerText : Color.DimGray;
+
+            return inputControl.Text == hint && inputControl.ForeColor == hintColor;
+        }
+
+        private void SetPlaceholderAsHint(RichTextBox inputControl)
+        {
+            var key = inputControl.Tag as string;
+            var hint = GetDefaultPlaceholderText(key);
+
+            if (string.IsNullOrEmpty(hint))
+                return;
+
+            inputControl.Text = hint;
+            inputControl.ForeColor = UiThemeManager.Current.IsDark ? UiThemeManager.Current.DarkerText : Color.DimGray;
+        }
+
+        private void SetPlaceholderAsValue(RichTextBox inputControl, string value)
+        {
+            inputControl.Text = value ?? string.Empty;
+            inputControl.ForeColor = UiThemeManager.Current.IsDark ? UiThemeManager.Current.Text : SystemColors.WindowText;
+        }
+
+        private void InputControl_Enter(object sender, EventArgs e)
+        {
+            var inputControl = sender as RichTextBox;
+            if (inputControl == null)
+                return;
+
+            if (IsPlaceholderHint(inputControl))
+                SetPlaceholderAsValue(inputControl, string.Empty);
+        }
+
+        private void InputControl_Leave(object sender, EventArgs e)
+        {
+            var inputControl = sender as RichTextBox;
+            if (inputControl == null)
+                return;
+
+            var key = inputControl.Tag as string;
+            if (string.IsNullOrEmpty(key))
+                return;
+
+            if (string.IsNullOrWhiteSpace(inputControl.Text))
+            {
+                Placeholders[key] = string.Empty;
+
+                if (!string.IsNullOrEmpty(GetDefaultPlaceholderText(key)))
+                    SetPlaceholderAsHint(inputControl);
+                else
+                    SetPlaceholderAsValue(inputControl, string.Empty);
+            }
         }
 
         private string GetMissingPlaceholderMessage(PromptPlaceholder placeholder)
         {
             if (string.Equals(placeholder.Name, "selected_sql", StringComparison.OrdinalIgnoreCase))
-                return "Tab contents are missing. Please input some SQL or select a portion of SQL in the editor to auto-fill this placeholder.";
+                return "Fill {{selected_sql}} or select SQL in the editor";
 
             if (string.Equals(placeholder.Name, "dialect", StringComparison.OrdinalIgnoreCase))
-                return "Connect to a database to auto-fill {{dialect}}";
+                return "Fill {{dialect}} or connect to a database";
 
             if (string.Equals(placeholder.Name, "table_name", StringComparison.OrdinalIgnoreCase))
-                return "Select a table in DB Manager";
+                return "Fill {{table_name}} or select a table in DB Manager";
 
             if (string.Equals(placeholder.Name, "table", StringComparison.OrdinalIgnoreCase))
-                return "Please expand table in DB Manager";
+                return "Fill {{table}} or expand a table in DB Manager";
 
             return "Fill {{" + placeholder.Name + "}}";
         }

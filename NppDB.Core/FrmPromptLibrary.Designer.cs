@@ -463,7 +463,7 @@ namespace NppDB.Core
             this.lblPlaceholders.Name = "lblPlaceholders";
             this.lblPlaceholders.Size = new System.Drawing.Size(270, 17);
             this.lblPlaceholders.TabIndex = 5;
-            this.lblPlaceholders.Text = "Fill placeholders (* required) — scroll";
+            this.lblPlaceholders.Text = "Review placeholders — SQL/table fields usually come from editor or DB Manager. Scroll down to see all if needed.";
             // 
             // panelRightActions
             // 
