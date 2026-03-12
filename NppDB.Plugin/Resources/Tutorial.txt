@@ -26,6 +26,7 @@ You can also find toolbar buttons for:
 - Opening DB Manager (database icon)
 
 ## First launch setup
+0. Switch into a different tab (as connections are per-tab)
 1. Open Database Connect Manager (`F10`)
 2. Add connection
    - MS Access: choose `.accdb` / `.mdb`

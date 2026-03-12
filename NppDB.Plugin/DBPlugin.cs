@@ -2166,6 +2166,8 @@ namespace NppDB
                 return;
 
             Win32.SendMessage(nppData._nppHandle, (uint)NppMsg.NPPM_DOOPEN, 0, _tutorialPath);
+            // open a new tab just so user knows to not write code in tutorial file
+            NewFile(true);
         }
         
         private bool EnsureTutorialFileExists()
