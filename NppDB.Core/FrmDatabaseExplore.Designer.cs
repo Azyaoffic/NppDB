@@ -42,6 +42,7 @@ namespace NppDB.Core
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.shortcuts = new System.Windows.Forms.ToolStripButton();
             this.trvDBList = new System.Windows.Forms.TreeView();
+            this.lblTreeTip = new System.Windows.Forms.Label();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -136,11 +137,23 @@ namespace NppDB.Core
             this.trvDBList.Location = new System.Drawing.Point(0, 25);
             this.trvDBList.Name = "trvDBList";
             this.trvDBList.PathSeparator = "!>!";
-            this.trvDBList.Size = new System.Drawing.Size(415, 559);
+            this.trvDBList.Size = new System.Drawing.Size(415, 539);
             this.trvDBList.TabIndex = 1;
             this.trvDBList.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.trvDBList_AfterSelect);
             this.trvDBList.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.trvDBList_NodeMouseClick);
             this.trvDBList.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.trvDBList_NodeMouseDoubleClick);
+            // 
+            // lblTreeTip
+            // 
+            this.lblTreeTip.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.lblTreeTip.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.lblTreeTip.Location = new System.Drawing.Point(0, 564);
+            this.lblTreeTip.Name = "lblTreeTip";
+            this.lblTreeTip.Padding = new System.Windows.Forms.Padding(6, 2, 6, 2);
+            this.lblTreeTip.Size = new System.Drawing.Size(415, 20);
+            this.lblTreeTip.TabIndex = 2;
+            this.lblTreeTip.Text = "Tip: right-click items in the tree for more actions.";
+            this.lblTreeTip.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // FrmDatabaseExplore
             // 
@@ -148,6 +161,7 @@ namespace NppDB.Core
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(415, 584);
             this.Controls.Add(this.trvDBList);
+            this.Controls.Add(this.lblTreeTip);
             this.Controls.Add(this.toolStrip1);
             this.Name = "FrmDatabaseExplore";
             this.Text = "FrmDatabaseExplore";
@@ -172,5 +186,6 @@ namespace NppDB.Core
         private System.Windows.Forms.ToolStripButton btnRegister;
         private System.Windows.Forms.ToolStripButton btnUnregister;
         private ToolStripSeparator toolStripSeparator2;
+        private Label lblTreeTip;
     }
 }
