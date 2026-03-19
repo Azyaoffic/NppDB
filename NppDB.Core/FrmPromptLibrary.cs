@@ -249,7 +249,9 @@ namespace NppDB.Core
 
             query = query.Where(p => PromptMatchesSearch(p, rawSearchText));
 
-            return query.ToList();
+            return query
+                .OrderBy(p => (p.Title ?? string.Empty).Trim(), StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
 
         private void RefreshPromptList()
