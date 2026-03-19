@@ -404,7 +404,6 @@ namespace NppDB.Core
             this.lblEditingBadge.AutoSize = false;
             this.lblEditingBadge.BackColor = System.Drawing.SystemColors.Highlight;
             this.lblEditingBadge.Dock = System.Windows.Forms.DockStyle.Left;
-            this.lblEditingBadge.ForeColor = System.Drawing.SystemColors.HighlightText;
             this.lblEditingBadge.Location = new System.Drawing.Point(90, 0);
             this.lblEditingBadge.Margin = new System.Windows.Forms.Padding(0);
             this.lblEditingBadge.Name = "lblEditingBadge";
@@ -414,6 +413,8 @@ namespace NppDB.Core
             this.lblEditingBadge.Text = "VIEW";
             this.lblEditingBadge.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblEditingBadge.TabIndex = 999;
+            this.lblEditingBadge.ForeColorChanged += lblEditingBadge_forceWhiteText;
+            this.lblEditingBadge.ForeColor = System.Drawing.Color.White;
             // 
             // splitterPreview
             // 

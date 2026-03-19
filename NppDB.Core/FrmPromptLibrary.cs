@@ -455,14 +455,6 @@ namespace NppDB.Core
             }
         }
 
-        private bool IsWarningOnlyPlaceholder(string placeholderName)
-        {
-            return string.Equals(placeholderName, "selected_sql", StringComparison.OrdinalIgnoreCase)
-                   || string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase)
-                   || string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase)
-                   || string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase);
-        }
-
         private void GeneratePlaceholderControls(PromptItem prompt)
         {
             var pal = UiThemeManager.Current;
@@ -665,6 +657,7 @@ namespace NppDB.Core
             txtTags.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
 
             lblEditingBadge.Text = _isEditingTemplate ? "EDITING" : "VIEW";
+            lblEditingBadge.ForeColor = Color.White;
 
             colPromptType.ReadOnly = true;
             colPromptName.ReadOnly = !isEditing;
@@ -1260,6 +1253,14 @@ namespace NppDB.Core
             catch (Exception ex)
             {
                 MessageBox.Show("Could not open the browser: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        
+        private void lblEditingBadge_forceWhiteText(object sender, EventArgs e)
+        {
+            if (lblEditingBadge != null && lblEditingBadge.ForeColor != Color.White)
+            {
+                lblEditingBadge.ForeColor = Color.White;
             }
         }
     }
