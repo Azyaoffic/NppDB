@@ -14,6 +14,7 @@ namespace NppDB.Core
 {
     public class DbTemplateContext
     {
+        public string DatabaseName { get; set; }
         public string TableName { get; set; }
         public string Dialect { get; set; }
         public string ColumnsWithTypes { get; set; }
@@ -511,6 +512,20 @@ namespace NppDB.Core
                 catch
                 {
                     context.Dialect = string.Empty;
+                }
+
+                if (dbConn is PostgreSqlConnect pgConn)
+                {
+                    context.DatabaseName = pgConn.Database;
+                }
+                else if (dbConn is MsAccessConnect msAccessConn)
+                {
+                    context.DatabaseName = Path.GetFileNameWithoutExtension(msAccessConn.ServerAddress);
+                }
+
+                if (string.IsNullOrWhiteSpace(context.DatabaseName))
+                {
+                    context.DatabaseName = dbConn.Title;
                 }
             }
 

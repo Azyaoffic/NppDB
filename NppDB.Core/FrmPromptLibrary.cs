@@ -95,8 +95,13 @@ namespace NppDB.Core
             panelSearch.Height = 42;
 
             colPromptType.Visible = false;
-            lblPromptType.Visible = false;
-            lblPromptCapabilities.Visible = false;
+
+            lblPromptType.Visible = true;
+            lblPromptCapabilities.Visible = true;
+
+            lblPromptType.Text = "DB: —";
+            lblPromptCapabilities.Text = "Table: —";
+            lblPromptType.Width = 170;
 
             _actionToolTip.SetToolTip(buttonDuplicate, "Select a prompt to duplicate.");
         }
@@ -153,6 +158,16 @@ namespace NppDB.Core
 
             Properties.Settings.Default.PromptLibrary_PlaceholdersHeight = panelPreviewBottom.Height;
             Properties.Settings.Default.Save();
+        }
+        
+        private static string GetPlaceholderValue(string key)
+        {
+            if (Placeholders == null)
+                return string.Empty;
+
+            return Placeholders.TryGetValue(key, out var value)
+                ? value ?? string.Empty
+                : string.Empty;
         }
 
         public static void SetPrompts(List<PromptItem> promptItems)
@@ -407,6 +422,15 @@ namespace NppDB.Core
         private void UpdatePromptMeta(PromptItem? prompt)
         {
             _actionToolTip.SetToolTip(buttonDuplicate, "Select a prompt to duplicate.");
+
+            var databaseName = GetPlaceholderValue("database_name");
+            var tableName = GetPlaceholderValue("table_name");
+
+            lblPromptType.Text = "DB: " + (!string.IsNullOrWhiteSpace(databaseName) ? databaseName : "not selected");
+            lblPromptCapabilities.Text = "Table: " + (!string.IsNullOrWhiteSpace(tableName) ? tableName : "not selected");
+
+            _actionToolTip.SetToolTip(lblPromptType, lblPromptType.Text);
+            _actionToolTip.SetToolTip(lblPromptCapabilities, lblPromptCapabilities.Text);
         }
 
         private void promptsListView_SelectedIndexChanged(object sender, EventArgs e)
