@@ -169,7 +169,7 @@ namespace NppDB.Core
             this.chkEnableNewTabCreation.Name = "chkEnableNewTabCreation";
             this.chkEnableNewTabCreation.Size = new System.Drawing.Size(720, 34);
             this.chkEnableNewTabCreation.TabIndex = 1;
-            this.chkEnableNewTabCreation.Text = "Create new tab every time for queries";
+            this.chkEnableNewTabCreation.Text = "Create new tab for operations selected from DB Manager";
             this.chkEnableNewTabCreation.UseVisualStyleBackColor = true;
             // 
             // chkEnableSqlAutocomplete
