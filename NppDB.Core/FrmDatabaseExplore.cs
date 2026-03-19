@@ -78,6 +78,8 @@ namespace NppDB.Core
 
                 trvDBList.ShowNodeToolTips = true;
                 trvDBList.BeforeExpand += trvDBList_BeforeExpand;
+                
+                UpdateCurrentTabConnectionLabel(null);
             }
             catch (Exception ex)
             {
@@ -265,6 +267,88 @@ namespace NppDB.Core
             UnregisterHandler?.Invoke(connection);
         }
         
+        private void UpdateToolbarState(TreeNode node)
+        {
+            btnUnregister.Enabled = node is IDbConnect;
+
+            var dbConnection = node != null ? GetRootParent(node) as IDbConnect : null;
+            if (dbConnection == null)
+            {
+                btnConnect.Enabled = false;
+                btnDisconnect.Enabled = false;
+                btnRefresh.Enabled = false;
+                return;
+            }
+
+            btnConnect.Enabled = node is IDbConnect && !dbConnection.IsOpened;
+            btnDisconnect.Enabled = node is IDbConnect && dbConnection.IsOpened;
+            btnRefresh.Enabled = node is IRefreshable && dbConnection.IsOpened;
+        }
+
+        private TreeNode FindConnectionNode(IDbConnect connection)
+        {
+            if (connection == null)
+                return null;
+
+            foreach (TreeNode node in trvDBList.Nodes)
+            {
+                if (node is IDbConnect dbConnect && ReferenceEquals(dbConnect, connection))
+                    return node;
+            }
+
+            return null;
+        }
+
+        private void UpdateCurrentTabConnectionLabel(IDbConnect connection)
+        {
+            if (connection == null)
+            {
+                lblCurrentTabConnection.Text = "Current tab connection: none";
+                return;
+            }
+
+            var dbSystem = string.IsNullOrWhiteSpace(connection.DatabaseSystemName)
+                ? "Database"
+                : connection.DatabaseSystemName;
+
+            var title = string.IsNullOrWhiteSpace(connection.Title)
+                ? "(unnamed connection)"
+                : connection.Title;
+
+            lblCurrentTabConnection.Text = $"Current tab connection: {dbSystem}: {title}";
+        }
+
+        public void SyncCurrentTabConnection(IDbConnect connection)
+        {
+            UpdateCurrentTabConnectionLabel(connection);
+
+            if (connection == null)
+            {
+                UpdateToolbarState(trvDBList.SelectedNode);
+                return;
+            }
+
+            var selectedNode = trvDBList.SelectedNode;
+            var selectedRootConnection = selectedNode != null ? GetRootParent(selectedNode) as IDbConnect : null;
+
+            if (ReferenceEquals(selectedRootConnection, connection))
+            {
+                UpdateToolbarState(selectedNode);
+                return;
+            }
+
+            var connectionNode = FindConnectionNode(connection);
+            if (connectionNode == null)
+            {
+                UpdateToolbarState(trvDBList.SelectedNode);
+                return;
+            }
+
+            trvDBList.SelectedNode = connectionNode;
+            connectionNode.EnsureVisible();
+            UpdateToolbarState(connectionNode);
+        }
+        
         private void trvDBList_BeforeExpand(object sender, TreeViewCancelEventArgs e)
         {
             if (e.Node.Nodes.Count != 1 || !string.IsNullOrEmpty(e.Node.Nodes[0].Text)) return;
@@ -306,11 +390,7 @@ namespace NppDB.Core
 
         private void trvDBList_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            btnUnregister.Enabled = e.Node is IDbConnect;
-            if (!(GetRootParent(e.Node) is IDbConnect dbConnection)) return;
-            btnConnect.Enabled = e.Node is IDbConnect && !dbConnection.IsOpened;
-            btnDisconnect.Enabled = e.Node is IDbConnect && dbConnection.IsOpened;
-            btnRefresh.Enabled = e.Node is IRefreshable && dbConnection.IsOpened;
+            UpdateToolbarState(e.Node);
         }
 
         private void trvDBList_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)

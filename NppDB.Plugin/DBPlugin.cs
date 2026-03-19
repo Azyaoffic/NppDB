@@ -187,9 +187,14 @@ namespace NppDB
             switch (nc.Header.Code) {
                 case (uint)NppMsg.NPPN_TBMODIFICATION: _funcItems.RefreshItems(); SetToolBarIcons(); break;
                 case (uint)NppMsg.NPPN_SHUTDOWN: FinalizePlugin(); break;
-                case (uint)NppMsg.NPPN_FILECLOSED: CloseSqlResult(nc.Header.IdFrom); break;
+                case (uint)NppMsg.NPPN_FILECLOSED:
+                    CloseSqlResult(nc.Header.IdFrom);
+                    SyncDbManagerToCurrentTab();
+                    break;
+
                 case (uint)NppMsg.NPPN_BUFFERACTIVATED:
                     UpdateCurrentSqlResult();
+                    SyncDbManagerToCurrentTab();
                     break;
                 case (uint)SciMsg.SCN_UPDATEUI:
                     ReadTranslations();
@@ -1540,9 +1545,20 @@ namespace NppDB
                             parameters[1] is IDbConnect p1 && parameters[2] is ISqlExecutor p2)
                         {
                             SetSqlLang(p0);
+
+                            var existing = SQLResultManager.Instance.GetSQLResult(p0);
+                            if (existing != null && !existing.IsDisposed && !ReferenceEquals(existing.LinkedDbConnect, p1))
+                            {
+                                CloseSqlResult(p0);
+                            }
+
                             var ctr = AddSqlResult(p0, p1, p2);
 
-                            if (p0 == GetCurrentBufferId()) UpdateCurrentSqlResult();
+                            if (p0 == GetCurrentBufferId())
+                            {
+                                UpdateCurrentSqlResult();
+                                SyncDbManagerToCurrentTab();
+                            }
 
                             return ctr;
                         }
@@ -1808,6 +1824,7 @@ namespace NppDB
             connection.Disconnect(); 
             CloseCurrentSqlResult(); 
             SQLResultManager.Instance.RemoveSQLResults(connection);
+            SyncDbManagerToCurrentTab();
         }
 
         private void Unregister(IDbConnect connection)
@@ -1817,6 +1834,41 @@ namespace NppDB
             connection.Disconnect();
             CloseCurrentSqlResult();
             SQLResultManager.Instance.RemoveSQLResults(connection);
+            SyncDbManagerToCurrentTab();
+        }
+
+        private IDbConnect GetAttachedConnectionForBuffer(IntPtr bufferId)
+        {
+            if (bufferId == IntPtr.Zero)
+                return null;
+
+            var result = SQLResultManager.Instance.GetSQLResult(bufferId);
+            if (result == null || result.IsDisposed)
+                return null;
+
+            return result.LinkedDbConnect;
+        }
+
+        private void SyncDbManagerToCurrentTab()
+        {
+            if (_frmDbExplorer == null || _frmDbExplorer.IsDisposed)
+                return;
+
+            var bufferId = GetCurrentBufferId();
+            var attachedConnection = GetAttachedConnectionForBuffer(bufferId);
+
+            if (_frmDbExplorer.InvokeRequired)
+            {
+                _frmDbExplorer.BeginInvoke(new Action(() =>
+                {
+                    if (_frmDbExplorer != null && !_frmDbExplorer.IsDisposed)
+                        _frmDbExplorer.SyncCurrentTabConnection(attachedConnection);
+                }));
+            }
+            else
+            {
+                _frmDbExplorer.SyncCurrentTabConnection(attachedConnection);
+            }
         }
 
          private void ToggleDbManager()
@@ -1880,6 +1932,8 @@ namespace NppDB
                     Win32.SendMessage(nppData._nppHandle, (uint)NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
                     Win32.SendMessage(nppData._nppHandle, (uint)NppMsg.NPPM_SETMENUITEMCHECK, _funcItems.Items[_cmdFrmDbExplorerIdx]._cmdID, 1);
                     Marshal.FreeHGlobal(ptrNppTbData);
+                    
+                    SyncDbManagerToCurrentTab();
                 }
                 else
                 {
@@ -1887,6 +1941,7 @@ namespace NppDB
                     if (_frmDbExplorer.Visible)
                     {
                         nppMsg = NppMsg.NPPM_DMMHIDE; toggleStatus = 0;
+                        SyncDbManagerToCurrentTab();
                     }
                     Win32.SendMessage(nppData._nppHandle, (uint)nppMsg, 0, _frmDbExplorer.Handle);
                     Win32.SendMessage(nppData._nppHandle, (uint)NppMsg.NPPM_SETMENUITEMCHECK, _funcItems.Items[_cmdFrmDbExplorerIdx]._cmdID, toggleStatus);

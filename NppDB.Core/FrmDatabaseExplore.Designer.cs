@@ -43,6 +43,7 @@ namespace NppDB.Core
             this.shortcuts = new System.Windows.Forms.ToolStripButton();
             this.trvDBList = new System.Windows.Forms.TreeView();
             this.lblTreeTip = new System.Windows.Forms.Label();
+            this.lblCurrentTabConnection = new System.Windows.Forms.Label();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -55,6 +56,18 @@ namespace NppDB.Core
             this.toolStrip1.Size = new System.Drawing.Size(415, 25);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // lblCurrentTabConnection
+            // 
+            this.lblCurrentTabConnection.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblCurrentTabConnection.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.lblCurrentTabConnection.Location = new System.Drawing.Point(0, 25);
+            this.lblCurrentTabConnection.Name = "lblCurrentTabConnection";
+            this.lblCurrentTabConnection.Padding = new System.Windows.Forms.Padding(6, 2, 6, 2);
+            this.lblCurrentTabConnection.Size = new System.Drawing.Size(415, 22);
+            this.lblCurrentTabConnection.TabIndex = 3;
+            this.lblCurrentTabConnection.Text = "Current tab connection: none";
+            this.lblCurrentTabConnection.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // btnRegister
             // 
@@ -134,10 +147,10 @@ namespace NppDB.Core
             // trvDBList
             // 
             this.trvDBList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.trvDBList.Location = new System.Drawing.Point(0, 25);
+            this.trvDBList.Location = new System.Drawing.Point(0, 47);
             this.trvDBList.Name = "trvDBList";
             this.trvDBList.PathSeparator = "!>!";
-            this.trvDBList.Size = new System.Drawing.Size(415, 539);
+            this.trvDBList.Size = new System.Drawing.Size(415, 517);
             this.trvDBList.TabIndex = 1;
             this.trvDBList.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.trvDBList_AfterSelect);
             this.trvDBList.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.trvDBList_NodeMouseClick);
@@ -161,6 +174,7 @@ namespace NppDB.Core
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(415, 584);
             this.Controls.Add(this.trvDBList);
+            this.Controls.Add(this.lblCurrentTabConnection);
             this.Controls.Add(this.lblTreeTip);
             this.Controls.Add(this.toolStrip1);
             this.Name = "FrmDatabaseExplore";
@@ -187,5 +201,6 @@ namespace NppDB.Core
         private System.Windows.Forms.ToolStripButton btnUnregister;
         private ToolStripSeparator toolStripSeparator2;
         private Label lblTreeTip;
+        private Label lblCurrentTabConnection;
     }
 }
