@@ -1209,7 +1209,7 @@ namespace NppDB.Core
             if (!string.IsNullOrEmpty(textToCopy))
             {
                 Clipboard.SetText(textToCopy);
-                buttonCopy.BackColor = pal.IsDark ? pal.SofterBackground : Color.LightGreen;
+                buttonCopy.BackColor = pal.IsDark ? pal.SofterBackground : Color.DarkBlue;
                 buttonCopy.ForeColor = pal.IsDark ? pal.Text : buttonCopy.ForeColor;
                 buttonCopy.Text = "Copied!";
                 var timer = new Timer { Interval = 1000 };
