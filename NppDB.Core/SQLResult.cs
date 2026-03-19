@@ -126,6 +126,8 @@ namespace NppDB.Core
             };
 
             tclSqlResult.BackColor = UiThemeManager.Current.Background;
+            tclSqlResult.DrawMode = TabDrawMode.OwnerDrawFixed;
+            tclSqlResult.SizeMode = TabSizeMode.Fixed;
 
             tclSqlResult.Paint += (s, e) => // tab strip area
             {
@@ -163,96 +165,73 @@ namespace NppDB.Core
                 var g = e.Graphics;
                 var tabRect = tclSqlResult.GetTabRect(e.Index);
                 var isSelected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
-                var textFont = e.Font;
+                var pal = UiThemeManager.Current;
 
-                using (new Font(e.Font, FontStyle.Bold))
+                Color backColor;
+                Color textColor;
+
+                if (pal.IsDark)
                 {
-                    var pal = UiThemeManager.Current;
-
-                    Color backColor;
-                    Color textColor;
-
-                    if (pal.IsDark)
-                    {
-                        backColor = isSelected ? pal.HotBackground : pal.Background;
-                        textColor = pal.Text;
-                    }
-                    else
-                    {
-                        backColor = isSelected ? SystemColors.Highlight : SystemColors.Control;
-                        textColor = isSelected ? SystemColors.HighlightText : SystemColors.ControlText;
-                    }
-
-                    using (var backBrush = new SolidBrush(backColor)) {
-                        g.FillRectangle(backBrush, tabRect);
-                    }
-
-                    var drawnIconWidth = 8;
-                    var drawnIconHeight = 8;
-                    Image buttonImage;
-                    if (e.Index == 0) {
-                        buttonImage = Resources.gui_eraser1;
-                        drawnIconWidth = 16;
-                        drawnIconHeight = 16;
-                    } else {
-                        buttonImage = Resources.x_letter1;
-                    }
-
-
-                    if (buttonImage != null)
-                    {
-                        var buttonY = tabRect.Top + (tabRect.Height - drawnIconHeight) / 2;
-                        var buttonX = tabRect.Right - drawnIconWidth - 4;
-                        var buttonRect = new Rectangle(buttonX, buttonY, drawnIconWidth, drawnIconHeight);
-
-                        if (tabRect.Width > buttonRect.Width + 8)
-                        {
-                            g.DrawImage(buttonImage, buttonRect);
-                        }
-                    }
-
-                    var textRect = new Rectangle(tabRect.Left + 4, tabRect.Top + 2, tabRect.Width - 8 - (buttonImage != null ? drawnIconWidth + 4 : 0), tabRect.Height - 4);
-
-                    TextRenderer.DrawText(g, tp.Text, textFont, textRect, textColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
-
+                    backColor = isSelected ? pal.HotBackground : pal.Background;
+                    textColor = pal.Text;
                 }
+                else
+                {
+                    backColor = isSelected ? SystemColors.Highlight : SystemColors.Control;
+                    textColor = isSelected ? SystemColors.HighlightText : SystemColors.ControlText;
+                }
+
+                using (var backBrush = new SolidBrush(backColor))
+                {
+                    g.FillRectangle(backBrush, tabRect);
+                }
+
+                Image buttonImage = e.Index == 0
+                    ? Resources.gui_eraser1
+                    : Resources.x_letter1;
+
+                var buttonRect = GetTabButtonRect(e.Index);
+
+                if (tabRect.Width > buttonRect.Width + 8)
+                {
+                    g.DrawImage(buttonImage, buttonRect);
+                }
+
+                var textRect = new Rectangle(
+                    tabRect.Left + 4,
+                    tabRect.Top + 2,
+                    tabRect.Width - 8 - buttonRect.Width - 4,
+                    tabRect.Height - 4);
+
+                TextRenderer.DrawText(
+                    g,
+                    tp.Text,
+                    e.Font,
+                    textRect,
+                    textColor,
+                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
             };
 
             tclSqlResult.MouseUp += (s, e) =>
             {
-                const int drawnIconWidth = 8;
-                const int drawnIconHeight = 8;
+                if (e.Button != MouseButtons.Left)
+                    return;
 
-                if (tclSqlResult.SelectedIndex == 0)
+                for (var i = 0; i < tclSqlResult.TabPages.Count; i++)
                 {
-                    var tr0 = tclSqlResult.GetTabRect(0);
-                    var buttonY0 = tr0.Top + (tr0.Height - drawnIconHeight) / 2;
-                    var clearButtonRect = new Rectangle(tr0.Right - drawnIconWidth - 4, buttonY0, drawnIconWidth, drawnIconHeight);
-                    if (clearButtonRect.Contains(e.Location))
+                    if (!GetTabButtonRect(i).Contains(e.Location))
+                        continue;
+
+                    if (i == 0)
                     {
                         btnCloseAllResultWindows?.Clear();
-                        return;
                     }
-                }
-
-                if (tclSqlResult.SelectedIndex > 0)
-                {
-                    var tr = tclSqlResult.GetTabRect(tclSqlResult.SelectedIndex);
-                    var buttonY = tr.Top + (tr.Height - drawnIconHeight) / 2;
-                    var closeButtonRect = new Rectangle(tr.Right - drawnIconWidth - 4, buttonY, drawnIconWidth, drawnIconHeight);
-                    if (closeButtonRect.Contains(e.Location))
+                    else
                     {
-                        var indexToRemove = tclSqlResult.SelectedIndex;
-                        if (indexToRemove <= 0) return;
-                        tclSqlResult.TabPages.RemoveAt(indexToRemove);
-                        var nextIndexToSelect = Math.Max(0, indexToRemove - 1);
-                        if (tclSqlResult.TabPages.Count > nextIndexToSelect)
-                        {
-                            tclSqlResult.SelectedIndex = nextIndexToSelect;
-                        }
-                        _selectedTabIndex = tclSqlResult.SelectedIndex;
-                        return;
+                        CloseResultTab(i);
                     }
+
+                    return;
                 }
 
                 if (tclSqlResult.SelectedIndex >= 0 && tclSqlResult.SelectedIndex != _selectedTabIndex)
@@ -281,6 +260,35 @@ namespace NppDB.Core
             };
             
             InitResizeGrip();
+        }
+        
+        private Rectangle GetTabButtonRect(int tabIndex)
+        {
+            var tabRect = tclSqlResult.GetTabRect(tabIndex);
+
+            var drawnIconWidth = tabIndex == 0 ? 16 : 8;
+            var drawnIconHeight = tabIndex == 0 ? 16 : 8;
+
+            var buttonY = tabRect.Top + (tabRect.Height - drawnIconHeight) / 2;
+            var buttonX = tabRect.Right - drawnIconWidth - 4;
+
+            return new Rectangle(buttonX, buttonY, drawnIconWidth, drawnIconHeight);
+        }
+
+        private void CloseResultTab(int tabIndex)
+        {
+            if (tabIndex <= 0 || tabIndex >= tclSqlResult.TabPages.Count)
+                return;
+
+            tclSqlResult.TabPages.RemoveAt(tabIndex);
+
+            var nextIndexToSelect = Math.Max(0, Math.Min(tabIndex - 1, tclSqlResult.TabPages.Count - 1));
+            if (tclSqlResult.TabPages.Count > 0)
+            {
+                tclSqlResult.SelectedIndex = nextIndexToSelect;
+            }
+
+            _selectedTabIndex = tclSqlResult.SelectedIndex;
         }
         
         private void InitResizeGrip()
