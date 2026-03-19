@@ -19,9 +19,20 @@ namespace NppDB.Core
         public string Dialect { get; set; }
         public string ColumnsWithTypes { get; set; }
     }
+    
+    
 
     public partial class FrmDatabaseExplore : Form
     {
+        private sealed class DbTreeViewState
+        {
+            public string SelectedPath { get; set; }
+            public List<string> ExpandedPaths { get; set; } = new List<string>();
+        }
+
+        private readonly Dictionary<IntPtr, DbTreeViewState> _treeStatesByBuffer = new Dictionary<IntPtr, DbTreeViewState>();
+        private bool _isRestoringTreeState;
+
         private readonly INppDbCommandHost _commandHostInstance;
         private bool _dbManagerFontScaleApplied;
 
@@ -132,6 +143,152 @@ namespace NppDB.Core
                 var suffix = $"{fk}{pk}{idx}{nn}";
                 var bmp = Resources.ResourceManager.GetObject("column" + suffix) as Bitmap;
                 AddTreeIcon("Column_" + suffix, bmp);
+            }
+        }
+        
+        private static string GetNodeStateKey(TreeNode node)
+        {
+            return node.GetType().FullName + "|" + node.Text;
+        }
+
+        private static string GetNodeStatePath(TreeNode node)
+        {
+            var parts = new List<string>();
+
+            while (node != null)
+            {
+                parts.Add(GetNodeStateKey(node));
+                node = node.Parent;
+            }
+
+            parts.Reverse();
+            return string.Join("\u001F", parts);
+        }
+
+        private static TreeNode FindNodeByStateKey(TreeNodeCollection nodes, string stateKey)
+        {
+            foreach (TreeNode node in nodes)
+            {
+                if (GetNodeStateKey(node) == stateKey)
+                    return node;
+            }
+
+            return null;
+        }
+
+        private TreeNode FindNodeByStatePath(string statePath, bool expandParents)
+        {
+            if (string.IsNullOrWhiteSpace(statePath))
+                return null;
+
+            var parts = statePath.Split(new[] { "\u001F" }, StringSplitOptions.None);
+            if (parts.Length == 0)
+                return null;
+
+            TreeNode current = FindNodeByStateKey(trvDBList.Nodes, parts[0]);
+            if (current == null)
+                return null;
+
+            for (var i = 1; i < parts.Length; i++)
+            {
+                if (expandParents && !current.IsExpanded)
+                    current.Expand();
+
+                current = FindNodeByStateKey(current.Nodes, parts[i]);
+                if (current == null)
+                    return null;
+            }
+
+            return current;
+        }
+
+        private static void CollectExpandedPaths(TreeNode node, List<string> expandedPaths)
+        {
+            if (node == null)
+                return;
+
+            if (node.IsExpanded)
+                expandedPaths.Add(GetNodeStatePath(node));
+
+            foreach (TreeNode child in node.Nodes)
+            {
+                CollectExpandedPaths(child, expandedPaths);
+            }
+        }
+
+        private DbTreeViewState CaptureCurrentTreeState()
+        {
+            var state = new DbTreeViewState();
+
+            if (trvDBList.SelectedNode != null)
+                state.SelectedPath = GetNodeStatePath(trvDBList.SelectedNode);
+
+            foreach (TreeNode root in trvDBList.Nodes)
+            {
+                CollectExpandedPaths(root, state.ExpandedPaths);
+            }
+
+            return state;
+        }
+        
+        public void SaveTreeStateForBuffer(IntPtr bufferId)
+        {
+            if (bufferId == IntPtr.Zero)
+                return;
+
+            _treeStatesByBuffer[bufferId] = CaptureCurrentTreeState();
+        }
+
+        public void RemoveTreeStateForBuffer(IntPtr bufferId)
+        {
+            if (bufferId == IntPtr.Zero)
+                return;
+
+            _treeStatesByBuffer.Remove(bufferId);
+        }
+
+        public void RestoreTreeStateForBuffer(IntPtr bufferId)
+        {
+            if (bufferId == IntPtr.Zero)
+                return;
+
+            _isRestoringTreeState = true;
+            trvDBList.BeginUpdate();
+
+            try
+            {
+                trvDBList.SelectedNode = null;
+                trvDBList.CollapseAll();
+
+                if (!_treeStatesByBuffer.TryGetValue(bufferId, out var state) || state == null)
+                {
+                    UpdateToolbarState(null);
+                    return;
+                }
+
+                foreach (var expandedPath in state.ExpandedPaths
+                             .OrderBy(x => x.Count(c => c == '\u001F')))
+                {
+                    var node = FindNodeByStatePath(expandedPath, true);
+                    node?.Expand();
+                }
+
+                if (!string.IsNullOrWhiteSpace(state.SelectedPath))
+                {
+                    var selectedNode = FindNodeByStatePath(state.SelectedPath, true);
+                    if (selectedNode != null)
+                    {
+                        trvDBList.SelectedNode = selectedNode;
+                        selectedNode.EnsureVisible();
+                    }
+                }
+
+                UpdateToolbarState(trvDBList.SelectedNode);
+            }
+            finally
+            {
+                trvDBList.EndUpdate();
+                _isRestoringTreeState = false;
             }
         }
         
@@ -322,14 +479,20 @@ namespace NppDB.Core
         {
             UpdateCurrentTabConnectionLabel(connection);
 
-            if (connection == null)
+            var selectedNode = trvDBList.SelectedNode;
+            var selectedRootConnection = selectedNode != null ? GetRootParent(selectedNode) as IDbConnect : null;
+
+            if (selectedNode == null)
             {
-                UpdateToolbarState(trvDBList.SelectedNode);
+                UpdateToolbarState(null);
                 return;
             }
 
-            var selectedNode = trvDBList.SelectedNode;
-            var selectedRootConnection = selectedNode != null ? GetRootParent(selectedNode) as IDbConnect : null;
+            if (connection == null)
+            {
+                UpdateToolbarState(selectedNode);
+                return;
+            }
 
             if (ReferenceEquals(selectedRootConnection, connection))
             {
@@ -337,18 +500,9 @@ namespace NppDB.Core
                 return;
             }
 
-            var connectionNode = FindConnectionNode(connection);
-            if (connectionNode == null)
-            {
-                UpdateToolbarState(trvDBList.SelectedNode);
-                return;
-            }
-
-            trvDBList.SelectedNode = connectionNode;
-            connectionNode.EnsureVisible();
-            UpdateToolbarState(connectionNode);
+            UpdateToolbarState(selectedNode);
         }
-        
+
         private void trvDBList_BeforeExpand(object sender, TreeViewCancelEventArgs e)
         {
             if (e.Node.Nodes.Count != 1 || !string.IsNullOrEmpty(e.Node.Nodes[0].Text)) return;

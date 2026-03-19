@@ -68,6 +68,7 @@ namespace NppDB
         private SqlDialect _lastUsedDialect;
         private IScintillaGateway _lastEditor;
         private readonly DbPluginMenuBuilder _menuBuilder = new DbPluginMenuBuilder(PLUGIN_NAME);
+        private IntPtr _lastActivatedBufferId = IntPtr.Zero;
         
         private bool _showRecreationNotificationsToUsers = false; // TODO: might be good to turn off to confuse users less?
 
@@ -188,11 +189,19 @@ namespace NppDB
                 case (uint)NppMsg.NPPN_TBMODIFICATION: _funcItems.RefreshItems(); SetToolBarIcons(); break;
                 case (uint)NppMsg.NPPN_SHUTDOWN: FinalizePlugin(); break;
                 case (uint)NppMsg.NPPN_FILECLOSED:
+                    if (_frmDbExplorer != null && !_frmDbExplorer.IsDisposed)
+                    {
+                        _frmDbExplorer.RemoveTreeStateForBuffer(nc.Header.IdFrom);
+
+                        if (_lastActivatedBufferId == nc.Header.IdFrom)
+                            _lastActivatedBufferId = IntPtr.Zero;
+                    }
+
                     CloseSqlResult(nc.Header.IdFrom);
                     SyncDbManagerToCurrentTab();
                     break;
-
                 case (uint)NppMsg.NPPN_BUFFERACTIVATED:
+                    SaveAndRestoreDbTreeForCurrentTab();
                     UpdateCurrentSqlResult();
                     SyncDbManagerToCurrentTab();
                     break;
@@ -1820,6 +1829,11 @@ namespace NppDB
 
         private void Disconnect(IDbConnect connection)
         {
+            var currentBufferId = GetCurrentBufferId();
+            if (_frmDbExplorer != null && !_frmDbExplorer.IsDisposed)
+            {
+                _frmDbExplorer.SaveTreeStateForBuffer(currentBufferId);
+            }
             SqlAutocompleteService.Invalidate(connection);
             connection.Disconnect(); 
             CloseCurrentSqlResult(); 
@@ -1829,6 +1843,11 @@ namespace NppDB
 
         private void Unregister(IDbConnect connection)
         {
+            var currentBufferId = GetCurrentBufferId();
+            if (_frmDbExplorer != null && !_frmDbExplorer.IsDisposed)
+            {
+                _frmDbExplorer.SaveTreeStateForBuffer(currentBufferId);
+            }
             SqlAutocompleteService.Invalidate(connection);
             DbServerManager.Instance.Unregister(connection);
             connection.Disconnect();
@@ -1847,6 +1866,24 @@ namespace NppDB
                 return null;
 
             return result.LinkedDbConnect;
+        }
+        
+        private void SaveAndRestoreDbTreeForCurrentTab()
+        {
+            if (_frmDbExplorer == null || _frmDbExplorer.IsDisposed)
+                return;
+
+            var currentBufferId = GetCurrentBufferId();
+            if (currentBufferId == IntPtr.Zero)
+                return;
+
+            if (_lastActivatedBufferId != IntPtr.Zero && _lastActivatedBufferId != currentBufferId)
+            {
+                _frmDbExplorer.SaveTreeStateForBuffer(_lastActivatedBufferId);
+            }
+
+            _frmDbExplorer.RestoreTreeStateForBuffer(currentBufferId);
+            _lastActivatedBufferId = currentBufferId;
         }
 
         private void SyncDbManagerToCurrentTab()
@@ -1933,6 +1970,7 @@ namespace NppDB
                     Win32.SendMessage(nppData._nppHandle, (uint)NppMsg.NPPM_SETMENUITEMCHECK, _funcItems.Items[_cmdFrmDbExplorerIdx]._cmdID, 1);
                     Marshal.FreeHGlobal(ptrNppTbData);
                     
+                    SaveAndRestoreDbTreeForCurrentTab();
                     SyncDbManagerToCurrentTab();
                 }
                 else
