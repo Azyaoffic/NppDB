@@ -112,12 +112,12 @@ You are a Senior Database Administrator focused on query correctness.
 ```
 **Problem Description**
 ```text
-{{error_message}}
+{{problem_description}}
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
             <Placeholder name="dialect"/>
-            <Placeholder name="error_message"/>
+            <Placeholder name="problem_description"/>
             <Placeholder name="table_name"/>
             <Placeholder name="table"/>
         </Placeholders>
