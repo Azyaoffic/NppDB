@@ -1533,8 +1533,18 @@ namespace NppDB
                         AppendToScintillaText(GetCurrentScintilla(), (string)parameters[0]);
                         break;
                     case NppDbCommandType.NEW_FILE:
-                        NewFile();
+                    {
+                        var forceNewTab = false;
+
+                        if (parameters != null && parameters.Length > 0)
+                        {
+                            if (parameters[0] is bool b)
+                                forceNewTab = b;
+                        }
+
+                        NewFile(forceNewTab);
                         break;
+                    }
                     
                     case NppDbCommandType.SET_SQL_LANGUAGE:
                         if (parameters != null && parameters.Length >= 1)
