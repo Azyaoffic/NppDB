@@ -4,9 +4,14 @@ setlocal enabledelayedexpansion
 rem ============================================================
 rem package_pluginadmin.cmd
 rem
-rem Creates a Plugins Admin compatible zip for NppDB:
-rem   - Zip root (installed into <...>\plugins\NppDB\): NppDB.dll + *.ini + lib\...
-rem   - Zip root MUST contain NppDB.dll as the only DLL file.
+rem Creates a zip for NppDB with this archive layout:
+rem   NppDB\
+rem     NppDB.dll
+rem     *.ini
+rem     lib\...
+rem
+rem This allows users to extract directly into Notepad++\plugins\
+rem without creating an extra unwanted folder layer.
 rem
 rem Usage:
 rem   package_pluginadmin.cmd [Configuration] [Platform] [VersionOrTimestamp] [OutputDir]
@@ -55,7 +60,8 @@ rem ----------------------------
 rem Staging paths
 rem ----------------------------
 set "STAGE_ROOT=%REPO_ROOT%\%OUTDIR%\NppDB_PluginsAdmin_%VERSION%"
-set "STAGE_LIB=%STAGE_ROOT%\lib"
+set "STAGE_PLUGIN_ROOT=%STAGE_ROOT%\NppDB"
+set "STAGE_LIB=%STAGE_PLUGIN_ROOT%\lib"
 
 if exist "%STAGE_ROOT%" rmdir /s /q "%STAGE_ROOT%"
 mkdir "%STAGE_LIB%" >nul 2>&1
@@ -66,7 +72,7 @@ rem Copy files into staging
 rem ============================================================
 
 rem --- Main plugin DLL (rename NppDB.Plugin.dll -> NppDB.dll)
-call :copy_if_exists "%BUILD_OUT%\NppDB.Plugin.dll" "%STAGE_ROOT%\NppDB.dll"
+call :copy_if_exists "%BUILD_OUT%\NppDB.Plugin.dll" "%STAGE_PLUGIN_ROOT%\NppDB.dll"
 
 rem --- Project modules (including Comm) go to lib\
 call :copy_if_exists "%BUILD_OUT%\NppDB.Comm.dll"       "%STAGE_LIB%\NppDB.Comm.dll"
@@ -86,32 +92,32 @@ for %%F in (%DEPS%) do (
 
 rem --- Translations/config INIs
 for %%T in ("%REPO_ROOT%\translations\*.ini") do (
-  if exist "%%~fT" copy /y "%%~fT" "%STAGE_ROOT%\" >nul
+  if exist "%%~fT" copy /y "%%~fT" "%STAGE_PLUGIN_ROOT%\" >nul
 )
 
 
 rem ============================================================
-rem Validate: only NppDB.dll at zip root
+rem Validate: only NppDB.dll at plugin root
 rem ============================================================
 set "ROOT_DLLS="
-for %%D in ("%STAGE_ROOT%\*.dll") do (
+for %%D in ("%STAGE_PLUGIN_ROOT%\*.dll") do (
   set "ROOT_DLLS=!ROOT_DLLS! %%~nxD"
 )
 
 if not "%ROOT_DLLS%"==" NppDB.dll" (
-  echo ERROR: Plugins Admin zip root must contain ONLY NppDB.dll.
+  echo ERROR: Plugin root must contain ONLY NppDB.dll.
   echo Found:%ROOT_DLLS%
   exit /b 3
 )
 
 
 rem ============================================================
-rem Zip the staging folder
+rem Zip the staging folder so archive root contains NppDB\
 rem ============================================================
 set "ZIP_PATH=%REPO_ROOT%\%OUTDIR%\NppDB_%VERSION%_pluginadmin.zip"
 
 powershell -NoProfile -Command ^
-  "Compress-Archive -Path '%STAGE_ROOT%\*' -DestinationPath '%ZIP_PATH%' -Force" >nul
+  "Compress-Archive -Path '%STAGE_PLUGIN_ROOT%' -DestinationPath '%ZIP_PATH%' -Force" >nul
 
 if errorlevel 1 (
   echo ERROR: Failed to create zip:
