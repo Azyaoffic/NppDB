@@ -338,7 +338,7 @@ namespace NppDB.Core
         
         private static void Numbering(DataGridView dgv)
         {
-            var idx = 0;
+            var idx = 1;
             foreach (DataGridViewRow row in dgv.Rows)
             {
                 row.HeaderCell.Value = idx++.ToString();
