@@ -57,6 +57,7 @@ namespace NppDB.Core
             this.editingModeCheckbox = new System.Windows.Forms.CheckBox();
             this.lblEditingBadge = new System.Windows.Forms.Label();
             this.buttonAiStudio = new System.Windows.Forms.Button();
+            this.buttonTogglePreview = new System.Windows.Forms.Button();
             this.lblPromptCapabilities = new System.Windows.Forms.Label();
             this.lblPromptType = new System.Windows.Forms.Label();
             this.splitterPreview = new System.Windows.Forms.Splitter();
@@ -119,7 +120,7 @@ namespace NppDB.Core
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle1.Padding = new System.Windows.Forms.Padding(6, 6, 6, 4);
+            dataGridViewCellStyle1.Padding = new System.Windows.Forms.Padding(8, 7, 8, 5);
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
@@ -132,7 +133,7 @@ namespace NppDB.Core
             this.promptsGridView.Name = "promptsGridView";
             this.promptsGridView.ReadOnly = true;
             this.promptsGridView.RowHeadersVisible = false;
-            this.promptsGridView.RowTemplate.Height = 44;
+            this.promptsGridView.RowTemplate.Height = 48;
             this.promptsGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.promptsGridView.Size = new System.Drawing.Size(380, 617);
             this.promptsGridView.TabIndex = 1;
@@ -278,7 +279,7 @@ namespace NppDB.Core
             this.promptTextBox.BackColor = System.Drawing.SystemColors.ControlLight;
             this.promptTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.promptTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.promptTextBox.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.promptTextBox.Font = new System.Drawing.Font("Segoe UI", 9.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.promptTextBox.Location = new System.Drawing.Point(3, 66);
             this.promptTextBox.Name = "promptTextBox";
             this.promptTextBox.ReadOnly = true;
@@ -332,11 +333,12 @@ namespace NppDB.Core
             // 
             this.panelMetaRight.Controls.Add(this.editingModeCheckbox);
             this.panelMetaRight.Controls.Add(this.lblEditingBadge);
+            this.panelMetaRight.Controls.Add(this.buttonTogglePreview);
             this.panelMetaRight.Controls.Add(this.buttonAiStudio);
             this.panelMetaRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panelMetaRight.Location = new System.Drawing.Point(555, 0);
+            this.panelMetaRight.Location = new System.Drawing.Point(435, 0);
             this.panelMetaRight.Name = "panelMetaRight";
-            this.panelMetaRight.Size = new System.Drawing.Size(300, 24);
+            this.panelMetaRight.Size = new System.Drawing.Size(420, 24);
             this.panelMetaRight.TabIndex = 10;
             // 
             // editingModeCheckbox
@@ -372,13 +374,24 @@ namespace NppDB.Core
             // buttonAiStudio
             // 
             this.buttonAiStudio.Dock = System.Windows.Forms.DockStyle.Right;
-            this.buttonAiStudio.Location = new System.Drawing.Point(180, 0);
+            this.buttonAiStudio.Location = new System.Drawing.Point(300, 0);
             this.buttonAiStudio.Name = "buttonAiStudio";
             this.buttonAiStudio.Size = new System.Drawing.Size(120, 24);
             this.buttonAiStudio.TabIndex = 2;
             this.buttonAiStudio.Text = "Open LLM";
             this.buttonAiStudio.UseVisualStyleBackColor = true;
             this.buttonAiStudio.Click += new System.EventHandler(this.buttonAiStudio_Click);
+            // 
+            // buttonTogglePreview
+            // 
+            this.buttonTogglePreview.Dock = System.Windows.Forms.DockStyle.Right;
+            this.buttonTogglePreview.Location = new System.Drawing.Point(190, 0);
+            this.buttonTogglePreview.Name = "buttonTogglePreview";
+            this.buttonTogglePreview.Size = new System.Drawing.Size(110, 24);
+            this.buttonTogglePreview.TabIndex = 4;
+            this.buttonTogglePreview.Text = "Hide Preview";
+            this.buttonTogglePreview.UseVisualStyleBackColor = true;
+            this.buttonTogglePreview.Click += new System.EventHandler(this.buttonTogglePreview_Click);
             // 
             // lblPromptCapabilities
             // 
@@ -450,7 +463,7 @@ namespace NppDB.Core
             this.lblPlaceholders.Name = "lblPlaceholders";
             this.lblPlaceholders.Size = new System.Drawing.Size(715, 17);
             this.lblPlaceholders.TabIndex = 5;
-            this.lblPlaceholders.Text = "Placeholders (* required. Auto-fill can come from editor or DB Manager. Drag the bar above to resize)";
+            this.lblPlaceholders.Text = "Placeholders (* required. Auto-filled fields come from the editor or DB Manager). The bar above can be dragged to resize this section.";
             // 
             // panelRightActions
             // 
@@ -532,6 +545,7 @@ namespace NppDB.Core
         private System.Windows.Forms.Panel panelPromptMeta;
         private System.Windows.Forms.Panel panelMetaRight;
         private System.Windows.Forms.Button buttonAiStudio;
+        private System.Windows.Forms.Button buttonTogglePreview;
         private System.Windows.Forms.CheckBox editingModeCheckbox;
 
         private System.Windows.Forms.Label lblPromptCapabilities;

@@ -57,5 +57,17 @@ namespace NppDB.Core.Properties {
                 this["PromptLibrary_Location"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool PromptLibrary_PreviewCollapsed {
+            get {
+                return ((bool)(this["PromptLibrary_PreviewCollapsed"]));
+            }
+            set {
+                this["PromptLibrary_PreviewCollapsed"] = value;
+            }
+        }
     }
 }

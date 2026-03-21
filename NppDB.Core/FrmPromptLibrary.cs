@@ -49,6 +49,9 @@ namespace NppDB.Core
         private bool _canCopy;
         private string _copyDisabledReason;
         private string _firstMissingPlaceholderName;
+        private bool _previewCollapsed;
+        private bool _restoreCollapsedAfterEditing;
+        private int _lastExpandedPlaceholdersHeight = LegacyDefaultPlaceholdersHeight;
 
         private const int TemplateAutoSaveDebounceMs = 650;
 
@@ -90,6 +93,7 @@ namespace NppDB.Core
             splitterPreview.Cursor = Cursors.HSplit;
             grpPreview.Resize += grpPreview_Resize;
             _actionToolTip.SetToolTip(splitterPreview, "Drag to resize the preview and placeholders. Double-click to reset.");
+            _actionToolTip.SetToolTip(buttonTogglePreview, "Hide the preview to focus on placeholder inputs.");
 
             SetEditingMode(false);
             ConfigureSourceFilter();
@@ -154,6 +158,11 @@ namespace NppDB.Core
                 : savedPlaceholdersHeight;
 
             ApplyPreviewBottomHeight(desiredPlaceholdersHeight);
+            _lastExpandedPlaceholdersHeight = panelPreviewBottom.Height;
+
+            var rawPreviewCollapsed = Properties.Settings.Default["PromptLibrary_PreviewCollapsed"];
+            var savedPreviewCollapsed = rawPreviewCollapsed is bool b && b;
+            SetPreviewCollapsed(savedPreviewCollapsed, false);
             ApplyPreviewSplitterVisuals();
         }
 
@@ -170,7 +179,10 @@ namespace NppDB.Core
                 Properties.Settings.Default.PromptLibrary_Location = RestoreBounds.Location;
             }
 
-            Properties.Settings.Default.PromptLibrary_PlaceholdersHeight = panelPreviewBottom.Height;
+            Properties.Settings.Default.PromptLibrary_PlaceholdersHeight = _previewCollapsed
+                ? _lastExpandedPlaceholdersHeight
+                : panelPreviewBottom.Height;
+            Properties.Settings.Default.PromptLibrary_PreviewCollapsed = _previewCollapsed;
             Properties.Settings.Default.Save();
         }
 
@@ -223,12 +235,124 @@ namespace NppDB.Core
             panelPreviewBottom.Height = Math.Max(MinPlaceholdersHeight, Math.Min(desiredHeight, maxBottom));
         }
 
+        private int GetCollapsedPlaceholdersHeight()
+        {
+            var displayHeight = Math.Max(0, grpPreview.DisplayRectangle.Height);
+            var reservedHeight = panelPromptMeta.Visible ? panelPromptMeta.Height : 0;
+            if (panelPromptTags.Visible)
+                reservedHeight += panelPromptTags.Height;
+
+            return Math.Max(MinPlaceholdersHeight, displayHeight - reservedHeight);
+        }
+
+
         private void ApplyPreviewSplitterVisuals()
         {
             var pal = UiThemeManager.Current;
             splitterPreview.BackColor = pal.IsDark
                 ? BlendColor(pal.PureBackground, Color.White, 0.12f)
                 : BlendColor(SystemColors.ControlLight, Color.Black, 0.10f);
+        }
+
+        private void UpdatePreviewToggleState()
+        {
+            buttonTogglePreview.Text = _previewCollapsed ? "Show Preview" : "Hide Preview";
+            _actionToolTip.SetToolTip(buttonTogglePreview,
+                _previewCollapsed
+                    ? "Show the prompt preview again."
+                    : "Hide the preview to focus on placeholder inputs.");
+        }
+
+        private void SetPreviewCollapsed(bool collapsed, bool rememberCurrentHeight)
+        {
+            if (rememberCurrentHeight && !_previewCollapsed && collapsed)
+                _lastExpandedPlaceholdersHeight = panelPreviewBottom.Height;
+
+            grpPreview.SuspendLayout();
+
+            if (collapsed)
+            {
+                promptTextBox.Visible = false;
+                panelPromptTags.Visible = false;
+                splitterPreview.Visible = false;
+                panelPreviewBottom.Height = GetCollapsedPlaceholdersHeight();
+            }
+            else
+            {
+                promptTextBox.Visible = true;
+                panelPromptTags.Visible = true;
+                splitterPreview.Visible = true;
+
+                ApplyPreviewBottomHeight(_lastExpandedPlaceholdersHeight > 0
+                    ? _lastExpandedPlaceholdersHeight
+                    : GetDefaultPlaceholdersHeight());
+            }
+
+            _previewCollapsed = collapsed;
+            UpdatePreviewToggleState();
+            grpPreview.ResumeLayout(true);
+            grpPreview.PerformLayout();
+        }
+
+        private static bool SupportsAutoFill(string placeholderName)
+        {
+            return string.Equals(placeholderName, "selected_sql", StringComparison.OrdinalIgnoreCase)
+                   || string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase)
+                   || string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase)
+                   || string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private Label CreatePlaceholderBadge(string name, string text)
+        {
+            return new Label
+            {
+                AutoSize = true,
+                Margin = new Padding(0, 0, 6, 0),
+                Padding = new Padding(6, 2, 6, 2),
+                Name = name,
+                Text = text,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Font = new Font(SystemFonts.DefaultFont.FontFamily, 7.5f, FontStyle.Bold)
+            };
+        }
+
+        private void ApplyPlaceholderBadgeState(Label badge, string text, Color backColor, Color foreColor, bool visible = true)
+        {
+            if (badge == null)
+                return;
+
+            badge.Text = text;
+            badge.BackColor = backColor;
+            badge.ForeColor = foreColor;
+            badge.Visible = visible;
+        }
+
+        private void UpdatePlaceholderBadges(FlowLayoutPanel container, bool hasValue)
+        {
+            var pal = UiThemeManager.Current;
+            var placeholderName = container.Tag as string;
+            var modeBadge = container.Controls.Find("lblFieldModeBadge", true).OfType<Label>().FirstOrDefault();
+            var valueBadge = container.Controls.Find("lblFieldValueBadge", true).OfType<Label>().FirstOrDefault();
+            var requiredBadge = container.Controls.Find("lblFieldRequiredBadge", true).OfType<Label>().FirstOrDefault();
+
+            var requiredBack = pal.IsDark ? Color.FromArgb(92, 44, 44) : Color.FromArgb(255, 234, 234);
+            var requiredFore = pal.IsDark ? Color.FromArgb(255, 214, 214) : Color.Firebrick;
+            var autoBack = pal.IsDark ? Color.FromArgb(34, 58, 84) : Color.FromArgb(229, 242, 255);
+            var autoFore = pal.IsDark ? Color.FromArgb(205, 227, 255) : Color.FromArgb(20, 78, 145);
+            var manualBack = pal.IsDark ? Color.FromArgb(58, 58, 58) : Color.FromArgb(240, 240, 240);
+            var manualFore = pal.IsDark ? pal.Text : Color.DimGray;
+            var readyBack = pal.IsDark ? Color.FromArgb(38, 74, 52) : Color.FromArgb(231, 247, 236);
+            var readyFore = pal.IsDark ? Color.FromArgb(209, 245, 219) : Color.FromArgb(26, 102, 56);
+            var missingBack = pal.IsDark ? Color.FromArgb(92, 56, 36) : Color.FromArgb(255, 244, 224);
+            var missingFore = pal.IsDark ? Color.FromArgb(255, 224, 186) : Color.FromArgb(140, 88, 15);
+
+            ApplyPlaceholderBadgeState(requiredBadge, "REQUIRED", requiredBack, requiredFore);
+            ApplyPlaceholderBadgeState(modeBadge, SupportsAutoFill(placeholderName) ? "AUTO" : "MANUAL",
+                SupportsAutoFill(placeholderName) ? autoBack : manualBack,
+                SupportsAutoFill(placeholderName) ? autoFore : manualFore);
+            ApplyPlaceholderBadgeState(valueBadge, hasValue ? "READY" : "MISSING",
+                hasValue ? readyBack : missingBack,
+                hasValue ? readyFore : missingFore);
         }
         
         private static string GetPlaceholderValue(string key)
@@ -525,7 +649,7 @@ namespace NppDB.Core
             }
             else
             {
-                SetPreviewText(string.Empty);
+                SetPreviewText(string.Empty, false);
                 flowLayoutPanelPlaceholders.Controls.Clear();
                 UpdateTagsBox(null);
                 UpdateCopyButtonState(false, "No prompt selected");
@@ -579,19 +703,33 @@ namespace NppDB.Core
                         Tag = placeholder.Name
                     };
 
+                    var headerRow = new FlowLayoutPanel
+                    {
+                        AutoSize = true,
+                        WrapContents = false,
+                        FlowDirection = FlowDirection.LeftToRight,
+                        Margin = new Padding(0, 0, 0, 2),
+                        Name = "panelFieldHeader",
+                        Width = container.Width
+                    };
+
                     var label = new Label
                     {
                         AutoSize = true,
-                        Margin = new Padding(0, 0, 0, 2),
+                        Margin = new Padding(0, 1, 8, 0),
                         Name = "lblFieldTitle",
-                        Text = $"{placeholder.Name} *",
+                        Text = placeholder.Name,
                         Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold),
                         ForeColor = pal.IsDark ? pal.Text : Color.Black
                     };
 
                     var tip = new ToolTip();
                     tip.SetToolTip(label, "This field is required.");
-                    container.Controls.Add(label);
+                    headerRow.Controls.Add(label);
+                    headerRow.Controls.Add(CreatePlaceholderBadge("lblFieldRequiredBadge", "REQUIRED"));
+                    headerRow.Controls.Add(CreatePlaceholderBadge("lblFieldModeBadge", string.Empty));
+                    headerRow.Controls.Add(CreatePlaceholderBadge("lblFieldValueBadge", string.Empty));
+                    container.Controls.Add(headerRow);
 
                     var initialValue = string.Empty;
                     var hasInitialValue = Placeholders.TryGetValue(placeholder.Name, out initialValue)
@@ -609,7 +747,7 @@ namespace NppDB.Core
 
                     var inputControl = new RichTextBox
                     {
-                        Height = 80,
+                        Height = 92,
                         Width = container.Width,
                         Tag = placeholder.Name,
                         BorderStyle = BorderStyle.FixedSingle,
@@ -635,6 +773,7 @@ namespace NppDB.Core
                     inputControl.Enter += InputControl_Enter;
                     inputControl.Leave += InputControl_Leave;
                     container.Controls.Add(inputControl);
+                    UpdatePlaceholderBadges(container, hasInitialValue);
 
                     var grip = new Panel
                     {
@@ -664,15 +803,23 @@ namespace NppDB.Core
 
         private void grpPreview_Resize(object sender, EventArgs e)
         {
+            if (_previewCollapsed)
+            {
+                panelPreviewBottom.Height = GetCollapsedPlaceholdersHeight();
+                return;
+            }
+
             ApplyPreviewBottomHeight(panelPreviewBottom.Height);
+            _lastExpandedPlaceholdersHeight = panelPreviewBottom.Height;
         }
 
         private void splitterPreview_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            if (e.Button != MouseButtons.Left)
+            if (e.Button != MouseButtons.Left || _previewCollapsed)
                 return;
 
             ApplyPreviewBottomHeight(GetDefaultPlaceholdersHeight());
+            _lastExpandedPlaceholdersHeight = panelPreviewBottom.Height;
         }
 
         private void splitterPreview_Paint(object sender, PaintEventArgs e)
@@ -710,7 +857,7 @@ namespace NppDB.Core
             if (_resizingControl != null && e.Button == MouseButtons.Left)
             {
                 int delta = Cursor.Position.Y - _resizeStartY;
-                _resizingControl.Height = Math.Max(40, _resizingControl.Height + delta);
+                _resizingControl.Height = Math.Max(52, _resizingControl.Height + delta);
                 _resizeStartY = Cursor.Position.Y;
                 flowLayoutPanelPlaceholders.PerformLayout();
             }
@@ -744,7 +891,48 @@ namespace NppDB.Core
             ValidateInputs();
         }
         
-        private void SetPreviewText(string text)
+        private string BuildPreviewDisplayText(string text)
+        {
+            var builder = new StringBuilder();
+            var normalized = (text ?? string.Empty)
+                .Replace("\r\n", "\n")
+                .Replace("\r", "\n");
+            var lines = normalized.Split('\n');
+            var inCodeBlock = false;
+            var previousWasBlank = true;
+
+            foreach (var rawLine in lines)
+            {
+                var line = rawLine ?? string.Empty;
+                var trimmed = line.Trim();
+
+                if (trimmed.StartsWith("```", StringComparison.Ordinal))
+                {
+                    inCodeBlock = !inCodeBlock;
+                    continue;
+                }
+
+                var isHeading = !inCodeBlock
+                                && trimmed.StartsWith("**", StringComparison.Ordinal)
+                                && trimmed.EndsWith("**", StringComparison.Ordinal)
+                                && trimmed.Length > 4;
+
+                var displayLine = isHeading
+                    ? trimmed.Substring(2, trimmed.Length - 4).Trim()
+                    : line;
+
+                if (isHeading && !previousWasBlank && builder.Length > 0)
+                    builder.AppendLine();
+
+                builder.AppendLine(displayLine);
+                previousWasBlank = string.IsNullOrWhiteSpace(displayLine);
+            }
+
+            return builder.ToString().TrimEnd('\r', '\n');
+
+        }
+
+        private void SetPreviewText(string text, bool formatAsPreview)
         {
             promptTextBox.SuspendLayout();
 
@@ -752,11 +940,23 @@ namespace NppDB.Core
             try
             {
                 promptTextBox.Clear();
-                promptTextBox.Text = text;
 
-                promptTextBox.SelectAll();
-                promptTextBox.SelectionFont = promptTextBox.Font;
-                promptTextBox.SelectionColor = promptTextBox.ForeColor;
+                if (formatAsPreview)
+                {
+                    promptTextBox.Text = BuildPreviewDisplayText(text);
+                    promptTextBox.SelectAll();
+                    promptTextBox.SelectionFont = promptTextBox.Font;
+                    promptTextBox.SelectionColor = UiThemeManager.Current.IsDark
+                        ? UiThemeManager.Current.Text
+                        : SystemColors.ControlText;
+                }
+                else
+                {
+                    promptTextBox.Text = text;
+                    promptTextBox.SelectAll();
+                    promptTextBox.SelectionFont = promptTextBox.Font;
+                    promptTextBox.SelectionColor = promptTextBox.ForeColor;
+                }
 
                 promptTextBox.SelectionStart = 0;
                 promptTextBox.SelectionLength = 0;
@@ -773,17 +973,28 @@ namespace NppDB.Core
         {
             if (_isEditingTemplate)
             {
-                SetPreviewText(prompt.Text ?? string.Empty);
+                SetPreviewText(prompt.Text ?? string.Empty, false);
                 return;
             }
 
             var baseText = ConstructPromptPreview(SubstitutePlaceholders(prompt.Text));
-            SetPreviewText(baseText);
+            SetPreviewText(baseText, true);
         }
         
         private void SetEditingMode(bool isEditing)
         {
             FlushPendingAutoSave();
+
+            if (isEditing && _previewCollapsed)
+            {
+                _restoreCollapsedAfterEditing = true;
+                SetPreviewCollapsed(false, false);
+            }
+            else if (!isEditing && _restoreCollapsedAfterEditing)
+            {
+                SetPreviewCollapsed(true, false);
+                _restoreCollapsedAfterEditing = false;
+            }
 
             _isEditingTemplate = isEditing;
 
@@ -794,6 +1005,7 @@ namespace NppDB.Core
             promptTextBox.ReadOnly = !isEditing;
             txtTags.ReadOnly = !isEditing;
             promptsGridView.ReadOnly = !isEditing;
+            buttonTogglePreview.Enabled = !isEditing;
             
             promptTextBox.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
             txtTags.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
@@ -817,6 +1029,11 @@ namespace NppDB.Core
                 promptTextBox.BackColor = isEditing ? Color.White : SystemColors.ControlLight;
                 txtTags.BackColor = isEditing ? Color.White : SystemColors.ControlLight;
             }
+
+            _actionToolTip.SetToolTip(buttonTogglePreview,
+                isEditing
+                    ? "Preview stays visible while you are editing the template."
+                    : (_previewCollapsed ? "Show the prompt preview again." : "Hide the preview to focus on placeholder inputs."));
 
             if (promptsGridView.SelectedRows.Count > 0)
             {
@@ -910,7 +1127,7 @@ namespace NppDB.Core
         private void UpdatePromptTextBoxForCurrentMode(PromptItem prompt)
         {
             if (_isEditingTemplate)
-                SetPreviewText(prompt.Text ?? string.Empty);
+                SetPreviewText(prompt.Text ?? string.Empty, false);
             else
                 UpdatePreviewText(prompt);
         }
@@ -1225,6 +1442,8 @@ namespace NppDB.Core
 
                 if (inputControl != null)
                     inputControl.BackColor = isMissing ? invalidBackColor : validBackColor;
+
+                UpdatePlaceholderBadges(container, hasValue);
             }
         }
 
@@ -1330,7 +1549,7 @@ namespace NppDB.Core
 
                 foreach (Control inner in container.Controls)
                 {
-                    if (inner is TextBox || inner is RichTextBox || inner is Panel)
+                    if (inner is TextBox || inner is RichTextBox || inner is Panel || inner is FlowLayoutPanel)
                         inner.Width = targetWidth;
                 }
             }
@@ -1346,6 +1565,14 @@ namespace NppDB.Core
         private void editingModeCheckbox_CheckedChanged(object sender, EventArgs e)
         {
             SetEditingMode(editingModeCheckbox.Checked);
+        }
+
+        private void buttonTogglePreview_Click(object sender, EventArgs e)
+        {
+            if (_isEditingTemplate)
+                return;
+
+            SetPreviewCollapsed(!_previewCollapsed, true);
         }
 
         private void buttonAdd_Click(object sender, EventArgs e)
