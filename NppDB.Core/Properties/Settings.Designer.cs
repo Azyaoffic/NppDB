@@ -24,7 +24,7 @@ namespace NppDB.Core.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("138")]
+        [global::System.Configuration.DefaultSettingValueAttribute("240")]
         public int PromptLibrary_PlaceholdersHeight {
             get {
                 return ((int)(this["PromptLibrary_PlaceholdersHeight"]));

@@ -407,11 +407,11 @@ namespace NppDB.Core
             // splitterPreview
             // 
             this.splitterPreview.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.splitterPreview.Location = new System.Drawing.Point(3, 432);
+            this.splitterPreview.Location = new System.Drawing.Point(3, 428);
             this.splitterPreview.MinExtra = 120;
             this.splitterPreview.MinSize = 80;
             this.splitterPreview.Name = "splitterPreview";
-            this.splitterPreview.Size = new System.Drawing.Size(855, 6);
+            this.splitterPreview.Size = new System.Drawing.Size(855, 10);
             this.splitterPreview.TabIndex = 1;
             this.splitterPreview.TabStop = false;
             // 
@@ -450,7 +450,7 @@ namespace NppDB.Core
             this.lblPlaceholders.Name = "lblPlaceholders";
             this.lblPlaceholders.Size = new System.Drawing.Size(715, 17);
             this.lblPlaceholders.TabIndex = 5;
-            this.lblPlaceholders.Text = "Placeholders (* required. SQL/table fields can auto-fill from editor or DB Manager)";
+            this.lblPlaceholders.Text = "Placeholders (* required. Auto-fill can come from editor or DB Manager. Drag the bar above to resize)";
             // 
             // panelRightActions
             // 
@@ -483,11 +483,11 @@ namespace NppDB.Core
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(1270, 755);
+            this.ClientSize = new System.Drawing.Size(1320, 780);
             this.Controls.Add(this.splitContainerMain);
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Location = new System.Drawing.Point(15, 15);
-            this.MinimumSize = new System.Drawing.Size(820, 520);
+            this.MinimumSize = new System.Drawing.Size(980, 620);
             this.Name = "FrmPromptLibrary";
             this.Padding = new System.Windows.Forms.Padding(10);
             this.ShowIcon = false;

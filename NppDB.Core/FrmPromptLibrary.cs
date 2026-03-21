@@ -34,6 +34,7 @@ namespace NppDB.Core
         
         private const int MinPlaceholdersHeight = 80;
         private const int MinPreviewTextHeight = 120;
+        private const int LegacyDefaultPlaceholdersHeight = 138;
 
         private bool _suppressPromptGridSelectionChanged;
 
@@ -84,6 +85,12 @@ namespace NppDB.Core
             _templateAutoSaveTimer = new Timer { Interval = TemplateAutoSaveDebounceMs };
             _templateAutoSaveTimer.Tick += TemplateAutoSaveTimer_Tick;
 
+            splitterPreview.Paint += splitterPreview_Paint;
+            splitterPreview.MouseDoubleClick += splitterPreview_MouseDoubleClick;
+            splitterPreview.Cursor = Cursors.HSplit;
+            grpPreview.Resize += grpPreview_Resize;
+            _actionToolTip.SetToolTip(splitterPreview, "Drag to resize the preview and placeholders. Double-click to reset.");
+
             SetEditingMode(false);
             ConfigureSourceFilter();
             RefreshPromptList();
@@ -122,26 +129,32 @@ namespace NppDB.Core
 
         private void RestoreLayoutFromSettings()
         {
+            var workingArea = Screen.FromControl(this).WorkingArea;
+
             var rawSize = Properties.Settings.Default["PromptLibrary_Size"];
             var savedSize = rawSize is Size s ? s : Size.Empty;
-            if (savedSize.Width > 0 && savedSize.Height > 0)
-            {
-                Size = savedSize;
-            }
+            var hasSavedSize = savedSize.Width > 0 && savedSize.Height > 0;
+
+            Size = hasSavedSize
+                ? ClampSizeToWorkingArea(savedSize, workingArea)
+                : GetDefaultPromptLibrarySize(workingArea);
 
             var rawLocation = Properties.Settings.Default["PromptLibrary_Location"];
             var savedLocation = rawLocation is Point p ? p : Point.Empty;
-            if (!savedLocation.IsEmpty)
-            {
-                StartPosition = FormStartPosition.Manual;
-                Location = savedLocation;
-            }
+
+            StartPosition = FormStartPosition.Manual;
+            Location = !savedLocation.IsEmpty
+                ? ClampLocationToWorkingArea(savedLocation, Size, workingArea)
+                : GetCenteredLocation(workingArea, Size);
 
             var rawHeight = Properties.Settings.Default["PromptLibrary_PlaceholdersHeight"];
-            var savedPlaceholdersHeight = rawHeight is int h && h > 0 ? h : 138;
+            var savedPlaceholdersHeight = rawHeight is int h && h > 0 ? h : LegacyDefaultPlaceholdersHeight;
+            var desiredPlaceholdersHeight = (!hasSavedSize && savedPlaceholdersHeight <= LegacyDefaultPlaceholdersHeight)
+                ? GetDefaultPlaceholdersHeight()
+                : savedPlaceholdersHeight;
 
-            var maxBottom = Math.Max(MinPlaceholdersHeight, grpPreview.ClientSize.Height - MinPreviewTextHeight);
-            panelPreviewBottom.Height = Math.Max(MinPlaceholdersHeight, Math.Min(savedPlaceholdersHeight, maxBottom));
+            ApplyPreviewBottomHeight(desiredPlaceholdersHeight);
+            ApplyPreviewSplitterVisuals();
         }
 
         private void SaveLayoutToSettings()
@@ -159,6 +172,63 @@ namespace NppDB.Core
 
             Properties.Settings.Default.PromptLibrary_PlaceholdersHeight = panelPreviewBottom.Height;
             Properties.Settings.Default.Save();
+        }
+
+        private Size GetDefaultPromptLibrarySize(Rectangle workingArea)
+        {
+            var preferredWidth = Math.Min(1500, Math.Max(1180, workingArea.Width - 80));
+            var preferredHeight = Math.Min(900, Math.Max(680, workingArea.Height - 80));
+
+            preferredWidth = Math.Min(preferredWidth, workingArea.Width);
+            preferredHeight = Math.Min(preferredHeight, workingArea.Height);
+
+            return new Size(
+                Math.Max(MinimumSize.Width, preferredWidth),
+                Math.Max(MinimumSize.Height, preferredHeight));
+        }
+
+        private static Size ClampSizeToWorkingArea(Size size, Rectangle workingArea)
+        {
+            return new Size(
+                Math.Max(820, Math.Min(size.Width, workingArea.Width)),
+                Math.Max(520, Math.Min(size.Height, workingArea.Height)));
+        }
+
+        private static Point ClampLocationToWorkingArea(Point location, Size size, Rectangle workingArea)
+        {
+            var maxX = Math.Max(workingArea.Left, workingArea.Right - size.Width);
+            var maxY = Math.Max(workingArea.Top, workingArea.Bottom - size.Height);
+
+            return new Point(
+                Math.Min(Math.Max(location.X, workingArea.Left), maxX),
+                Math.Min(Math.Max(location.Y, workingArea.Top), maxY));
+        }
+
+        private static Point GetCenteredLocation(Rectangle workingArea, Size size)
+        {
+            return new Point(
+                workingArea.Left + Math.Max(0, (workingArea.Width - size.Width) / 2),
+                workingArea.Top + Math.Max(0, (workingArea.Height - size.Height) / 2));
+        }
+
+        private int GetDefaultPlaceholdersHeight()
+        {
+            var preferredHeight = Math.Max(220, grpPreview.ClientSize.Height * 40 / 100);
+            return Math.Min(340, preferredHeight);
+        }
+
+        private void ApplyPreviewBottomHeight(int desiredHeight)
+        {
+            var maxBottom = Math.Max(MinPlaceholdersHeight, grpPreview.ClientSize.Height - MinPreviewTextHeight);
+            panelPreviewBottom.Height = Math.Max(MinPlaceholdersHeight, Math.Min(desiredHeight, maxBottom));
+        }
+
+        private void ApplyPreviewSplitterVisuals()
+        {
+            var pal = UiThemeManager.Current;
+            splitterPreview.BackColor = pal.IsDark
+                ? BlendColor(pal.PureBackground, Color.White, 0.12f)
+                : BlendColor(SystemColors.ControlLight, Color.Black, 0.10f);
         }
         
         private static string GetPlaceholderValue(string key)
@@ -590,6 +660,39 @@ namespace NppDB.Core
             ResizePlaceholderControlWidths();
 
             ValidateInputs();
+        }
+
+        private void grpPreview_Resize(object sender, EventArgs e)
+        {
+            ApplyPreviewBottomHeight(panelPreviewBottom.Height);
+        }
+
+        private void splitterPreview_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left)
+                return;
+
+            ApplyPreviewBottomHeight(GetDefaultPlaceholdersHeight());
+        }
+
+        private void splitterPreview_Paint(object sender, PaintEventArgs e)
+        {
+            ApplyPreviewSplitterVisuals();
+
+            var pal = UiThemeManager.Current;
+            var lineColor = pal.IsDark ? pal.Edge : SystemColors.ControlDark;
+            var centerX = splitterPreview.ClientSize.Width / 2;
+            var centerY = splitterPreview.ClientSize.Height / 2;
+            const int gripWidth = 72;
+
+            using (var pen = new Pen(lineColor))
+            {
+                for (int i = -1; i <= 1; i++)
+                {
+                    var y = centerY + (i * 3);
+                    e.Graphics.DrawLine(pen, centerX - (gripWidth / 2), y, centerX + (gripWidth / 2), y);
+                }
+            }
         }
 
         private void Grip_MouseDown(object sender, MouseEventArgs e)
