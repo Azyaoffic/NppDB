@@ -450,7 +450,7 @@ namespace NppDB.Core
             this.lblPlaceholders.Name = "lblPlaceholders";
             this.lblPlaceholders.Size = new System.Drawing.Size(715, 17);
             this.lblPlaceholders.TabIndex = 5;
-            this.lblPlaceholders.Text = "Review placeholders — SQL/table fields usually come from editor or DB Manager. Sc" + "roll down to see all if needed.";
+            this.lblPlaceholders.Text = "Placeholders (* required. SQL/table fields can auto-fill from editor or DB Manager)";
             // 
             // panelRightActions
             // 

@@ -112,12 +112,12 @@ You are a Senior Database Administrator focused on query correctness.
 ```
 **Problem Description**
 ```text
-{{problem_description}}
+{{issue_description}}
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
             <Placeholder name="dialect"/>
-            <Placeholder name="problem_description"/>
+            <Placeholder name="issue_description"/>
             <Placeholder name="table_name"/>
             <Placeholder name="table"/>
         </Placeholders>
@@ -133,13 +133,13 @@ You are a Senior Database Administrator focused on query correctness.
         <Text>**Role**
 You are a SQL Migration Specialist.
 **Task**
-- Convert the SQL query from `{{source_dialect}}` to `{{target_dialect}}`.
+- Convert the SQL query from `{{source_database}}` to `{{target_database}}`.
 - Adapt functions, quoting, date/time syntax, NULL handling, and dialect-specific clauses (e.g., LIMIT vs
 TOP).
 - Keep semantics equivalent.
 **Constraints**
 - The converted query must return the same results (as closely as the dialect allows).
-- Avoid non-standard extensions unless needed for `{{target_dialect}}`.
+- Avoid non-standard extensions unless needed for `{{target_database}}`.
 - If something cannot be converted cleanly, explain the limitation and provide the closest workaround.
 **Response**
 - Provide, in order:
@@ -151,8 +151,8 @@ TOP).
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
-            <Placeholder name="source_dialect"/>
-            <Placeholder name="target_dialect"/>
+            <Placeholder name="source_database"/>
+            <Placeholder name="target_database"/>
         </Placeholders>
         <Metadata>
             <Category>Refactor</Category>
@@ -166,7 +166,7 @@ TOP).
         <Text>**Role**
 You are a Technical Writer specializing in databases.
 **Task**
-- Generate technical documentation for the SQL query in `{{format}}` format.
+- Generate technical documentation for the SQL query in `{{output_format}}` format.
 - Assume SQL dialect `{{dialect}}`.
 **Constraints**
 - Include: a title, description of the logic, list of input parameters, and a summary of the tables
@@ -174,7 +174,7 @@ involved.
 - Do not invent unknown schema details; if something is unclear, note assumptions.
 - Keep the documentation focused on what can be inferred from the query text.
 **Response**
-- Output strictly in `{{format}}` format (no extra commentary outside the requested format).
+- Output strictly in `{{output_format}}` format (no extra commentary outside the requested format).
 - Include the required sections and keep them clearly labeled.
 **Query**
 ```sql
@@ -183,7 +183,7 @@ involved.
         <Placeholders>
             <Placeholder name="selected_sql"/>
             <Placeholder name="dialect"/>
-            <Placeholder name="format"/>
+            <Placeholder name="output_format"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -211,11 +211,11 @@ You are a Database Architect.
 3) Optional: follow-up questions if critical details are missing
 **Requirement**
 ```text
-{{user_input}}
+{{table_requirements}}
 ```</Text>
         <Placeholders>
             <Placeholder name="target_dialect"/>
-            <Placeholder name="user_input"/>
+            <Placeholder name="table_requirements"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -251,13 +251,13 @@ You are a SQL Query Generator.
 ```
 **User Requirement**
 ```text
-{{user_input}}
+{{query_request}}
 ```</Text>
         <Placeholders>
             <Placeholder name="dialect"/>
             <Placeholder name="table_name"/>
             <Placeholder name="table"/>
-            <Placeholder name="user_input"/>
+            <Placeholder name="query_request"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>
@@ -290,16 +290,16 @@ You are a SQL Comparator.
 5) Suggested “best” version (optional) with rationale, if one is clearly preferable
 **Query A**
 ```sql
-{{query_a}}
+{{first_query}}
 ```
 **Query B**
 ```sql
-{{query_b}}
+{{second_query}}
 ```</Text>
         <Placeholders>
             <Placeholder name="target_dialect"/>
-            <Placeholder name="query_a"/>
-            <Placeholder name="query_b"/>
+            <Placeholder name="first_query"/>
+            <Placeholder name="second_query"/>
         </Placeholders>
         <Metadata>
             <Category>Analyze</Category>
@@ -651,12 +651,12 @@ You are a Senior Database Performance Engineer.
 ```
 **Execution Plan**
 ```text
-{{execution_plan}}
+{{query_plan}}
 ```</Text>
         <Placeholders>
             <Placeholder name="selected_sql"/>
             <Placeholder name="dialect"/>
-            <Placeholder name="execution_plan"/>
+            <Placeholder name="query_plan"/>
         </Placeholders>
         <Metadata>
             <Category>Analyze</Category>
@@ -762,13 +762,13 @@ You are a database migration engineer.
 ```
 **Requirement**
 ```text
-{{user_input}}
+{{change_request}}
 ```</Text>
         <Placeholders>
             <Placeholder name="dialect"/>
             <Placeholder name="table_name"/>
             <Placeholder name="table"/>
-            <Placeholder name="user_input"/>
+            <Placeholder name="change_request"/>
         </Placeholders>
         <Metadata>
             <Category>Generate</Category>

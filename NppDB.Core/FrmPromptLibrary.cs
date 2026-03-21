@@ -47,6 +47,7 @@ namespace NppDB.Core
         private bool _autoSaveErrorShown;
         private bool _canCopy;
         private string _copyDisabledReason;
+        private string _firstMissingPlaceholderName;
 
         private const int TemplateAutoSaveDebounceMs = 650;
 
@@ -504,13 +505,15 @@ namespace NppDB.Core
                         FlowDirection = FlowDirection.TopDown,
                         AutoSize = true,
                         Width = flowLayoutPanelPlaceholders.Width - 25,
-                        Margin = new Padding(0, 0, 0, 10)
+                        Margin = new Padding(0, 0, 0, 10),
+                        Tag = placeholder.Name
                     };
 
                     var label = new Label
                     {
                         AutoSize = true,
                         Margin = new Padding(0, 0, 0, 2),
+                        Name = "lblFieldTitle",
                         Text = $"{placeholder.Name} *",
                         Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold),
                         ForeColor = pal.IsDark ? pal.Text : Color.Black
@@ -523,6 +526,16 @@ namespace NppDB.Core
                     var initialValue = string.Empty;
                     var hasInitialValue = Placeholders.TryGetValue(placeholder.Name, out initialValue)
                         && !string.IsNullOrWhiteSpace(initialValue);
+
+                    var statusLabel = new Label
+                    {
+                        AutoSize = true,
+                        Margin = new Padding(0, 0, 0, 4),
+                        Name = "lblFieldStatus",
+                        ForeColor = pal.IsDark ? pal.DarkerText : Color.DimGray,
+                        Text = GetPlaceholderStatusText(placeholder.Name, hasInitialValue)
+                    };
+                    container.Controls.Add(statusLabel);
 
                     var inputControl = new RichTextBox
                     {
@@ -926,13 +939,13 @@ namespace NppDB.Core
                 return string.Empty;
 
             if (string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase))
-                return "Database dialect (connect to a database to auto-fill)";
+                return "Connect to a database to auto-fill, or enter the dialect manually";
 
             if (string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase))
-                return "Table name (select table in DB Manager to auto-fill)";
+                return "Enter table name or select in DB Manager";
 
             if (string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
-                return "Expanded table metadata (expand a table in DB Manager to auto-fill)";
+                return "Expand a table in DB Manager to auto-fill, or enter metadata manually";
 
             return string.Empty;
         }
@@ -1001,6 +1014,24 @@ namespace NppDB.Core
             }
         }
 
+        private string GetPlaceholderStatusText(string placeholderName, bool hasInitialValue)
+        {
+            if (hasInitialValue)
+                return "Value ready";
+
+            if (string.Equals(placeholderName, "selected_sql", StringComparison.OrdinalIgnoreCase))
+                return "Select SQL in the editor or enter it manually";
+
+            if (string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase))
+                return "Auto-fill available from the current database connection";
+
+            if (string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
+                return "Auto-fill available from DB Manager";
+
+            return "Enter this value manually";
+        }
+
         private string GetMissingPlaceholderMessage(PromptPlaceholder placeholder)
         {
             if (string.Equals(placeholder.Name, "selected_sql", StringComparison.OrdinalIgnoreCase))
@@ -1020,15 +1051,18 @@ namespace NppDB.Core
 
         private void ValidateInputs()
         {
+            _firstMissingPlaceholderName = null;
+
             if (promptsGridView.SelectedRows.Count == 0)
             {
+                UpdatePlaceholderValidationState();
                 UpdateCopyButtonState(false, "No prompt selected");
                 return;
             }
 
             var prompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
             var isValid = true;
-            var disabledReason = "Fill required fields (*) to Copy";
+            var disabledReason = "Fill required fields (*) to copy";
 
             if (prompt.Placeholders != null)
             {
@@ -1038,12 +1072,87 @@ namespace NppDB.Core
                         continue;
 
                     isValid = false;
+                    _firstMissingPlaceholderName = ph.Name;
                     disabledReason = GetMissingPlaceholderMessage(ph);
                     break;
                 }
             }
 
+            UpdatePlaceholderValidationState();
             UpdateCopyButtonState(isValid, disabledReason);
+        }
+
+        private void UpdatePlaceholderValidationState()
+        {
+            var pal = UiThemeManager.Current;
+            var validBackColor = pal.IsDark ? pal.PureBackground : SystemColors.Window;
+            var invalidBackColor = pal.IsDark ? Color.FromArgb(70, 40, 40) : Color.MistyRose;
+            var validTitleColor = pal.IsDark ? pal.Text : Color.Black;
+            var invalidTitleColor = pal.IsDark ? Color.FromArgb(255, 170, 170) : Color.Firebrick;
+            var validStatusColor = pal.IsDark ? pal.DarkerText : Color.DimGray;
+            var invalidStatusColor = pal.IsDark ? Color.FromArgb(255, 200, 200) : Color.Firebrick;
+
+            foreach (Control control in flowLayoutPanelPlaceholders.Controls)
+            {
+                if (!(control is FlowLayoutPanel container))
+                    continue;
+
+                var placeholderName = container.Tag as string;
+                var hasValue = !string.IsNullOrWhiteSpace(placeholderName)
+                    && Placeholders.TryGetValue(placeholderName, out var value)
+                    && !string.IsNullOrWhiteSpace(value);
+                var isMissing = !hasValue;
+
+                var titleLabel = container.Controls.Find("lblFieldTitle", false).OfType<Label>().FirstOrDefault();
+                var statusLabel = container.Controls.Find("lblFieldStatus", false).OfType<Label>().FirstOrDefault();
+                var inputControl = container.Controls.OfType<RichTextBox>().FirstOrDefault();
+
+                if (titleLabel != null)
+                    titleLabel.ForeColor = isMissing ? invalidTitleColor : validTitleColor;
+
+                if (statusLabel != null)
+                {
+                    statusLabel.ForeColor = isMissing ? invalidStatusColor : validStatusColor;
+
+                    if (isMissing && !string.IsNullOrWhiteSpace(placeholderName))
+                        statusLabel.Text = GetMissingPlaceholderMessage(new PromptPlaceholder { Name = placeholderName });
+                    else if (!string.IsNullOrWhiteSpace(placeholderName))
+                        statusLabel.Text = GetPlaceholderStatusText(placeholderName, hasValue);
+                }
+
+                if (inputControl != null)
+                    inputControl.BackColor = isMissing ? invalidBackColor : validBackColor;
+            }
+        }
+
+        private void FocusFirstMissingPlaceholder()
+        {
+            if (string.IsNullOrWhiteSpace(_firstMissingPlaceholderName))
+                return;
+
+            foreach (Control control in flowLayoutPanelPlaceholders.Controls)
+            {
+                if (!(control is FlowLayoutPanel container))
+                    continue;
+
+                if (!string.Equals(container.Tag as string, _firstMissingPlaceholderName, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var inputControl = container.Controls.OfType<RichTextBox>().FirstOrDefault();
+                if (inputControl == null)
+                    return;
+
+                flowLayoutPanelPlaceholders.ScrollControlIntoView(container);
+                inputControl.Focus();
+
+                if (!IsPlaceholderHint(inputControl))
+                {
+                    inputControl.SelectionStart = 0;
+                    inputControl.SelectionLength = inputControl.TextLength;
+                }
+
+                return;
+            }
         }
 
         private void UpdateCopyButtonState(bool enabled, string reason)
@@ -1127,8 +1236,8 @@ namespace NppDB.Core
         private string LoadUserPromptPreferences()
         {
             var preferences = NppDbSettingsStore.Get().Prompt;
-            return $"\nRespond in the following language: {preferences.ResponseLanguage}." +
-                   $"\nAlso follow user's custom instructions: {preferences.CustomInstructions}.";
+            return $"\nRespond in: {preferences.ResponseLanguage}." +
+                   $"\nCustom instructions: {preferences.CustomInstructions}.";
         }
 
         private void editingModeCheckbox_CheckedChanged(object sender, EventArgs e)
@@ -1210,6 +1319,8 @@ namespace NppDB.Core
         {
             if (!_canCopy)
             {
+                FocusFirstMissingPlaceholder();
+
                 if (!string.IsNullOrWhiteSpace(_copyDisabledReason))
                     _actionToolTip.Show(_copyDisabledReason, buttonCopy, buttonCopy.Width / 2, -18, 2000);
                 return;
