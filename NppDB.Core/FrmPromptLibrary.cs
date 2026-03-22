@@ -307,7 +307,7 @@ namespace NppDB.Core
             return new Label
             {
                 AutoSize = true,
-                Margin = new Padding(0, 0, 6, 0),
+                Margin = new Padding(0, 0, 8, 0),
                 Padding = new Padding(6, 2, 6, 2),
                 Name = name,
                 Text = text,
@@ -335,15 +335,15 @@ namespace NppDB.Core
             var valueBadge = container.Controls.Find("lblFieldValueBadge", true).OfType<Label>().FirstOrDefault();
             var requiredBadge = container.Controls.Find("lblFieldRequiredBadge", true).OfType<Label>().FirstOrDefault();
 
-            var requiredBack = pal.IsDark ? Color.FromArgb(92, 44, 44) : Color.FromArgb(255, 234, 234);
-            var requiredFore = pal.IsDark ? Color.FromArgb(255, 214, 214) : Color.Firebrick;
+            var requiredBack = pal.IsDark ? Color.FromArgb(82, 40, 40) : Color.FromArgb(255, 234, 234);
+            var requiredFore = pal.IsDark ? Color.FromArgb(245, 210, 210) : Color.Firebrick;
             var autoBack = pal.IsDark ? Color.FromArgb(34, 58, 84) : Color.FromArgb(229, 242, 255);
             var autoFore = pal.IsDark ? Color.FromArgb(205, 227, 255) : Color.FromArgb(20, 78, 145);
-            var manualBack = pal.IsDark ? Color.FromArgb(58, 58, 58) : Color.FromArgb(240, 240, 240);
+            var manualBack = pal.IsDark ? Color.FromArgb(62, 62, 62) : Color.FromArgb(240, 240, 240);
             var manualFore = pal.IsDark ? pal.Text : Color.DimGray;
             var readyBack = pal.IsDark ? Color.FromArgb(38, 74, 52) : Color.FromArgb(231, 247, 236);
             var readyFore = pal.IsDark ? Color.FromArgb(209, 245, 219) : Color.FromArgb(26, 102, 56);
-            var missingBack = pal.IsDark ? Color.FromArgb(92, 56, 36) : Color.FromArgb(255, 244, 224);
+            var missingBack = pal.IsDark ? Color.FromArgb(90, 55, 38) : Color.FromArgb(255, 244, 224);
             var missingFore = pal.IsDark ? Color.FromArgb(255, 224, 186) : Color.FromArgb(140, 88, 15);
 
             ApplyPlaceholderBadgeState(requiredBadge, "REQUIRED", requiredBack, requiredFore);
@@ -745,13 +745,38 @@ namespace NppDB.Core
                     };
                     container.Controls.Add(statusLabel);
 
+                    var inputHost = new Panel
+                    {
+                        Width = container.Width,
+                        Height = 92,
+                        Margin = new Padding(0),
+                        Name = "pnlInputHost",
+                        BackColor = pal.IsDark ? pal.PureBackground : SystemColors.Window
+                    };
+
+                    var stateAccent = new Panel
+                    {
+                        Width = 4,
+                        Margin = new Padding(0),
+                        Name = "pnlFieldIndicator",
+                        BackColor = pal.IsDark ? pal.Edge : SystemColors.ControlDark,
+                        Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left,
+                        Location = new Point(0, 0),
+                        Height = inputHost.Height
+                    };
+                    inputHost.Controls.Add(stateAccent);
+
                     var inputControl = new RichTextBox
                     {
-                        Height = 92,
-                        Width = container.Width,
                         Tag = placeholder.Name,
                         BorderStyle = BorderStyle.FixedSingle,
-                        ScrollBars = RichTextBoxScrollBars.Vertical
+                        ScrollBars = RichTextBoxScrollBars.Vertical,
+                        Margin = new Padding(0),
+                        Name = "rtbPlaceholderValue",
+                        Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
+                        Location = new Point(stateAccent.Width + 4, 0),
+                        Width = Math.Max(40, inputHost.Width - stateAccent.Width - 4),
+                        Height = inputHost.Height
                     };
 
                     if (hasInitialValue)
@@ -772,7 +797,10 @@ namespace NppDB.Core
                     inputControl.TextChanged += InputControl_TextChanged;
                     inputControl.Enter += InputControl_Enter;
                     inputControl.Leave += InputControl_Leave;
-                    container.Controls.Add(inputControl);
+                    inputHost.Controls.Add(inputControl);
+                    inputHost.Resize += PlaceholderInputHost_Resize;
+                    LayoutPlaceholderInputHost(inputHost);
+                    container.Controls.Add(inputHost);
                     UpdatePlaceholderBadges(container, hasInitialValue);
 
                     var grip = new Panel
@@ -780,12 +808,12 @@ namespace NppDB.Core
                         Height = 5,
                         Dock = DockStyle.Bottom,
                         Cursor = Cursors.SizeNS,
-                        BackColor = pal.IsDark ? pal.Edge : SystemColors.ControlDark
+                        BackColor = pal.IsDark ? pal.Edge : SystemColors.ControlDark,
+                        Tag = inputHost
                     };
                     grip.MouseDown += Grip_MouseDown;
                     grip.MouseMove += Grip_MouseMove;
                     grip.MouseUp += Grip_MouseUp;
-                    grip.Tag = inputControl;
                     container.Controls.Add(grip);
 
                     flowLayoutPanelPlaceholders.Controls.Add(container);
@@ -856,9 +884,14 @@ namespace NppDB.Core
         {
             if (_resizingControl != null && e.Button == MouseButtons.Left)
             {
-                int delta = Cursor.Position.Y - _resizeStartY;
-                _resizingControl.Height = Math.Max(52, _resizingControl.Height + delta);
+                var delta = Cursor.Position.Y - _resizeStartY;
+                _resizingControl.Height = Math.Max(92, _resizingControl.Height + delta);
                 _resizeStartY = Cursor.Position.Y;
+
+                if (_resizingControl.Controls.OfType<RichTextBox>().FirstOrDefault() is RichTextBox input)
+                    input.Height = _resizingControl.ClientSize.Height;
+
+                _resizingControl.PerformLayout();
                 flowLayoutPanelPlaceholders.PerformLayout();
             }
         }
@@ -1006,11 +1039,13 @@ namespace NppDB.Core
             txtTags.ReadOnly = !isEditing;
             promptsGridView.ReadOnly = !isEditing;
             buttonTogglePreview.Enabled = !isEditing;
+            promptTextBox.TabStop = isEditing;
+            txtTags.TabStop = isEditing;
             
             promptTextBox.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
             txtTags.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
 
-            lblEditingBadge.Text = _isEditingTemplate ? "EDITING" : "VIEW";
+            lblEditingBadge.Text = _isEditingTemplate ? "Editing" : "View";
             lblEditingBadge.ForeColor = Color.White;
 
             colPromptType.ReadOnly = true;
@@ -1355,18 +1390,18 @@ namespace NppDB.Core
         private string GetMissingPlaceholderMessage(PromptPlaceholder placeholder)
         {
             if (string.Equals(placeholder.Name, "selected_sql", StringComparison.OrdinalIgnoreCase))
-                return "Fill {{selected_sql}} or select SQL in the editor";
+                return "Value for {{selected_sql}}: select SQL in the editor or enter it manually";
 
             if (string.Equals(placeholder.Name, "dialect", StringComparison.OrdinalIgnoreCase))
-                return "Fill {{dialect}} or connect to a database";
+                return "Value for {{dialect}}: connect to a database or enter it manually";
 
             if (string.Equals(placeholder.Name, "table_name", StringComparison.OrdinalIgnoreCase))
-                return "Fill {{table_name}} or select a table in DB Manager";
+                return "Value for {{table_name}}: select a table in DB Manager or enter it manually";
 
             if (string.Equals(placeholder.Name, "table", StringComparison.OrdinalIgnoreCase))
-                return "Fill {{table}} or expand a table in DB Manager";
+                return "Value for {{table}}: expand a table in DB Manager or enter metadata manually";
 
-            return "Fill {{" + placeholder.Name + "}}";
+            return "Value for {{" + placeholder.Name + "}} is required";
         }
 
         private void ValidateInputs()
@@ -1406,11 +1441,13 @@ namespace NppDB.Core
         {
             var pal = UiThemeManager.Current;
             var validBackColor = pal.IsDark ? pal.PureBackground : SystemColors.Window;
-            var invalidBackColor = pal.IsDark ? Color.FromArgb(70, 40, 40) : Color.MistyRose;
+            var invalidBackColor = pal.IsDark ? pal.PureBackground : Color.MistyRose;
             var validTitleColor = pal.IsDark ? pal.Text : Color.Black;
-            var invalidTitleColor = pal.IsDark ? Color.FromArgb(255, 170, 170) : Color.Firebrick;
+            var invalidTitleColor = pal.IsDark ? Color.FromArgb(255, 182, 182) : Color.Firebrick;
             var validStatusColor = pal.IsDark ? pal.DarkerText : Color.DimGray;
-            var invalidStatusColor = pal.IsDark ? Color.FromArgb(255, 200, 200) : Color.Firebrick;
+            var invalidStatusColor = pal.IsDark ? Color.FromArgb(255, 214, 214) : Color.Firebrick;
+            var validAccentColor = pal.IsDark ? Color.FromArgb(82, 163, 118) : Color.FromArgb(55, 122, 72);
+            var invalidAccentColor = pal.IsDark ? Color.FromArgb(255, 112, 112) : Color.Firebrick;
 
             foreach (Control control in flowLayoutPanelPlaceholders.Controls)
             {
@@ -1425,7 +1462,8 @@ namespace NppDB.Core
 
                 var titleLabel = container.Controls.Find("lblFieldTitle", false).OfType<Label>().FirstOrDefault();
                 var statusLabel = container.Controls.Find("lblFieldStatus", false).OfType<Label>().FirstOrDefault();
-                var inputControl = container.Controls.OfType<RichTextBox>().FirstOrDefault();
+                var inputControl = container.Controls.Find("rtbPlaceholderValue", true).OfType<RichTextBox>().FirstOrDefault();
+                var accentPanel = container.Controls.Find("pnlFieldIndicator", true).OfType<Panel>().FirstOrDefault();
 
                 if (titleLabel != null)
                     titleLabel.ForeColor = isMissing ? invalidTitleColor : validTitleColor;
@@ -1442,6 +1480,9 @@ namespace NppDB.Core
 
                 if (inputControl != null)
                     inputControl.BackColor = isMissing ? invalidBackColor : validBackColor;
+
+                if (accentPanel != null)
+                    accentPanel.BackColor = isMissing ? invalidAccentColor : validAccentColor;
 
                 UpdatePlaceholderBadges(container, hasValue);
             }
@@ -1460,7 +1501,7 @@ namespace NppDB.Core
                 if (!string.Equals(container.Tag as string, _firstMissingPlaceholderName, StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                var inputControl = container.Controls.OfType<RichTextBox>().FirstOrDefault();
+                var inputControl = container.Controls.Find("rtbPlaceholderValue", true).OfType<RichTextBox>().FirstOrDefault();
                 if (inputControl == null)
                     return;
 
@@ -1484,8 +1525,8 @@ namespace NppDB.Core
             _canCopy = enabled;
             _copyDisabledReason = reason ?? string.Empty;
 
-            buttonCopy.Enabled = true;
             buttonCopy.Text = "Copy Prompt";
+            buttonCopy.Enabled = true;
 
             if (enabled)
             {
@@ -1530,6 +1571,30 @@ namespace NppDB.Core
             return PromptStringBuilder.ToString();
         }
         
+        private void PlaceholderInputHost_Resize(object sender, EventArgs e)
+        {
+            if (sender is Panel inputHost)
+                LayoutPlaceholderInputHost(inputHost);
+        }
+
+        private void LayoutPlaceholderInputHost(Panel inputHost)
+        {
+            if (inputHost == null)
+                return;
+
+            var accent = inputHost.Controls.Find("pnlFieldIndicator", false).OfType<Panel>().FirstOrDefault();
+            var input = inputHost.Controls.Find("rtbPlaceholderValue", false).OfType<RichTextBox>().FirstOrDefault();
+            if (accent == null || input == null)
+                return;
+
+            accent.Location = new Point(0, 0);
+            accent.Height = inputHost.ClientSize.Height;
+
+            var left = accent.Width + 4;
+            input.Location = new Point(left, 0);
+            input.Size = new Size(Math.Max(40, inputHost.ClientSize.Width - left), inputHost.ClientSize.Height);
+        }
+
         private void flowLayoutPanelPlaceholders_SizeChanged(object sender, EventArgs e)
         {
             ResizePlaceholderControlWidths();
@@ -1547,11 +1612,20 @@ namespace NppDB.Core
 
                 container.Width = targetWidth;
 
-                foreach (Control inner in container.Controls)
+                var headerRow = container.Controls.Find("panelFieldHeader", false).OfType<FlowLayoutPanel>().FirstOrDefault();
+                if (headerRow != null)
+                    headerRow.Width = targetWidth;
+
+                var inputHost = container.Controls.Find("pnlInputHost", false).OfType<Panel>().FirstOrDefault();
+                if (inputHost != null)
                 {
-                    if (inner is TextBox || inner is RichTextBox || inner is Panel || inner is FlowLayoutPanel)
-                        inner.Width = targetWidth;
+                    inputHost.Width = targetWidth;
+                    LayoutPlaceholderInputHost(inputHost);
                 }
+
+                var grip = container.Controls.OfType<Panel>().FirstOrDefault(p => p.Tag == inputHost);
+                if (grip != null)
+                    grip.Width = targetWidth;
             }
         }
 

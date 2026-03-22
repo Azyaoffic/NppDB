@@ -367,7 +367,7 @@ namespace NppDB.Core
             this.lblEditingBadge.Padding = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.lblEditingBadge.Size = new System.Drawing.Size(78, 24);
             this.lblEditingBadge.TabIndex = 999;
-            this.lblEditingBadge.Text = "VIEW";
+            this.lblEditingBadge.Text = "Viewing";
             this.lblEditingBadge.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblEditingBadge.ForeColorChanged += new System.EventHandler(this.lblEditingBadge_forceWhiteText);
             // 

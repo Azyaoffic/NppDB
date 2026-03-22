@@ -112,7 +112,7 @@ namespace NppDB.Core
             this.lblName.Name = "lblName";
             this.lblName.Size = new System.Drawing.Size(43, 15);
             this.lblName.TabIndex = 0;
-            this.lblName.Text = "Name:";
+            this.lblName.Text = "Name (mandatory):";
             // 
             // txtName
             // 
@@ -148,7 +148,7 @@ namespace NppDB.Core
             this.lblTags.Name = "lblTags";
             this.lblTags.Size = new System.Drawing.Size(114, 15);
             this.lblTags.TabIndex = 10;
-            this.lblTags.Text = "Tags (comma-sep):";
+            this.lblTags.Text = "Tags (comma-separated):";
             // 
             // txtTags
             // 
