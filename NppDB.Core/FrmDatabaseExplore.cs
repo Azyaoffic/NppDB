@@ -767,6 +767,7 @@ namespace NppDB.Core
             if (postgreSqlTableNode != null)
             {
                 context.TableName = postgreSqlTableNode.Text;
+                EnsureTemplateMetadataLoaded(postgreSqlTableNode);
                 context.ColumnsWithTypes = GetColumnsWithTypesFromTree(postgreSqlTableNode);
                 return context;
             }
@@ -775,10 +776,31 @@ namespace NppDB.Core
             if (msAccessTableNode != null)
             {
                 context.TableName = msAccessTableNode.Text;
+                EnsureTemplateMetadataLoaded(msAccessTableNode);
                 context.ColumnsWithTypes = GetColumnsWithTypesFromTree(msAccessTableNode);
             }
 
             return context;
+        }
+        
+        private static void EnsureTemplateMetadataLoaded(TreeNode tableNode)
+        {
+            if (tableNode == null)
+                return;
+
+            var hasOnlyPlaceholderChild =
+                tableNode.Nodes.Count == 1 &&
+                string.IsNullOrWhiteSpace(tableNode.Nodes[0].Text);
+
+            var needsLoad = tableNode.Nodes.Count == 0 || hasOnlyPlaceholderChild;
+
+            if (!needsLoad)
+                return;
+
+            if (tableNode is IRefreshable refreshableNode)
+            {
+                refreshableNode.Refresh();
+            }
         }
 
         private static PostgreSqlTable GetParentPostgreSqlTableNode(TreeNode node)

@@ -1300,7 +1300,7 @@ namespace NppDB.Core
                 return "Enter table name or select in DB Manager";
 
             if (string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
-                return "Expand a table in DB Manager to auto-fill, or enter metadata manually";
+                return "Select a table in DB Manager, or enter metadata manually";
 
             return string.Empty;
         }

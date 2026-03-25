@@ -109,7 +109,7 @@ namespace NppDB.Core
                 else if (string.Equals(placeholder, "table_name", StringComparison.OrdinalIgnoreCase))
                     description = "selected table name from DB Manager";
                 else if (string.Equals(placeholder, "table", StringComparison.OrdinalIgnoreCase))
-                    description = "selected table metadata; expand the table in DB Manager first";
+                    description = "selected table metadata";
 
                 lines.Add($"{{{{{placeholder}}}}} - {description}");
             }

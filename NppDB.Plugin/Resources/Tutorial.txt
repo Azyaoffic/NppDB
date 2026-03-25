@@ -188,7 +188,7 @@ Notes:
   - `{{selected_sql}}` - selected SQL, or the whole current file if nothing is selected
   - `{{dialect}}` - current database dialect
   - `{{table_name}}` - selected table name from DB Manager
-  - `{{table}}` - selected table metadata; expand the table in DB Manager first
+  - `{{table}}` - selected table metadata
 - Tags should be short keywords separated by commas
 
 ## Common problems
