@@ -31,6 +31,7 @@ namespace NppDB.Core
         }
 
         private readonly Dictionary<IntPtr, DbTreeViewState> _treeStatesByBuffer = new Dictionary<IntPtr, DbTreeViewState>();
+        private readonly Dictionary<TreeNode, string> _lastSelectedTablePathByRoot = new Dictionary<TreeNode, string>();
         private bool _isRestoringTreeState;
 
         private readonly INppDbCommandHost _commandHostInstance;
@@ -406,6 +407,8 @@ namespace NppDB.Core
         {
             if (!(trvDBList.SelectedNode is IDbConnect connection) || trvDBList.SelectedNode.Level > 0) return;
 
+            _lastSelectedTablePathByRoot.Remove(trvDBList.SelectedNode);
+
             DisconnectHandler?.Invoke(connection);
             trvDBList.SelectedNode?.Nodes.Clear();
         }
@@ -413,6 +416,8 @@ namespace NppDB.Core
         private void btnUnregister_Click(object sender, EventArgs e)
         {
             if (!(trvDBList.SelectedNode is IDbConnect connection) || trvDBList.SelectedNode.Level > 0) return;
+
+            _lastSelectedTablePathByRoot.Remove(trvDBList.SelectedNode);
 
             trvDBList.Nodes.Remove(trvDBList.SelectedNode);
             btnRegister.Enabled = true;
@@ -544,6 +549,7 @@ namespace NppDB.Core
 
         private void trvDBList_AfterSelect(object sender, TreeViewEventArgs e)
         {
+            RememberLastSelectedTable(e.Node);
             UpdateToolbarState(e.Node);
         }
 
@@ -717,7 +723,6 @@ namespace NppDB.Core
         
             var context = new DbTemplateContext();
         
-            // database connection (root node)
             var root = node;
             while (root.Parent != null)
                 root = root.Parent;
@@ -763,8 +768,9 @@ namespace NppDB.Core
                 }
             }
 
-            var postgreSqlTableNode = GetParentPostgreSqlTableNode(node);
-            if (postgreSqlTableNode != null)
+            var tableNode = GetEffectiveTableNode(node);
+
+            if (tableNode is PostgreSqlTable postgreSqlTableNode)
             {
                 context.TableName = postgreSqlTableNode.Text;
                 EnsureTemplateMetadataLoaded(postgreSqlTableNode);
@@ -772,8 +778,7 @@ namespace NppDB.Core
                 return context;
             }
 
-            var msAccessTableNode = GetParentMsAccessTableNode(node);
-            if (msAccessTableNode != null)
+            if (tableNode is MsAccessTable msAccessTableNode)
             {
                 context.TableName = msAccessTableNode.Text;
                 EnsureTemplateMetadataLoaded(msAccessTableNode);
@@ -781,6 +786,46 @@ namespace NppDB.Core
             }
 
             return context;
+        }        
+        private void RememberLastSelectedTable(TreeNode node)
+        {
+            if (node == null)
+                return;
+
+            var root = GetRootParent(node);
+            if (root == null)
+                return;
+
+            TreeNode tableNode = GetParentPostgreSqlTableNode(node);
+            if (tableNode == null)
+                tableNode = GetParentMsAccessTableNode(node);
+
+            if (tableNode == null)
+                return;
+
+            _lastSelectedTablePathByRoot[root] = GetNodeStatePath(tableNode);
+        }
+
+        private TreeNode GetEffectiveTableNode(TreeNode node)
+        {
+            if (node == null)
+                return null;
+
+            TreeNode tableNode = GetParentPostgreSqlTableNode(node);
+            if (tableNode == null)
+                tableNode = GetParentMsAccessTableNode(node);
+
+            if (tableNode != null)
+                return tableNode;
+
+            var root = GetRootParent(node);
+            if (root == null)
+                return null;
+
+            if (!_lastSelectedTablePathByRoot.TryGetValue(root, out var tablePath) || string.IsNullOrWhiteSpace(tablePath))
+                return null;
+
+            return FindNodeByStatePath(tablePath, true);
         }
         
         private static void EnsureTemplateMetadataLoaded(TreeNode tableNode)
