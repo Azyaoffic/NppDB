@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -391,6 +392,38 @@ namespace NppDB.Core
             return string.Join(", ", tags.Where(t => !string.IsNullOrWhiteSpace(t)).Select(t => t.Trim()));
         }
 
+        private static string[] GetVisibleTags(string[] tags)
+        {
+            if (tags == null)
+                return Array.Empty<string>();
+
+            return tags
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .Select(t => t.Trim())
+                .ToArray();
+        }
+
+        private static GraphicsPath CreateRoundedRectangle(Rectangle rect, int radius)
+        {
+            var path = new GraphicsPath();
+
+            if (rect.Width <= 0 || rect.Height <= 0)
+                return path;
+
+            var diameter = Math.Max(2, radius * 2);
+            var arc = new Rectangle(rect.Location, new Size(diameter, diameter));
+
+            path.AddArc(arc, 180, 90);
+            arc.X = rect.Right - diameter;
+            path.AddArc(arc, 270, 90);
+            arc.Y = rect.Bottom - diameter;
+            path.AddArc(arc, 0, 90);
+            arc.X = rect.Left;
+            path.AddArc(arc, 90, 90);
+            path.CloseFigure();
+            return path;
+        }
+
         private static bool ContainsIgnoreCase(string haystack, string needle)
         {
             if (string.IsNullOrEmpty(needle))
@@ -515,7 +548,7 @@ namespace NppDB.Core
                     var rowIndex = promptsGridView.Rows.Add(prompt.Title, prompt.Description, string.Empty);
                     var row = promptsGridView.Rows[rowIndex];
                     row.Tag = prompt;
-                    row.DividerHeight = (prompt.Tags != null && prompt.Tags.Length > 0) ? 22 : 0;
+                    row.DividerHeight = GetVisibleTags(prompt.Tags).Length > 0 ? 28 : 10;
                     ApplyRowStyling(row, prompt);
                 }
 
@@ -547,42 +580,101 @@ namespace NppDB.Core
         private void promptsGridView_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
         {
             var row = promptsGridView.Rows[e.RowIndex];
-            if (row.DividerHeight > 0 && row.Tag is PromptItem prompt)
+            var pal = UiThemeManager.Current;
+            var lineColor = pal.IsDark
+                ? BlendColor(pal.Edge, Color.White, 0.10f)
+                : BlendColor(SystemColors.ControlDark, Color.White, 0.25f);
+
+            var startX = e.RowBounds.Left;
+            if (promptsGridView.RowHeadersVisible)
+                startX += promptsGridView.RowHeadersWidth;
+
+            var contentWidth = e.RowBounds.Width - (startX - e.RowBounds.Left);
+            var tags = row.Tag is PromptItem prompt ? GetVisibleTags(prompt.Tags) : Array.Empty<string>();
+
+            if (row.DividerHeight > 0 && tags.Length > 0)
             {
-                var tagsText = FormatTags(prompt.Tags);
-                if (!string.IsNullOrEmpty(tagsText))
+                var rect = new Rectangle(
+                    startX,
+                    e.RowBounds.Bottom - row.DividerHeight,
+                    Math.Max(0, contentWidth),
+                    row.DividerHeight);
+
+                var isSelected = row.Selected;
+                var bgColor = isSelected ? row.DefaultCellStyle.SelectionBackColor : row.DefaultCellStyle.BackColor;
+
+                using (var bgBrush = new SolidBrush(bgColor))
                 {
-                    var startX = e.RowBounds.Left;
-                    if (promptsGridView.RowHeadersVisible)
-                        startX += promptsGridView.RowHeadersWidth;
+                    e.Graphics.FillRectangle(bgBrush, rect);
+                }
 
-                    var rect = new Rectangle(startX, e.RowBounds.Bottom - row.DividerHeight, e.RowBounds.Width - (startX - e.RowBounds.Left), row.DividerHeight);
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-                    var isSelected = row.Selected;
-                    var pal = UiThemeManager.Current;
+                using (var font = new Font(promptsGridView.Font.FontFamily, 8.0f, FontStyle.Regular))
+                {
+                    var pillX = rect.Left + 8;
+                    var pillY = rect.Top + 4;
+                    var pillHeight = Math.Max(16, rect.Height - 8);
+                    var availableRight = rect.Right - 8;
+                    var pillTextColor = isSelected ? row.DefaultCellStyle.SelectionForeColor : (pal.IsDark ? pal.Text : SystemColors.ControlText);
+                    var pillFillColor = isSelected
+                        ? BlendColor(bgColor, Color.White, pal.IsDark ? 0.18f : 0.30f)
+                        : pal.IsDark
+                            ? BlendColor(bgColor, Color.White, 0.12f)
+                            : BlendColor(bgColor, SystemColors.Highlight, 0.10f);
+                    var pillBorderColor = isSelected
+                        ? BlendColor(bgColor, Color.White, pal.IsDark ? 0.28f : 0.40f)
+                        : pal.IsDark
+                            ? BlendColor(bgColor, Color.White, 0.22f)
+                            : BlendColor(SystemColors.Highlight, Color.White, 0.18f);
 
-                    var bgColor = isSelected ? row.DefaultCellStyle.SelectionBackColor : row.DefaultCellStyle.BackColor;
-                    var textColor = isSelected
-                        ? row.DefaultCellStyle.SelectionForeColor
-                        : pal.IsDark ? pal.DarkerText : Color.DimGray;
-
-                    using (var bgBrush = new SolidBrush(bgColor))
+                    foreach (var tag in tags)
                     {
-                        e.Graphics.FillRectangle(bgBrush, rect);
-                    }
+                        var textSize = TextRenderer.MeasureText(e.Graphics, tag, font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding);
+                        var pillWidth = Math.Max(24, textSize.Width + 16);
 
-                    var fontSize = 8.25f;
-                    using (var font = new Font(promptsGridView.Font.FontFamily, fontSize, FontStyle.Regular))
-                    using (var textBrush = new SolidBrush(textColor))
-                    {
-                        e.Graphics.DrawString("Tags: " + tagsText, font, textBrush, startX + 7, rect.Top + 3);
-                    }
+                        if (pillX + pillWidth > availableRight)
+                        {
+                            var overflowWidth = TextRenderer.MeasureText(e.Graphics, "…", font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width + 16;
+                            if (pillX + overflowWidth <= availableRight)
+                            {
+                                var overflowRect = new Rectangle(pillX, pillY, overflowWidth, pillHeight);
+                                using (var path = CreateRoundedRectangle(overflowRect, 8))
+                                using (var fillBrush = new SolidBrush(pillFillColor))
+                                using (var borderPen = new Pen(pillBorderColor))
+                                {
+                                    e.Graphics.FillPath(fillBrush, path);
+                                    e.Graphics.DrawPath(borderPen, path);
+                                }
 
-                    using (var linePen = new Pen(promptsGridView.GridColor))
-                    {
-                        e.Graphics.DrawLine(linePen, rect.Left, rect.Bottom - 1, rect.Right, rect.Bottom - 1);
+                                TextRenderer.DrawText(e.Graphics, "…", font, overflowRect, pillTextColor,
+                                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                            }
+                            break;
+                        }
+
+                        var pillRect = new Rectangle(pillX, pillY, pillWidth, pillHeight);
+                        using (var path = CreateRoundedRectangle(pillRect, 8))
+                        using (var fillBrush = new SolidBrush(pillFillColor))
+                        using (var borderPen = new Pen(pillBorderColor))
+                        {
+                            e.Graphics.FillPath(fillBrush, path);
+                            e.Graphics.DrawPath(borderPen, path);
+                        }
+
+                        TextRenderer.DrawText(e.Graphics, tag, font, pillRect, pillTextColor,
+                            TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+
+                        pillX += pillWidth + 6;
                     }
                 }
+
+                e.Graphics.SmoothingMode = SmoothingMode.Default;
+            }
+
+            using (var linePen = new Pen(lineColor))
+            {
+                e.Graphics.DrawLine(linePen, startX + 6, e.RowBounds.Bottom - 1, startX + Math.Max(0, contentWidth - 6), e.RowBounds.Bottom - 1);
             }
         }
 
@@ -1254,6 +1346,34 @@ namespace NppDB.Core
             }
         }
 
+        private void SelectPromptById(string promptId)
+        {
+            if (string.IsNullOrWhiteSpace(promptId))
+                return;
+
+            for (int i = 0; i < promptsGridView.Rows.Count; i++)
+            {
+                var row = promptsGridView.Rows[i];
+                if (!(row.Tag is PromptItem prompt) || !string.Equals(prompt.Id, promptId, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                _suppressPromptGridSelectionChanged = true;
+                try
+                {
+                    promptsGridView.ClearSelection();
+                    row.Selected = true;
+                    promptsGridView.CurrentCell = row.Cells[Math.Max(0, colPromptName.Index)];
+                }
+                finally
+                {
+                    _suppressPromptGridSelectionChanged = false;
+                }
+
+                promptsListView_SelectedIndexChanged(promptsGridView, EventArgs.Empty);
+                return;
+            }
+        }
+
         private PromptPlaceholder[] BuildPlaceholdersFromText(string promptText, PromptPlaceholder[] existingPlaceholders)
         {
             var extracted = new List<PromptPlaceholder>();
@@ -1294,13 +1414,13 @@ namespace NppDB.Core
                 return string.Empty;
 
             if (string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase))
-                return "Connect to a database to auto-fill, or enter the dialect manually";
+                return "Connect to a database to auto-fill, or enter the dialect manually.";
 
             if (string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase))
-                return "Enter table name or select in DB Manager";
+                return "Select a table in the DB Manager, or enter the table name manually.";
 
             if (string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
-                return "Select a table in DB Manager, or enter metadata manually";
+                return "Select a table in the DB Manager, or enter metadata manually.";
 
             return string.Empty;
         }
@@ -1390,18 +1510,18 @@ namespace NppDB.Core
         private string GetMissingPlaceholderMessage(PromptPlaceholder placeholder)
         {
             if (string.Equals(placeholder.Name, "selected_sql", StringComparison.OrdinalIgnoreCase))
-                return "Value for {{selected_sql}}: select SQL in the editor or enter it manually";
+                return "Value for selected_sql: Select SQL in the editor or enter it manually.";
 
             if (string.Equals(placeholder.Name, "dialect", StringComparison.OrdinalIgnoreCase))
-                return "Value for {{dialect}}: connect to a database or enter it manually";
+                return "Value for dialect: Connect to a database or enter it manually.";
 
             if (string.Equals(placeholder.Name, "table_name", StringComparison.OrdinalIgnoreCase))
-                return "Value for {{table_name}}: select a table in DB Manager or enter it manually";
+                return "Value for table_name: Select a table in the DB Manager or enter it manually.";
 
             if (string.Equals(placeholder.Name, "table", StringComparison.OrdinalIgnoreCase))
-                return "Value for {{table}}: expand a table in DB Manager or enter metadata manually";
+                return "Value for table: Select a table in the DB Manager or enter metadata manually.";
 
-            return "Value for {{" + placeholder.Name + "}} is required";
+            return "Value for " + placeholder.Name + " is required.";
         }
 
         private void ValidateInputs()
@@ -1773,6 +1893,16 @@ namespace NppDB.Core
             FrmPromptEditor.SaveNewPromptToFile(newPrompt);
 
             RefreshPromptList();
+            SelectPromptById(newPrompt.Id);
+            editingModeCheckbox.Checked = true;
+
+            if (promptsGridView.SelectedRows.Count > 0)
+            {
+                var row = promptsGridView.SelectedRows[0];
+                var nameCell = row.Cells[colPromptName.Index];
+                promptsGridView.CurrentCell = nameCell;
+                promptsGridView.BeginEdit(true);
+            }
         }
         
         private void buttonAiStudio_Click(object sender, EventArgs e)

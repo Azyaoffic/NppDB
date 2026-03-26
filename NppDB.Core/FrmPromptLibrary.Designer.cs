@@ -112,7 +112,7 @@ namespace NppDB.Core
             this.promptsGridView.AllowUserToResizeRows = false;
             this.promptsGridView.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCellsExceptHeaders;
             this.promptsGridView.BackgroundColor = System.Drawing.SystemColors.Window;
-            this.promptsGridView.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
+            this.promptsGridView.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.None;
             this.promptsGridView.ColumnHeadersHeight = 30;
             this.promptsGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.promptsGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] { this.colPromptName, this.colPromptDesc, this.colPromptType });
@@ -120,7 +120,7 @@ namespace NppDB.Core
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle1.Padding = new System.Windows.Forms.Padding(8, 7, 8, 5);
+            dataGridViewCellStyle1.Padding = new System.Windows.Forms.Padding(10, 8, 10, 6);
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
@@ -133,7 +133,7 @@ namespace NppDB.Core
             this.promptsGridView.Name = "promptsGridView";
             this.promptsGridView.ReadOnly = true;
             this.promptsGridView.RowHeadersVisible = false;
-            this.promptsGridView.RowTemplate.Height = 48;
+            this.promptsGridView.RowTemplate.Height = 58;
             this.promptsGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.promptsGridView.Size = new System.Drawing.Size(380, 617);
             this.promptsGridView.TabIndex = 1;
@@ -463,7 +463,7 @@ namespace NppDB.Core
             this.lblPlaceholders.Name = "lblPlaceholders";
             this.lblPlaceholders.Size = new System.Drawing.Size(715, 17);
             this.lblPlaceholders.TabIndex = 5;
-            this.lblPlaceholders.Text = "Placeholders (* required. Auto-filled fields come from the editor or DB Manager). The bar above can be dragged to resize this section.";
+            this.lblPlaceholders.Text = "Placeholders (* required. Auto-filled fields come from the editor or DB Manager).";
             // 
             // panelRightActions
             // 
