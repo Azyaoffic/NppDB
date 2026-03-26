@@ -44,6 +44,7 @@ namespace NppDB.Core
         private bool _isEditingTemplate;
         private bool _suppressPromptTextBoxChange;
         private bool _suppressTagsTextBoxChange;
+        private bool _suppressPromptMetaTextBoxChange;
         private Timer _templateAutoSaveTimer;
         private PromptItem? _pendingAutoSavePrompt;
         private bool _autoSaveErrorShown;
@@ -83,6 +84,8 @@ namespace NppDB.Core
             promptsGridView.RowPostPaint += promptsGridView_RowPostPaint;
             promptTextBox.TextChanged += promptTextBox_TextChanged;
             txtTags.TextChanged += txtTags_TextChanged;
+            txtPromptName.TextChanged += txtPromptName_TextChanged;
+            txtPromptDescription.TextChanged += txtPromptDescription_TextChanged;
             promptsGridView.CellEndEdit += promptsGridView_CellEndEdit;
             promptsGridView.EditingControlShowing += promptsGridView_EditingControlShowing;
 
@@ -558,12 +561,14 @@ namespace NppDB.Core
 
                 UpdatePromptMeta(null);
                 UpdateTagsBox(null);
+                UpdatePromptInfoFields(null);
 
                 if (promptsGridView.Rows.Count == 0)
                 {
                     promptTextBox.Text = string.Empty;
                     flowLayoutPanelPlaceholders.Controls.Clear();
                     UpdateTagsBox(null);
+                    UpdatePromptInfoFields(null);
                     UpdateCopyButtonState(false, "No prompts match the search criteria.");
                 }
                 else
@@ -703,7 +708,8 @@ namespace NppDB.Core
                 promptsGridView.CurrentCell = row.Cells[e.ColumnIndex];
 
             editingModeCheckbox.Checked = true;
-            promptTextBox.Focus();
+            txtPromptName.Focus();
+            txtPromptName.SelectAll();
         }
 
         private void UpdatePromptMeta(PromptItem? prompt)
@@ -738,12 +744,14 @@ namespace NppDB.Core
                 UpdatePromptTextBoxForCurrentMode(prompt);
                 UpdatePromptMeta(prompt);
                 UpdateTagsBox(prompt);
+                UpdatePromptInfoFields(prompt);
             }
             else
             {
                 SetPreviewText(string.Empty, false);
                 flowLayoutPanelPlaceholders.Controls.Clear();
                 UpdateTagsBox(null);
+                UpdatePromptInfoFields(null);
                 UpdateCopyButtonState(false, "No prompt selected");
                 UpdatePromptMeta(null);
             }
@@ -766,6 +774,80 @@ namespace NppDB.Core
             {
                 _suppressTagsTextBoxChange = false;
             }
+        }
+
+        private void UpdatePromptInfoFields(PromptItem? prompt)
+        {
+            _suppressPromptMetaTextBoxChange = true;
+            try
+            {
+                if (!prompt.HasValue)
+                {
+                    txtPromptName.Text = string.Empty;
+                    txtPromptDescription.Text = string.Empty;
+                    return;
+                }
+
+                txtPromptName.Text = prompt.Value.Title ?? string.Empty;
+                txtPromptDescription.Text = prompt.Value.Description ?? string.Empty;
+            }
+            finally
+            {
+                _suppressPromptMetaTextBoxChange = false;
+            }
+        }
+
+        private void SaveSelectedPromptMetadata(Func<PromptItem, PromptItem> updateAction)
+        {
+            if (_suppressPromptMetaTextBoxChange || !_isEditingTemplate)
+                return;
+
+            if (promptsGridView.SelectedRows.Count == 0)
+                return;
+
+            var selectedRow = promptsGridView.SelectedRows[0];
+            if (!(selectedRow.Tag is PromptItem prompt))
+                return;
+
+            var beforeTitle = prompt.Title ?? string.Empty;
+            var beforeDescription = prompt.Description ?? string.Empty;
+
+            prompt = updateAction(prompt);
+
+            var afterTitle = prompt.Title ?? string.Empty;
+            var afterDescription = prompt.Description ?? string.Empty;
+
+            if (beforeTitle == afterTitle && beforeDescription == afterDescription)
+                return;
+
+            selectedRow.Tag = prompt;
+            selectedRow.Cells[colPromptName.Index].Value = prompt.Title;
+            selectedRow.Cells[colPromptDesc.Index].Value = prompt.Description;
+            ReplacePromptInCollections(prompt);
+
+            _pendingAutoSavePrompt = prompt;
+            _templateAutoSaveTimer.Stop();
+            _templateAutoSaveTimer.Start();
+        }
+
+        private void txtPromptName_TextChanged(object sender, EventArgs e)
+        {
+            SaveSelectedPromptMetadata(prompt =>
+            {
+                var value = (txtPromptName.Text ?? string.Empty).Trim();
+                if (!string.IsNullOrWhiteSpace(value))
+                    prompt.Title = value;
+                return prompt;
+            });
+        }
+
+        private void txtPromptDescription_TextChanged(object sender, EventArgs e)
+        {
+            SaveSelectedPromptMetadata(prompt =>
+            {
+                prompt.Description = (txtPromptDescription.Text ?? string.Empty).Trim();
+                return prompt;
+            });
         }
 
         private void GeneratePlaceholderControls(PromptItem prompt)
@@ -1127,22 +1209,30 @@ namespace NppDB.Core
             promptTextBox.BorderStyle = BorderStyle.FixedSingle;
             txtTags.BorderStyle = BorderStyle.FixedSingle;
             
+            panelEditFields.Visible = isEditing;
             promptTextBox.ReadOnly = !isEditing;
             txtTags.ReadOnly = !isEditing;
-            promptsGridView.ReadOnly = !isEditing;
+            txtPromptName.ReadOnly = !isEditing;
+            txtPromptDescription.ReadOnly = !isEditing;
+            promptsGridView.ReadOnly = true;
             buttonTogglePreview.Enabled = !isEditing;
             promptTextBox.TabStop = isEditing;
             txtTags.TabStop = isEditing;
+            txtPromptName.TabStop = isEditing;
+            txtPromptDescription.TabStop = isEditing;
             
             promptTextBox.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
             txtTags.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
+            txtPromptName.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
+            txtPromptDescription.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
 
-            lblEditingBadge.Text = _isEditingTemplate ? "Editing" : "View";
+            editingModeCheckbox.Text = _isEditingTemplate ? "Done" : "Edit";
+            lblEditingBadge.Text = _isEditingTemplate ? "Edit mode" : "View mode";
             lblEditingBadge.ForeColor = Color.White;
 
             colPromptType.ReadOnly = true;
-            colPromptName.ReadOnly = !isEditing;
-            colPromptDesc.ReadOnly = !isEditing;
+            colPromptName.ReadOnly = true;
+            colPromptDesc.ReadOnly = true;
 
             var pal = UiThemeManager.Current;
 
@@ -1150,11 +1240,15 @@ namespace NppDB.Core
             {
                 promptTextBox.BackColor = isEditing ? pal.HotBackground : pal.SofterBackground;
                 txtTags.BackColor = isEditing ? pal.HotBackground : pal.SofterBackground;
+                txtPromptName.BackColor = isEditing ? pal.HotBackground : pal.SofterBackground;
+                txtPromptDescription.BackColor = isEditing ? pal.HotBackground : pal.SofterBackground;
             }
             else
             {
                 promptTextBox.BackColor = isEditing ? Color.White : SystemColors.ControlLight;
                 txtTags.BackColor = isEditing ? Color.White : SystemColors.ControlLight;
+                txtPromptName.BackColor = isEditing ? Color.White : SystemColors.ControlLight;
+                txtPromptDescription.BackColor = isEditing ? Color.White : SystemColors.ControlLight;
             }
 
             _actionToolTip.SetToolTip(buttonTogglePreview,
@@ -1166,6 +1260,7 @@ namespace NppDB.Core
             {
                 var prompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
                 UpdatePromptTextBoxForCurrentMode(prompt);
+                UpdatePromptInfoFields(prompt);
             }
         }
         
@@ -1898,10 +1993,8 @@ namespace NppDB.Core
 
             if (promptsGridView.SelectedRows.Count > 0)
             {
-                var row = promptsGridView.SelectedRows[0];
-                var nameCell = row.Cells[colPromptName.Index];
-                promptsGridView.CurrentCell = nameCell;
-                promptsGridView.BeginEdit(true);
+                txtPromptName.Focus();
+                txtPromptName.SelectAll();
             }
         }
         
