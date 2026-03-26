@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
@@ -304,6 +305,66 @@ namespace NppDB.Core
                    || string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase)
                    || string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase)
                    || string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string GetPlaceholderDisplayName(string placeholderName)
+        {
+            if (string.IsNullOrWhiteSpace(placeholderName))
+                return "Value";
+
+            var parts = placeholderName
+                .Split(new[] { '_', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(part =>
+                {
+                    switch (part.ToLowerInvariant())
+                    {
+                        case "sql": return "SQL";
+                        case "db": return "DB";
+                        case "llm": return "LLM";
+                        case "api": return "API";
+                        case "id": return "ID";
+                        case "json": return "JSON";
+                        case "csv": return "CSV";
+                        case "rest": return "REST";
+                        default:
+                            return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(part.ToLowerInvariant());
+                    }
+                });
+
+            return string.Join(" ", parts);
+        }
+
+        private static string GetPlaceholderManualInstruction(string placeholderName)
+        {
+            if (string.IsNullOrWhiteSpace(placeholderName))
+                return "Enter the value manually.";
+
+            if (string.Equals(placeholderName, "selected_sql", StringComparison.OrdinalIgnoreCase))
+                return "Select SQL in the editor or enter it manually.";
+
+            if (string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase))
+                return "Connect to a database or enter it manually.";
+
+            if (string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase))
+                return "Select a table in the DB Manager or enter it manually.";
+
+            if (string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
+                return "Select a table in the DB Manager or enter metadata manually.";
+
+            if (placeholderName.IndexOf("query", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "Paste or type the query manually.";
+
+            if (placeholderName.IndexOf("dialect", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "Enter the SQL dialect manually.";
+
+            if (placeholderName.IndexOf("description", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "Enter the description manually.";
+
+            if (placeholderName.EndsWith("_name", StringComparison.OrdinalIgnoreCase)
+                || placeholderName.IndexOf("name", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "Enter the name manually.";
+
+            return "Enter the value manually.";
         }
 
         private Label CreatePlaceholderBadge(string name, string text)
@@ -892,7 +953,7 @@ namespace NppDB.Core
                         AutoSize = true,
                         Margin = new Padding(0, 1, 8, 0),
                         Name = "lblFieldTitle",
-                        Text = placeholder.Name,
+                        Text = GetPlaceholderDisplayName(placeholder.Name),
                         Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold),
                         ForeColor = pal.IsDark ? pal.Text : Color.Black
                     };
@@ -1517,6 +1578,15 @@ namespace NppDB.Core
             if (string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
                 return "Select a table in the DB Manager, or enter metadata manually.";
 
+            if (placeholderName.IndexOf("query", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "Paste or type the query here.";
+
+            if (placeholderName.IndexOf("dialect", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "Enter the target SQL dialect here.";
+
+            if (placeholderName.IndexOf("description", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "Describe the issue or request here.";
+
             return string.Empty;
         }
         
@@ -1599,24 +1669,22 @@ namespace NppDB.Core
                 || string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
                 return "Auto-fill available from DB Manager";
 
+            if (placeholderName.IndexOf("query", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "Paste or type the query manually";
+
+            if (placeholderName.IndexOf("dialect", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "Enter the SQL dialect manually";
+
+            if (placeholderName.IndexOf("description", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "Describe the issue or request manually";
+
             return "Enter this value manually";
         }
 
         private string GetMissingPlaceholderMessage(PromptPlaceholder placeholder)
         {
-            if (string.Equals(placeholder.Name, "selected_sql", StringComparison.OrdinalIgnoreCase))
-                return "Value for selected_sql: Select SQL in the editor or enter it manually.";
-
-            if (string.Equals(placeholder.Name, "dialect", StringComparison.OrdinalIgnoreCase))
-                return "Value for dialect: Connect to a database or enter it manually.";
-
-            if (string.Equals(placeholder.Name, "table_name", StringComparison.OrdinalIgnoreCase))
-                return "Value for table_name: Select a table in the DB Manager or enter it manually.";
-
-            if (string.Equals(placeholder.Name, "table", StringComparison.OrdinalIgnoreCase))
-                return "Value for table: Select a table in the DB Manager or enter metadata manually.";
-
-            return "Value for " + placeholder.Name + " is required.";
+            var displayName = GetPlaceholderDisplayName(placeholder.Name);
+            return displayName + " is required. " + GetPlaceholderManualInstruction(placeholder.Name);
         }
 
         private void ValidateInputs()
