@@ -257,7 +257,8 @@ namespace NppDB.Core
             // 
             // buttonDelete
             // 
-            this.buttonDelete.Location = new System.Drawing.Point(195, 11);
+            this.buttonDelete.Location = new System.Drawing.Point(192, 8);
+            this.buttonDelete.Margin = new System.Windows.Forms.Padding(0, 0, 8, 0);
             this.buttonDelete.Name = "buttonDelete";
             this.buttonDelete.Size = new System.Drawing.Size(88, 30);
             this.buttonDelete.TabIndex = 2;
@@ -287,11 +288,11 @@ namespace NppDB.Core
             this.promptTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.promptTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.promptTextBox.Font = new System.Drawing.Font("Segoe UI", 9.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.promptTextBox.Location = new System.Drawing.Point(3, 124);
+            this.promptTextBox.Location = new System.Drawing.Point(3, 134);
             this.promptTextBox.Name = "promptTextBox";
             this.promptTextBox.ReadOnly = true;
             this.promptTextBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.promptTextBox.Size = new System.Drawing.Size(855, 308);
+            this.promptTextBox.Size = new System.Drawing.Size(855, 298);
             this.promptTextBox.TabIndex = 0;
             this.promptTextBox.Text = "";
             // 
@@ -355,7 +356,7 @@ namespace NppDB.Core
             this.panelPromptTags.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelPromptTags.Location = new System.Drawing.Point(3, 100);
             this.panelPromptTags.Name = "panelPromptTags";
-            this.panelPromptTags.Size = new System.Drawing.Size(855, 24);
+            this.panelPromptTags.Size = new System.Drawing.Size(855, 34);
             this.panelPromptTags.TabIndex = 6;
             // 
             // txtTags
@@ -363,7 +364,7 @@ namespace NppDB.Core
             this.txtTags.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.txtTags.BackColor = System.Drawing.SystemColors.ControlLight;
             this.txtTags.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtTags.Location = new System.Drawing.Point(47, 4);
+            this.txtTags.Location = new System.Drawing.Point(47, 7);
             this.txtTags.Name = "txtTags";
             this.txtTags.ReadOnly = true;
             this.txtTags.Size = new System.Drawing.Size(685, 15);
@@ -372,7 +373,7 @@ namespace NppDB.Core
             // lblTags
             // 
             this.lblTags.AutoSize = true;
-            this.lblTags.Location = new System.Drawing.Point(0, 4);
+            this.lblTags.Location = new System.Drawing.Point(0, 7);
             this.lblTags.Name = "lblTags";
             this.lblTags.Size = new System.Drawing.Size(32, 13);
             this.lblTags.TabIndex = 0;

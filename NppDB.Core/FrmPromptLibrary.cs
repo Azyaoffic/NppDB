@@ -1742,18 +1742,25 @@ namespace NppDB.Core
 
             buttonCopy.Text = "Copy Prompt";
             buttonCopy.Enabled = true;
+            buttonAiStudio.Enabled = true;
 
             if (enabled)
             {
                 buttonCopy.BackColor = pal.IsDark ? pal.HotBackground : SystemColors.Highlight;
                 buttonCopy.ForeColor = pal.IsDark ? pal.Text : SystemColors.HighlightText;
+                buttonAiStudio.BackColor = pal.IsDark ? pal.HotBackground : SystemColors.Control;
+                buttonAiStudio.ForeColor = pal.IsDark ? pal.Text : SystemColors.ControlText;
                 _actionToolTip.SetToolTip(buttonCopy, "Copy prompt to clipboard");
+                _actionToolTip.SetToolTip(buttonAiStudio, "Open the configured LLM URL");
             }
             else
             {
                 buttonCopy.BackColor = pal.IsDark ? pal.SofterBackground : Color.Gainsboro;
                 buttonCopy.ForeColor = pal.IsDark ? pal.DarkerText : Color.DimGray;
+                buttonAiStudio.BackColor = pal.IsDark ? pal.SofterBackground : Color.Gainsboro;
+                buttonAiStudio.ForeColor = pal.IsDark ? pal.DarkerText : Color.DimGray;
                 _actionToolTip.SetToolTip(buttonCopy, _copyDisabledReason);
+                _actionToolTip.SetToolTip(buttonAiStudio, _copyDisabledReason);
             }
         }
 
@@ -2000,6 +2007,15 @@ namespace NppDB.Core
         
         private void buttonAiStudio_Click(object sender, EventArgs e)
         {
+            if (!_canCopy)
+            {
+                FocusFirstMissingPlaceholder();
+
+                if (!string.IsNullOrWhiteSpace(_copyDisabledReason))
+                    _actionToolTip.Show(_copyDisabledReason, buttonAiStudio, buttonAiStudio.Width / 2, -18, 2000);
+                return;
+            }
+
             try
             {
                 var url = NppDbSettingsStore.Get().Prompt.OpenLlmUrl?.Trim() ?? "https://chatgpt.com/";
