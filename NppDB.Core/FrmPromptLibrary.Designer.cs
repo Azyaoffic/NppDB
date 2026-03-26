@@ -147,7 +147,7 @@ namespace NppDB.Core
             // 
             // colPromptName
             // 
-            this.colPromptName.HeaderText = "Prompt Name";
+            this.colPromptName.HeaderText = "Prompt Name ↕";
             this.colPromptName.MinimumWidth = 160;
             this.colPromptName.Name = "colPromptName";
             this.colPromptName.ReadOnly = true;
@@ -156,7 +156,7 @@ namespace NppDB.Core
             // colPromptDesc
             // 
             this.colPromptDesc.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colPromptDesc.HeaderText = "Description";
+            this.colPromptDesc.HeaderText = "Description ↕";
             this.colPromptDesc.Name = "colPromptDesc";
             this.colPromptDesc.ReadOnly = true;
             // 
