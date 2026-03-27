@@ -58,6 +58,8 @@ namespace NppDB.Core
             this.txtTags = new System.Windows.Forms.TextBox();
             this.lblTags = new System.Windows.Forms.Label();
             this.panelPromptMeta = new System.Windows.Forms.Panel();
+            this.panelWorkflowHint = new System.Windows.Forms.Panel();
+            this.lblWorkflowHint = new System.Windows.Forms.Label();
             this.panelMetaRight = new System.Windows.Forms.Panel();
             this.editingModeCheckbox = new System.Windows.Forms.CheckBox();
             this.lblEditingBadge = new System.Windows.Forms.Label();
@@ -82,6 +84,7 @@ namespace NppDB.Core
             this.panelEditFields.SuspendLayout();
             this.panelPromptTags.SuspendLayout();
             this.panelPromptMeta.SuspendLayout();
+            this.panelWorkflowHint.SuspendLayout();
             this.panelMetaRight.SuspendLayout();
             this.panelPreviewBottom.SuspendLayout();
             this.panelRightActions.SuspendLayout();
@@ -271,6 +274,7 @@ namespace NppDB.Core
             this.grpPreview.Controls.Add(this.promptTextBox);
             this.grpPreview.Controls.Add(this.panelPromptTags);
             this.grpPreview.Controls.Add(this.panelEditFields);
+            this.grpPreview.Controls.Add(this.panelWorkflowHint);
             this.grpPreview.Controls.Add(this.panelPromptMeta);
             this.grpPreview.Controls.Add(this.splitterPreview);
             this.grpPreview.Controls.Add(this.panelPreviewBottom);
@@ -280,7 +284,7 @@ namespace NppDB.Core
             this.grpPreview.Size = new System.Drawing.Size(861, 687);
             this.grpPreview.TabIndex = 0;
             this.grpPreview.TabStop = false;
-            this.grpPreview.Text = "Prompt Preview";
+            this.grpPreview.Text = "Prompt Details";
             // 
             // promptTextBox
             // 
@@ -288,11 +292,11 @@ namespace NppDB.Core
             this.promptTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.promptTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.promptTextBox.Font = new System.Drawing.Font("Segoe UI", 9.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.promptTextBox.Location = new System.Drawing.Point(3, 134);
+            this.promptTextBox.Location = new System.Drawing.Point(3, 158);
             this.promptTextBox.Name = "promptTextBox";
             this.promptTextBox.ReadOnly = true;
             this.promptTextBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.promptTextBox.Size = new System.Drawing.Size(855, 298);
+            this.promptTextBox.Size = new System.Drawing.Size(855, 274);
             this.promptTextBox.TabIndex = 0;
             this.promptTextBox.Text = "";
             // 
@@ -304,7 +308,7 @@ namespace NppDB.Core
             this.panelEditFields.Controls.Add(this.txtPromptName);
             this.panelEditFields.Controls.Add(this.lblPromptName);
             this.panelEditFields.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelEditFields.Location = new System.Drawing.Point(3, 42);
+            this.panelEditFields.Location = new System.Drawing.Point(3, 66);
             this.panelEditFields.Name = "panelEditFields";
             this.panelEditFields.Padding = new System.Windows.Forms.Padding(0, 4, 0, 4);
             this.panelEditFields.Size = new System.Drawing.Size(855, 58);
@@ -354,7 +358,7 @@ namespace NppDB.Core
             this.panelPromptTags.Controls.Add(this.txtTags);
             this.panelPromptTags.Controls.Add(this.lblTags);
             this.panelPromptTags.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panelPromptTags.Location = new System.Drawing.Point(3, 100);
+            this.panelPromptTags.Location = new System.Drawing.Point(3, 124);
             this.panelPromptTags.Name = "panelPromptTags";
             this.panelPromptTags.Size = new System.Drawing.Size(855, 34);
             this.panelPromptTags.TabIndex = 6;
@@ -378,6 +382,27 @@ namespace NppDB.Core
             this.lblTags.Size = new System.Drawing.Size(32, 13);
             this.lblTags.TabIndex = 0;
             this.lblTags.Text = "Tags:";
+            // 
+            // panelWorkflowHint
+            // 
+            this.panelWorkflowHint.Controls.Add(this.lblWorkflowHint);
+            this.panelWorkflowHint.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panelWorkflowHint.Location = new System.Drawing.Point(3, 42);
+            this.panelWorkflowHint.Name = "panelWorkflowHint";
+            this.panelWorkflowHint.Padding = new System.Windows.Forms.Padding(0, 3, 0, 1);
+            this.panelWorkflowHint.Size = new System.Drawing.Size(855, 24);
+            this.panelWorkflowHint.TabIndex = 8;
+            // 
+            // lblWorkflowHint
+            // 
+            this.lblWorkflowHint.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblWorkflowHint.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.lblWorkflowHint.Location = new System.Drawing.Point(0, 3);
+            this.lblWorkflowHint.Name = "lblWorkflowHint";
+            this.lblWorkflowHint.Size = new System.Drawing.Size(855, 20);
+            this.lblWorkflowHint.TabIndex = 0;
+            this.lblWorkflowHint.Text = "1. Select a prompt   2. Fill missing inputs   3. Copy prompt / Open in LLM";
+            this.lblWorkflowHint.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // panelPromptMeta
             // 
@@ -428,7 +453,7 @@ namespace NppDB.Core
             this.lblEditingBadge.Padding = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.lblEditingBadge.Size = new System.Drawing.Size(78, 24);
             this.lblEditingBadge.TabIndex = 999;
-            this.lblEditingBadge.Text = "View mode";
+            this.lblEditingBadge.Text = "Preview";
             this.lblEditingBadge.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblEditingBadge.ForeColorChanged += new System.EventHandler(this.lblEditingBadge_forceWhiteText);
             // 
@@ -439,7 +464,7 @@ namespace NppDB.Core
             this.buttonAiStudio.Name = "buttonAiStudio";
             this.buttonAiStudio.Size = new System.Drawing.Size(120, 24);
             this.buttonAiStudio.TabIndex = 2;
-            this.buttonAiStudio.Text = "Open LLM";
+            this.buttonAiStudio.Text = "Open in LLM";
             this.buttonAiStudio.UseVisualStyleBackColor = true;
             this.buttonAiStudio.Click += new System.EventHandler(this.buttonAiStudio_Click);
             // 
@@ -450,7 +475,7 @@ namespace NppDB.Core
             this.buttonTogglePreview.Name = "buttonTogglePreview";
             this.buttonTogglePreview.Size = new System.Drawing.Size(110, 24);
             this.buttonTogglePreview.TabIndex = 4;
-            this.buttonTogglePreview.Text = "Hide Preview";
+            this.buttonTogglePreview.Text = "Collapse Preview";
             this.buttonTogglePreview.UseVisualStyleBackColor = true;
             this.buttonTogglePreview.Click += new System.EventHandler(this.buttonTogglePreview_Click);
             // 
@@ -459,11 +484,11 @@ namespace NppDB.Core
             this.lblPromptCapabilities.AutoEllipsis = true;
             this.lblPromptCapabilities.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblPromptCapabilities.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.lblPromptCapabilities.Location = new System.Drawing.Point(138, 0);
+            this.lblPromptCapabilities.Location = new System.Drawing.Point(190, 0);
             this.lblPromptCapabilities.Name = "lblPromptCapabilities";
-            this.lblPromptCapabilities.Size = new System.Drawing.Size(717, 24);
+            this.lblPromptCapabilities.Size = new System.Drawing.Size(665, 24);
             this.lblPromptCapabilities.TabIndex = 1;
-            this.lblPromptCapabilities.Text = "Capabilities: —";
+            this.lblPromptCapabilities.Text = "No table selected";
             this.lblPromptCapabilities.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lblPromptType
@@ -473,9 +498,9 @@ namespace NppDB.Core
             this.lblPromptType.Location = new System.Drawing.Point(0, 0);
             this.lblPromptType.Name = "lblPromptType";
             this.lblPromptType.Padding = new System.Windows.Forms.Padding(0, 0, 6, 0);
-            this.lblPromptType.Size = new System.Drawing.Size(138, 24);
+            this.lblPromptType.Size = new System.Drawing.Size(190, 24);
             this.lblPromptType.TabIndex = 0;
-            this.lblPromptType.Text = "Type: —";
+            this.lblPromptType.Text = "No database selected";
             this.lblPromptType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // splitterPreview
@@ -522,9 +547,9 @@ namespace NppDB.Core
             this.lblPlaceholders.ForeColor = System.Drawing.SystemColors.ControlText;
             this.lblPlaceholders.Location = new System.Drawing.Point(3, 3);
             this.lblPlaceholders.Name = "lblPlaceholders";
-            this.lblPlaceholders.Size = new System.Drawing.Size(715, 17);
+            this.lblPlaceholders.Size = new System.Drawing.Size(520, 17);
             this.lblPlaceholders.TabIndex = 5;
-            this.lblPlaceholders.Text = "Placeholders (* required. Auto-filled fields come from the editor or DB Manager).";
+            this.lblPlaceholders.Text = "Prompt Inputs (* required. Auto-filled fields come from the editor or DB Manager).";
             // 
             // panelRightActions
             // 
@@ -581,6 +606,7 @@ namespace NppDB.Core
             this.panelPromptTags.ResumeLayout(false);
             this.panelPromptTags.PerformLayout();
             this.panelPromptMeta.ResumeLayout(false);
+            this.panelWorkflowHint.ResumeLayout(false);
             this.panelMetaRight.ResumeLayout(false);
             this.panelPreviewBottom.ResumeLayout(false);
             this.panelPreviewBottom.PerformLayout();
@@ -606,6 +632,7 @@ namespace NppDB.Core
         private System.Windows.Forms.GroupBox grpPreview;
 
         private System.Windows.Forms.Panel panelPromptMeta;
+        private System.Windows.Forms.Panel panelWorkflowHint;
         private System.Windows.Forms.Panel panelMetaRight;
         private System.Windows.Forms.Button buttonAiStudio;
         private System.Windows.Forms.Button buttonTogglePreview;
@@ -614,6 +641,7 @@ namespace NppDB.Core
         private System.Windows.Forms.Label lblPromptCapabilities;
         private System.Windows.Forms.Label lblPromptType;
         private System.Windows.Forms.Label lblEditingBadge;
+        private System.Windows.Forms.Label lblWorkflowHint;
 
         private System.Windows.Forms.Panel panelPromptTags;
         private System.Windows.Forms.TextBox txtTags;

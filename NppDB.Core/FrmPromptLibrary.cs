@@ -53,6 +53,7 @@ namespace NppDB.Core
         private string _copyDisabledReason;
         private string _firstMissingPlaceholderName;
         private bool _previewCollapsed;
+        private bool _showBlockingValidation;
         private bool _restoreCollapsedAfterEditing;
         private int _lastExpandedPlaceholdersHeight = LegacyDefaultPlaceholdersHeight;
 
@@ -97,8 +98,8 @@ namespace NppDB.Core
             splitterPreview.MouseDoubleClick += splitterPreview_MouseDoubleClick;
             splitterPreview.Cursor = Cursors.HSplit;
             grpPreview.Resize += grpPreview_Resize;
-            _actionToolTip.SetToolTip(splitterPreview, "Drag to resize the preview and placeholders. Double-click to reset.");
-            _actionToolTip.SetToolTip(buttonTogglePreview, "Hide the preview to focus on placeholder inputs.");
+            _actionToolTip.SetToolTip(splitterPreview, "Drag to resize the preview and prompt inputs. Double-click to reset.");
+            _actionToolTip.SetToolTip(buttonTogglePreview, "Collapse the preview to focus on prompt inputs.");
 
             SetEditingMode(false);
             ConfigureSourceFilter();
@@ -116,9 +117,9 @@ namespace NppDB.Core
             lblPromptType.Visible = true;
             lblPromptCapabilities.Visible = true;
 
-            lblPromptType.Text = "DB: —";
-            lblPromptCapabilities.Text = "Table: —";
-            lblPromptType.Width = 170;
+            lblPromptType.Text = "No database selected";
+            lblPromptCapabilities.Text = "No table selected";
+            lblPromptType.Width = 190;
 
             _actionToolTip.SetToolTip(buttonDuplicate, "Select a prompt to duplicate.");
         }
@@ -230,8 +231,8 @@ namespace NppDB.Core
 
         private int GetDefaultPlaceholdersHeight()
         {
-            var preferredHeight = Math.Max(220, grpPreview.ClientSize.Height * 40 / 100);
-            return Math.Min(340, preferredHeight);
+            var preferredHeight = Math.Max(250, grpPreview.ClientSize.Height * 46 / 100);
+            return Math.Min(380, preferredHeight);
         }
 
         private void ApplyPreviewBottomHeight(int desiredHeight)
@@ -261,11 +262,11 @@ namespace NppDB.Core
 
         private void UpdatePreviewToggleState()
         {
-            buttonTogglePreview.Text = _previewCollapsed ? "Show Preview" : "Hide Preview";
+            buttonTogglePreview.Text = _previewCollapsed ? "Show Preview" : "Collapse Preview";
             _actionToolTip.SetToolTip(buttonTogglePreview,
                 _previewCollapsed
                     ? "Show the prompt preview again."
-                    : "Hide the preview to focus on placeholder inputs.");
+                    : "Collapse the preview to focus on prompt inputs.");
         }
 
         private void SetPreviewCollapsed(bool collapsed, bool rememberCurrentHeight)
@@ -312,6 +313,22 @@ namespace NppDB.Core
             if (string.IsNullOrWhiteSpace(placeholderName))
                 return "Value";
 
+            switch (placeholderName.Trim().ToLowerInvariant())
+            {
+                case "selected_sql":
+                    return "Selected SQL Query";
+                case "dialect":
+                    return "Current SQL Dialect";
+                case "target_dialect":
+                    return "Target SQL Dialect";
+                case "table":
+                    return "Table Metadata";
+                case "table_name":
+                    return "Table Name";
+                case "issue_description":
+                    return "Issue Description";
+            }
+
             var parts = placeholderName
                 .Split(new[] { '_', ' ' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(part =>
@@ -337,34 +354,34 @@ namespace NppDB.Core
         private static string GetPlaceholderManualInstruction(string placeholderName)
         {
             if (string.IsNullOrWhiteSpace(placeholderName))
-                return "Enter the value manually.";
+                return "Enter the value here.";
 
             if (string.Equals(placeholderName, "selected_sql", StringComparison.OrdinalIgnoreCase))
-                return "Select SQL in the editor or enter it manually.";
+                return "Select SQL in the editor or type it manually.";
 
             if (string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase))
-                return "Connect to a database or enter it manually.";
+                return "Connect to a database to auto-fill, or type it manually.";
 
             if (string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase))
-                return "Select a table in the DB Manager or enter it manually.";
+                return "Select a table in the DB Manager to auto-fill, or type it manually.";
 
             if (string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
-                return "Select a table in the DB Manager or enter metadata manually.";
+                return "Select a table in the DB Manager to auto-fill, or enter the metadata manually.";
 
             if (placeholderName.IndexOf("query", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Paste or type the query manually.";
+                return "Paste or type the query here.";
 
             if (placeholderName.IndexOf("dialect", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Enter the SQL dialect manually.";
+                return "Enter the target SQL dialect here.";
 
             if (placeholderName.IndexOf("description", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Enter the description manually.";
+                return "Describe the issue or request here.";
 
             if (placeholderName.EndsWith("_name", StringComparison.OrdinalIgnoreCase)
                 || placeholderName.IndexOf("name", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Enter the name manually.";
+                return "Enter the name here.";
 
-            return "Enter the value manually.";
+            return "Enter the value here.";
         }
 
         private Label CreatePlaceholderBadge(string name, string text)
@@ -392,7 +409,7 @@ namespace NppDB.Core
             badge.Visible = visible;
         }
 
-        private void UpdatePlaceholderBadges(FlowLayoutPanel container, bool hasValue)
+        private void UpdatePlaceholderBadges(FlowLayoutPanel container, bool hasValue, bool showBlockingState)
         {
             var pal = UiThemeManager.Current;
             var placeholderName = container.Tag as string;
@@ -408,6 +425,8 @@ namespace NppDB.Core
             var manualFore = pal.IsDark ? pal.Text : Color.DimGray;
             var readyBack = pal.IsDark ? Color.FromArgb(38, 74, 52) : Color.FromArgb(231, 247, 236);
             var readyFore = pal.IsDark ? Color.FromArgb(209, 245, 219) : Color.FromArgb(26, 102, 56);
+            var incompleteBack = pal.IsDark ? Color.FromArgb(58, 64, 72) : Color.FromArgb(240, 244, 248);
+            var incompleteFore = pal.IsDark ? Color.FromArgb(219, 226, 233) : Color.FromArgb(77, 91, 107);
             var missingBack = pal.IsDark ? Color.FromArgb(90, 55, 38) : Color.FromArgb(255, 244, 224);
             var missingFore = pal.IsDark ? Color.FromArgb(255, 224, 186) : Color.FromArgb(140, 88, 15);
 
@@ -415,9 +434,16 @@ namespace NppDB.Core
             ApplyPlaceholderBadgeState(modeBadge, SupportsAutoFill(placeholderName) ? "AUTO" : "MANUAL",
                 SupportsAutoFill(placeholderName) ? autoBack : manualBack,
                 SupportsAutoFill(placeholderName) ? autoFore : manualFore);
-            ApplyPlaceholderBadgeState(valueBadge, hasValue ? "READY" : "MISSING",
-                hasValue ? readyBack : missingBack,
-                hasValue ? readyFore : missingFore);
+
+            if (hasValue)
+            {
+                ApplyPlaceholderBadgeState(valueBadge, "READY", readyBack, readyFore);
+                return;
+            }
+
+            ApplyPlaceholderBadgeState(valueBadge, showBlockingState ? "MISSING" : "INCOMPLETE",
+                showBlockingState ? missingBack : incompleteBack,
+                showBlockingState ? missingFore : incompleteFore);
         }
         
         private static string GetPlaceholderValue(string key)
@@ -780,8 +806,8 @@ namespace NppDB.Core
             var databaseName = GetPlaceholderValue("database_name");
             var tableName = GetPlaceholderValue("table_name");
 
-            lblPromptType.Text = "DB: " + (!string.IsNullOrWhiteSpace(databaseName) ? databaseName : "not selected");
-            lblPromptCapabilities.Text = "Table: " + (!string.IsNullOrWhiteSpace(tableName) ? tableName : "not selected");
+            lblPromptType.Text = !string.IsNullOrWhiteSpace(databaseName) ? "Database: " + databaseName : "No database selected";
+            lblPromptCapabilities.Text = !string.IsNullOrWhiteSpace(tableName) ? "Table: " + tableName : "No table selected";
 
             _actionToolTip.SetToolTip(lblPromptType, lblPromptType.Text);
             _actionToolTip.SetToolTip(lblPromptCapabilities, lblPromptCapabilities.Text);
@@ -801,6 +827,7 @@ namespace NppDB.Core
                 if (!(selectedRow.Tag is PromptItem prompt))
                     return;
 
+                _showBlockingValidation = false;
                 GeneratePlaceholderControls(prompt);
                 UpdatePromptTextBoxForCurrentMode(prompt);
                 UpdatePromptMeta(prompt);
@@ -809,6 +836,7 @@ namespace NppDB.Core
             }
             else
             {
+                _showBlockingValidation = false;
                 SetPreviewText(string.Empty, false);
                 flowLayoutPanelPlaceholders.Controls.Clear();
                 UpdateTagsBox(null);
@@ -958,12 +986,22 @@ namespace NppDB.Core
                         ForeColor = pal.IsDark ? pal.Text : Color.Black
                     };
 
-                    var tip = new ToolTip();
-                    tip.SetToolTip(label, "This field is required.");
+                    _actionToolTip.SetToolTip(label, "This prompt input is required.");
+
+                    var requiredBadge = CreatePlaceholderBadge("lblFieldRequiredBadge", "REQUIRED");
+                    var modeBadge = CreatePlaceholderBadge("lblFieldModeBadge", string.Empty);
+                    var valueBadge = CreatePlaceholderBadge("lblFieldValueBadge", string.Empty);
+
+                    _actionToolTip.SetToolTip(requiredBadge, "Required input.");
+                    _actionToolTip.SetToolTip(modeBadge, SupportsAutoFill(placeholder.Name)
+                        ? "Auto-filled when the required editor or DB context is available."
+                        : "Enter this value manually.");
+                    _actionToolTip.SetToolTip(valueBadge, "Shows whether this input is ready to use.");
+
                     headerRow.Controls.Add(label);
-                    headerRow.Controls.Add(CreatePlaceholderBadge("lblFieldRequiredBadge", "REQUIRED"));
-                    headerRow.Controls.Add(CreatePlaceholderBadge("lblFieldModeBadge", string.Empty));
-                    headerRow.Controls.Add(CreatePlaceholderBadge("lblFieldValueBadge", string.Empty));
+                    headerRow.Controls.Add(requiredBadge);
+                    headerRow.Controls.Add(modeBadge);
+                    headerRow.Controls.Add(valueBadge);
                     container.Controls.Add(headerRow);
 
                     var initialValue = string.Empty;
@@ -973,7 +1011,7 @@ namespace NppDB.Core
                     var statusLabel = new Label
                     {
                         AutoSize = true,
-                        Margin = new Padding(0, 0, 0, 4),
+                        Margin = new Padding(0, 0, 0, 6),
                         Name = "lblFieldStatus",
                         ForeColor = pal.IsDark ? pal.DarkerText : Color.DimGray,
                         Text = GetPlaceholderStatusText(placeholder.Name, hasInitialValue)
@@ -1036,7 +1074,7 @@ namespace NppDB.Core
                     inputHost.Resize += PlaceholderInputHost_Resize;
                     LayoutPlaceholderInputHost(inputHost);
                     container.Controls.Add(inputHost);
-                    UpdatePlaceholderBadges(container, hasInitialValue);
+                    UpdatePlaceholderBadges(container, hasInitialValue, false);
 
                     var grip = new Panel
                     {
@@ -1266,7 +1304,7 @@ namespace NppDB.Core
 
             _isEditingTemplate = isEditing;
 
-            grpPreview.Text = _isEditingTemplate ? "Edit Template (Auto-Save)" : "Prompt Preview";
+            grpPreview.Text = _isEditingTemplate ? "Edit Template (Auto-Save)" : "Prompt Details";
             promptTextBox.BorderStyle = BorderStyle.FixedSingle;
             txtTags.BorderStyle = BorderStyle.FixedSingle;
             
@@ -1288,7 +1326,7 @@ namespace NppDB.Core
             txtPromptDescription.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
 
             editingModeCheckbox.Text = _isEditingTemplate ? "Done" : "Edit";
-            lblEditingBadge.Text = _isEditingTemplate ? "Edit mode" : "View mode";
+            lblEditingBadge.Text = _isEditingTemplate ? "Edit mode" : "Preview";
             lblEditingBadge.ForeColor = Color.White;
 
             colPromptType.ReadOnly = true;
@@ -1315,7 +1353,7 @@ namespace NppDB.Core
             _actionToolTip.SetToolTip(buttonTogglePreview,
                 isEditing
                     ? "Preview stays visible while you are editing the template."
-                    : (_previewCollapsed ? "Show the prompt preview again." : "Hide the preview to focus on placeholder inputs."));
+                    : (_previewCollapsed ? "Show the prompt preview again." : "Collapse the preview to focus on prompt inputs."));
 
             if (promptsGridView.SelectedRows.Count > 0)
             {
@@ -1570,13 +1608,13 @@ namespace NppDB.Core
                 return string.Empty;
 
             if (string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase))
-                return "Connect to a database to auto-fill, or enter the dialect manually.";
+                return "Connect to a database to auto-fill, or enter the SQL dialect manually.";
 
             if (string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase))
-                return "Select a table in the DB Manager, or enter the table name manually.";
+                return "Select a table in the DB Manager to auto-fill, or enter the table name manually.";
 
             if (string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
-                return "Select a table in the DB Manager, or enter metadata manually.";
+                return "Select a table in the DB Manager to auto-fill, or enter the metadata manually.";
 
             if (placeholderName.IndexOf("query", StringComparison.OrdinalIgnoreCase) >= 0)
                 return "Paste or type the query here.";
@@ -1657,28 +1695,34 @@ namespace NppDB.Core
         private string GetPlaceholderStatusText(string placeholderName, bool hasInitialValue)
         {
             if (hasInitialValue)
-                return "Value ready";
+                return "Value available.";
 
             if (string.Equals(placeholderName, "selected_sql", StringComparison.OrdinalIgnoreCase))
-                return "Select SQL in the editor or enter it manually";
+                return "Select SQL in the editor to auto-fill, or type it manually.";
 
             if (string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase))
-                return "Auto-fill available from the current database connection";
+                return "Available from the current database connection, or enter it manually.";
 
-            if (string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
-                return "Auto-fill available from DB Manager";
+            if (string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase))
+                return "Select a table in the DB Manager to auto-fill, or type it manually.";
+
+            if (string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
+                return "Select a table in the DB Manager to auto-fill, or enter the metadata manually.";
 
             if (placeholderName.IndexOf("query", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Paste or type the query manually";
+                return "Paste or type the query here.";
 
             if (placeholderName.IndexOf("dialect", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Enter the SQL dialect manually";
+                return "Enter the target SQL dialect here.";
 
             if (placeholderName.IndexOf("description", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Describe the issue or request manually";
+                return "Describe the issue or request here.";
 
-            return "Enter this value manually";
+            if (placeholderName.EndsWith("_name", StringComparison.OrdinalIgnoreCase)
+                || placeholderName.IndexOf("name", StringComparison.OrdinalIgnoreCase) >= 0)
+                return "Enter the name here.";
+
+            return "Enter the value here.";
         }
 
         private string GetMissingPlaceholderMessage(PromptPlaceholder placeholder)
@@ -1700,7 +1744,7 @@ namespace NppDB.Core
 
             var prompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
             var isValid = true;
-            var disabledReason = "Fill required fields (*) to copy";
+            var disabledReason = "Fill all required prompt inputs before continuing.";
 
             if (prompt.Placeholders != null)
             {
@@ -1724,12 +1768,14 @@ namespace NppDB.Core
         {
             var pal = UiThemeManager.Current;
             var validBackColor = pal.IsDark ? pal.PureBackground : SystemColors.Window;
-            var invalidBackColor = pal.IsDark ? pal.PureBackground : Color.MistyRose;
+            var incompleteBackColor = pal.IsDark ? pal.PureBackground : SystemColors.Window;
+            var invalidBackColor = pal.IsDark ? pal.PureBackground : Color.FromArgb(255, 244, 244);
             var validTitleColor = pal.IsDark ? pal.Text : Color.Black;
             var invalidTitleColor = pal.IsDark ? Color.FromArgb(255, 182, 182) : Color.Firebrick;
             var validStatusColor = pal.IsDark ? pal.DarkerText : Color.DimGray;
             var invalidStatusColor = pal.IsDark ? Color.FromArgb(255, 214, 214) : Color.Firebrick;
             var validAccentColor = pal.IsDark ? Color.FromArgb(82, 163, 118) : Color.FromArgb(55, 122, 72);
+            var incompleteAccentColor = pal.IsDark ? Color.FromArgb(88, 103, 120) : Color.FromArgb(150, 163, 177);
             var invalidAccentColor = pal.IsDark ? Color.FromArgb(255, 112, 112) : Color.Firebrick;
 
             foreach (Control control in flowLayoutPanelPlaceholders.Controls)
@@ -1741,7 +1787,7 @@ namespace NppDB.Core
                 var hasValue = !string.IsNullOrWhiteSpace(placeholderName)
                     && Placeholders.TryGetValue(placeholderName, out var value)
                     && !string.IsNullOrWhiteSpace(value);
-                var isMissing = !hasValue;
+                var showBlockingState = !hasValue && _showBlockingValidation;
 
                 var titleLabel = container.Controls.Find("lblFieldTitle", false).OfType<Label>().FirstOrDefault();
                 var statusLabel = container.Controls.Find("lblFieldStatus", false).OfType<Label>().FirstOrDefault();
@@ -1749,25 +1795,25 @@ namespace NppDB.Core
                 var accentPanel = container.Controls.Find("pnlFieldIndicator", true).OfType<Panel>().FirstOrDefault();
 
                 if (titleLabel != null)
-                    titleLabel.ForeColor = isMissing ? invalidTitleColor : validTitleColor;
+                    titleLabel.ForeColor = showBlockingState ? invalidTitleColor : validTitleColor;
 
                 if (statusLabel != null)
                 {
-                    statusLabel.ForeColor = isMissing ? invalidStatusColor : validStatusColor;
+                    statusLabel.ForeColor = showBlockingState ? invalidStatusColor : validStatusColor;
 
-                    if (isMissing && !string.IsNullOrWhiteSpace(placeholderName))
+                    if (showBlockingState && !string.IsNullOrWhiteSpace(placeholderName))
                         statusLabel.Text = GetMissingPlaceholderMessage(new PromptPlaceholder { Name = placeholderName });
                     else if (!string.IsNullOrWhiteSpace(placeholderName))
                         statusLabel.Text = GetPlaceholderStatusText(placeholderName, hasValue);
                 }
 
                 if (inputControl != null)
-                    inputControl.BackColor = isMissing ? invalidBackColor : validBackColor;
+                    inputControl.BackColor = hasValue ? validBackColor : (showBlockingState ? invalidBackColor : incompleteBackColor);
 
                 if (accentPanel != null)
-                    accentPanel.BackColor = isMissing ? invalidAccentColor : validAccentColor;
+                    accentPanel.BackColor = hasValue ? validAccentColor : (showBlockingState ? invalidAccentColor : incompleteAccentColor);
 
-                UpdatePlaceholderBadges(container, hasValue);
+                UpdatePlaceholderBadges(container, hasValue, showBlockingState);
             }
         }
 
@@ -1819,7 +1865,7 @@ namespace NppDB.Core
                 buttonAiStudio.BackColor = pal.IsDark ? pal.HotBackground : SystemColors.Control;
                 buttonAiStudio.ForeColor = pal.IsDark ? pal.Text : SystemColors.ControlText;
                 _actionToolTip.SetToolTip(buttonCopy, "Copy prompt to clipboard");
-                _actionToolTip.SetToolTip(buttonAiStudio, "Open the configured LLM URL");
+                _actionToolTip.SetToolTip(buttonAiStudio, "Open the configured external LLM URL");
             }
             else
             {
@@ -2013,10 +2059,12 @@ namespace NppDB.Core
         {
             if (!_canCopy)
             {
+                _showBlockingValidation = true;
+                ValidateInputs();
                 FocusFirstMissingPlaceholder();
 
                 if (!string.IsNullOrWhiteSpace(_copyDisabledReason))
-                    _actionToolTip.Show(_copyDisabledReason, buttonCopy, buttonCopy.Width / 2, -18, 2000);
+                    _actionToolTip.Show(_copyDisabledReason, buttonCopy, buttonCopy.Width / 2, -18, 2400);
                 return;
             }
 
@@ -2077,10 +2125,12 @@ namespace NppDB.Core
         {
             if (!_canCopy)
             {
+                _showBlockingValidation = true;
+                ValidateInputs();
                 FocusFirstMissingPlaceholder();
 
                 if (!string.IsNullOrWhiteSpace(_copyDisabledReason))
-                    _actionToolTip.Show(_copyDisabledReason, buttonAiStudio, buttonAiStudio.Width / 2, -18, 2000);
+                    _actionToolTip.Show(_copyDisabledReason, buttonAiStudio, buttonAiStudio.Width / 2, -18, 2400);
                 return;
             }
 
