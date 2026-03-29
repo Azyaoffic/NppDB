@@ -28,6 +28,7 @@ namespace NppDB.Core
             this.layoutBehaviorOptions = new System.Windows.Forms.TableLayoutPanel();
             this.chkEnableDestructiveSelectInto = new System.Windows.Forms.CheckBox();
             this.chkEnableNewTabCreation = new System.Windows.Forms.CheckBox();
+            this.chkEnableSqlAutocomplete = new System.Windows.Forms.CheckBox();
             this.pnlDbManagerFont = new System.Windows.Forms.FlowLayoutPanel();
             this.lblDbManagerFontScale = new System.Windows.Forms.Label();
             this.numDbManagerFontScale = new System.Windows.Forms.NumericUpDown();
@@ -41,8 +42,8 @@ namespace NppDB.Core
             this.comboResponseLanguage = new System.Windows.Forms.ComboBox();
             this.lblOpenUrl = new System.Windows.Forms.Label();
             this.txtOpenLlmUrl = new System.Windows.Forms.TextBox();
-            this.lblCustomInstructions = new System.Windows.Forms.Label();
             this.pnlCustomInstructionsHeader = new System.Windows.Forms.FlowLayoutPanel();
+            this.lblCustomInstructions = new System.Windows.Forms.Label();
             this.btnCustomInstructionsInfo = new System.Windows.Forms.Button();
             this.txtCustomInstructions = new System.Windows.Forms.RichTextBox();
             this.tabAiTemplate = new System.Windows.Forms.TabPage();
@@ -55,7 +56,6 @@ namespace NppDB.Core
             this.btnRestoreDefaultTemplate = new System.Windows.Forms.Button();
             this.txtAiTemplate = new System.Windows.Forms.TextBox();
             this.panelButtons = new System.Windows.Forms.FlowLayoutPanel();
-            this.chkEnableSqlAutocomplete = new System.Windows.Forms.CheckBox();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.tableRoot.SuspendLayout();
@@ -64,11 +64,12 @@ namespace NppDB.Core
             this.grpBehavior.SuspendLayout();
             this.layoutBehaviorOptions.SuspendLayout();
             this.pnlDbManagerFont.SuspendLayout();
-            this.pnlThemeMode.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numDbManagerFontScale)).BeginInit();
+            this.pnlThemeMode.SuspendLayout();
             this.tabLlm.SuspendLayout();
             this.grpLlm.SuspendLayout();
             this.tableLlm.SuspendLayout();
+            this.pnlCustomInstructionsHeader.SuspendLayout();
             this.tabAiTemplate.SuspendLayout();
             this.grpAiTemplate.SuspendLayout();
             this.tableAi.SuspendLayout();
@@ -228,7 +229,7 @@ namespace NppDB.Core
             this.pnlThemeMode.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlThemeMode.Location = new System.Drawing.Point(3, 157);
             this.pnlThemeMode.Name = "pnlThemeMode";
-            this.pnlThemeMode.Size = new System.Drawing.Size(720, 28);
+            this.pnlThemeMode.Size = new System.Drawing.Size(720, 27);
             this.pnlThemeMode.TabIndex = 4;
             this.pnlThemeMode.WrapContents = false;
             // 
@@ -238,7 +239,7 @@ namespace NppDB.Core
             this.lblThemeMode.Location = new System.Drawing.Point(0, 6);
             this.lblThemeMode.Margin = new System.Windows.Forms.Padding(0, 6, 8, 0);
             this.lblThemeMode.Name = "lblThemeMode";
-            this.lblThemeMode.Size = new System.Drawing.Size(102, 13);
+            this.lblThemeMode.Size = new System.Drawing.Size(97, 13);
             this.lblThemeMode.TabIndex = 0;
             this.lblThemeMode.Text = "Theme (UI colors):";
             // 
@@ -247,7 +248,7 @@ namespace NppDB.Core
             this.comboThemeMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboThemeMode.FormattingEnabled = true;
             this.comboThemeMode.Items.AddRange(new object[] { "FollowNotepadPlusPlus", "ForceDark", "ForceLight" });
-            this.comboThemeMode.Location = new System.Drawing.Point(113, 3);
+            this.comboThemeMode.Location = new System.Drawing.Point(108, 3);
             this.comboThemeMode.Name = "comboThemeMode";
             this.comboThemeMode.Size = new System.Drawing.Size(200, 21);
             this.comboThemeMode.TabIndex = 1;
@@ -338,9 +339,9 @@ namespace NppDB.Core
             this.txtOpenLlmUrl.Name = "txtOpenLlmUrl";
             this.txtOpenLlmUrl.Size = new System.Drawing.Size(560, 22);
             this.txtOpenLlmUrl.TabIndex = 3;
-            //
+            // 
             // pnlCustomInstructionsHeader
-            //
+            // 
             this.pnlCustomInstructionsHeader.AutoSize = true;
             this.pnlCustomInstructionsHeader.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tableLlm.SetColumnSpan(this.pnlCustomInstructionsHeader, 2);
@@ -353,20 +354,20 @@ namespace NppDB.Core
             this.pnlCustomInstructionsHeader.Size = new System.Drawing.Size(720, 26);
             this.pnlCustomInstructionsHeader.TabIndex = 4;
             this.pnlCustomInstructionsHeader.WrapContents = false;
-            //
+            // 
             // lblCustomInstructions
-            //
+            // 
             this.lblCustomInstructions.AutoSize = true;
-            this.lblCustomInstructions.Location = new System.Drawing.Point(0, 0);
+            this.lblCustomInstructions.Location = new System.Drawing.Point(0, 8);
             this.lblCustomInstructions.Margin = new System.Windows.Forms.Padding(0, 8, 6, 0);
             this.lblCustomInstructions.Name = "lblCustomInstructions";
-            this.lblCustomInstructions.Size = new System.Drawing.Size(101, 13);
+            this.lblCustomInstructions.Size = new System.Drawing.Size(110, 13);
             this.lblCustomInstructions.TabIndex = 0;
             this.lblCustomInstructions.Text = "Custom instructions";
-            //
+            // 
             // btnCustomInstructionsInfo
-            //
-            this.btnCustomInstructionsInfo.Location = new System.Drawing.Point(107, 3);
+            // 
+            this.btnCustomInstructionsInfo.Location = new System.Drawing.Point(116, 3);
             this.btnCustomInstructionsInfo.Margin = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.btnCustomInstructionsInfo.Name = "btnCustomInstructionsInfo";
             this.btnCustomInstructionsInfo.Size = new System.Drawing.Size(24, 22);
@@ -496,8 +497,8 @@ namespace NppDB.Core
             // 
             // panelButtons
             // 
-            this.panelButtons.Controls.Add(this.btnSave);
             this.panelButtons.Controls.Add(this.btnCancel);
+            this.panelButtons.Controls.Add(this.btnSave);
             this.panelButtons.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelButtons.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
             this.panelButtons.Location = new System.Drawing.Point(3, 479);
@@ -507,7 +508,7 @@ namespace NppDB.Core
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(696, 3);
+            this.btnSave.Location = new System.Drawing.Point(615, 3);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 0;
@@ -517,7 +518,7 @@ namespace NppDB.Core
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(615, 3);
+            this.btnCancel.Location = new System.Drawing.Point(696, 3);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 1;
@@ -549,13 +550,15 @@ namespace NppDB.Core
             this.layoutBehaviorOptions.PerformLayout();
             this.pnlDbManagerFont.ResumeLayout(false);
             this.pnlDbManagerFont.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numDbManagerFontScale)).EndInit();
             this.pnlThemeMode.ResumeLayout(false);
             this.pnlThemeMode.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numDbManagerFontScale)).EndInit();
             this.tabLlm.ResumeLayout(false);
             this.grpLlm.ResumeLayout(false);
             this.tableLlm.ResumeLayout(false);
             this.tableLlm.PerformLayout();
+            this.pnlCustomInstructionsHeader.ResumeLayout(false);
+            this.pnlCustomInstructionsHeader.PerformLayout();
             this.tabAiTemplate.ResumeLayout(false);
             this.grpAiTemplate.ResumeLayout(false);
             this.tableAi.ResumeLayout(false);
