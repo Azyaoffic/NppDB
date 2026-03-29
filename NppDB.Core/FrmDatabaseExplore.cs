@@ -687,8 +687,8 @@ namespace NppDB.Core
             {
                 new[] { "Execute SQL", "F9" },
                 new[] { "Analyze SQL", "Shift+F9" },
-                new[] { "Analyze and Create Prompt", "Ctrl+F9" },
-                new[] { "Analyze and Create Prompt (Issue at Caret)", "Alt+F9" },
+                new[] { "Analyze and Create Prompt (all queries)", "Ctrl+F9" },
+                new[] { "Analyze and Create Prompt (query at text cursor)", "Alt+F9" },
                 new[] { "Clear Analysis", "Ctrl+Shift+F9" },
                 new[] { "DB Connect Manager", "F10" },
                 new[] { "Show Prompt Library", "Ctrl+F10" },

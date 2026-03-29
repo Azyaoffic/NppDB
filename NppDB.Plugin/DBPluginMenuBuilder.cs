@@ -66,8 +66,8 @@ namespace NppDB
                 new List<string> {
                     "Execute SQL",
                     "Analyze SQL",
-                    "Analyze and Create Prompt",
-                    "Analyze and Create Prompt (Issue at Caret)",
+                    "Analyze and Create Prompt (all queries)",
+                    "Analyze and Create Prompt (query at text cursor)",
                     "Clear analysis",
                 },
                 new List<string> {

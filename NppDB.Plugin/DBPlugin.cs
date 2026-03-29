@@ -345,14 +345,14 @@ namespace NppDB
              
              SetCommand(0, "Execute SQL", Execute, new ShortcutKey(false, false, false, Keys.F9));
              SetCommand(1, "Analyze SQL", Analyze, new ShortcutKey(false, false, true, Keys.F9));
-             SetCommand(2, "Analyze and Create Prompt", HandleCtrlF9ForAiPrompt, new ShortcutKey(true, false, false, Keys.F9));
+             SetCommand(2, "Analyze and Create Prompt (all queries)", HandleCtrlF9ForAiPrompt, new ShortcutKey(true, false, false, Keys.F9));
              SetCommand(3, "Database Connect Manager", ToggleDbManager, new ShortcutKey(false, false, false, Keys.F10));
              SetCommand(4, "Clear analysis", ClearAnalysis, new ShortcutKey(true, false, true, Keys.F9));
              SetCommand(5, "Open console", OpenConsole);
              SetCommand(6, "About", ShowAbout);
              SetCommand(7, "Show Prompt Library", ShowPromptLibrary, new ShortcutKey(true, false, false, Keys.F10));
              SetCommand(8, "Settings", ShowSettings);
-             SetCommand(9, "Analyze and Create Prompt (Issue at Caret)", AnalyzeAndCreatePromptForIssueAtCaret, new ShortcutKey(false, true, false, Keys.F9));
+             SetCommand(9, "Analyze and Create Prompt (query at text cursor)", AnalyzeAndCreatePromptForIssueAtCaret, new ShortcutKey(false, true, false, Keys.F9));
              SetCommand(10, "Show Tutorial", ShowTutorial, new ShortcutKey(true, false, false, Keys.F11));
 
              _cmdFrmDbExplorerIdx = 3; 
