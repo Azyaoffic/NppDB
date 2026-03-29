@@ -59,12 +59,13 @@ namespace NppDB.Core
             // 
             // lblCurrentTabConnection
             // 
+            this.lblCurrentTabConnection.AutoEllipsis = true;
             this.lblCurrentTabConnection.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblCurrentTabConnection.ForeColor = System.Drawing.SystemColors.GrayText;
             this.lblCurrentTabConnection.Location = new System.Drawing.Point(0, 25);
             this.lblCurrentTabConnection.Name = "lblCurrentTabConnection";
-            this.lblCurrentTabConnection.Padding = new System.Windows.Forms.Padding(6, 2, 6, 2);
-            this.lblCurrentTabConnection.Size = new System.Drawing.Size(415, 22);
+            this.lblCurrentTabConnection.Padding = new System.Windows.Forms.Padding(6, 4, 6, 4);
+            this.lblCurrentTabConnection.Size = new System.Drawing.Size(415, 26);
             this.lblCurrentTabConnection.TabIndex = 3;
             this.lblCurrentTabConnection.Text = "Current tab connection: none";
             this.lblCurrentTabConnection.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -147,10 +148,10 @@ namespace NppDB.Core
             // trvDBList
             // 
             this.trvDBList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.trvDBList.Location = new System.Drawing.Point(0, 47);
+            this.trvDBList.Location = new System.Drawing.Point(0, 51);
             this.trvDBList.Name = "trvDBList";
             this.trvDBList.PathSeparator = "!>!";
-            this.trvDBList.Size = new System.Drawing.Size(415, 517);
+            this.trvDBList.Size = new System.Drawing.Size(415, 513);
             this.trvDBList.TabIndex = 1;
             this.trvDBList.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.trvDBList_AfterSelect);
             this.trvDBList.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.trvDBList_NodeMouseClick);

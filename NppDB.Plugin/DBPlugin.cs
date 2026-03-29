@@ -1618,6 +1618,17 @@ namespace NppDB
                         }
                         ShowSettingsInternal(tab);
                         break;
+                    case NppDbCommandType.CLONE_DB_TREE_STATE_TO_BUFFER:
+                        if (parameters != null &&
+                            parameters.Length >= 2 &&
+                            parameters[0] is IntPtr sourceBufferId &&
+                            parameters[1] is IntPtr targetBufferId &&
+                            _frmDbExplorer != null &&
+                            !_frmDbExplorer.IsDisposed)
+                        {
+                            _frmDbExplorer.CloneTreeStateForBuffer(sourceBufferId, targetBufferId, true);
+                        }
+                        break;
                     default:
                         return null;
                 }

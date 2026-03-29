@@ -232,6 +232,34 @@ namespace NppDB.Core
             return state;
         }
         
+        private static DbTreeViewState CloneTreeState(DbTreeViewState state)
+        {
+            if (state == null)
+                return null;
+
+            return new DbTreeViewState
+            {
+                SelectedPath = state.SelectedPath,
+                ExpandedPaths = state.ExpandedPaths != null
+                    ? new List<string>(state.ExpandedPaths)
+                    : new List<string>()
+            };
+        }
+
+        public void CloneTreeStateForBuffer(IntPtr sourceBufferId, IntPtr targetBufferId, bool restoreTarget)
+        {
+            if (sourceBufferId == IntPtr.Zero || targetBufferId == IntPtr.Zero)
+                return;
+
+            if (!_treeStatesByBuffer.TryGetValue(sourceBufferId, out var state) || state == null)
+                return;
+
+            _treeStatesByBuffer[targetBufferId] = CloneTreeState(state);
+
+            if (restoreTarget)
+                RestoreTreeStateForBuffer(targetBufferId);
+        }
+        
         public void SaveTreeStateForBuffer(IntPtr bufferId)
         {
             if (bufferId == IntPtr.Zero)
