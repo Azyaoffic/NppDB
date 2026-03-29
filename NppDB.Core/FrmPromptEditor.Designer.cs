@@ -85,7 +85,7 @@ namespace NppDB.Core
             // 
             this.buttonDiscard.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonDiscard.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonDiscard.Location = new System.Drawing.Point(597, 8);
+            this.buttonDiscard.Location = new System.Drawing.Point(516, 8);
             this.buttonDiscard.Name = "buttonDiscard";
             this.buttonDiscard.Size = new System.Drawing.Size(75, 27);
             this.buttonDiscard.TabIndex = 1;
@@ -96,7 +96,7 @@ namespace NppDB.Core
             // buttonSave
             // 
             this.buttonSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonSave.Location = new System.Drawing.Point(516, 8);
+            this.buttonSave.Location = new System.Drawing.Point(597, 8);
             this.buttonSave.Name = "buttonSave";
             this.buttonSave.Size = new System.Drawing.Size(75, 27);
             this.buttonSave.TabIndex = 0;
@@ -110,7 +110,7 @@ namespace NppDB.Core
             this.lblName.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblName.Location = new System.Drawing.Point(12, 15);
             this.lblName.Name = "lblName";
-            this.lblName.Size = new System.Drawing.Size(43, 15);
+            this.lblName.Size = new System.Drawing.Size(114, 15);
             this.lblName.TabIndex = 0;
             this.lblName.Text = "Name (mandatory):";
             // 
@@ -146,7 +146,7 @@ namespace NppDB.Core
             this.lblTags.AutoSize = true;
             this.lblTags.Location = new System.Drawing.Point(12, 142);
             this.lblTags.Name = "lblTags";
-            this.lblTags.Size = new System.Drawing.Size(114, 15);
+            this.lblTags.Size = new System.Drawing.Size(142, 15);
             this.lblTags.TabIndex = 10;
             this.lblTags.Text = "Tags (comma-separated):";
             // 
@@ -182,8 +182,7 @@ namespace NppDB.Core
             // 
             // lblPlaceholders
             // 
-            this.lblPlaceholders.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblPlaceholders.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.lblPlaceholders.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblPlaceholders.ForeColor = System.Drawing.SystemColors.GrayText;
             this.lblPlaceholders.Location = new System.Drawing.Point(15, 473);
