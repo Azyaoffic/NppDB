@@ -393,7 +393,7 @@ namespace NppDB.Core
             this.tabAiTemplate.Padding = new System.Windows.Forms.Padding(10);
             this.tabAiTemplate.Size = new System.Drawing.Size(766, 444);
             this.tabAiTemplate.TabIndex = 2;
-            this.tabAiTemplate.Text = "AI Prompt Template";
+            this.tabAiTemplate.Text = "Analysis Prompt Template";
             this.tabAiTemplate.UseVisualStyleBackColor = true;
             // 
             // grpAiTemplate
@@ -406,7 +406,7 @@ namespace NppDB.Core
             this.grpAiTemplate.Size = new System.Drawing.Size(746, 424);
             this.grpAiTemplate.TabIndex = 0;
             this.grpAiTemplate.TabStop = false;
-            this.grpAiTemplate.Text = "AI Prompt Template";
+            this.grpAiTemplate.Text = "Analysis Prompt Template";
             // 
             // tableAi
             // 

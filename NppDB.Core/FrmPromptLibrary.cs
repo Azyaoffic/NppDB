@@ -321,6 +321,8 @@ namespace NppDB.Core
                     return "Current SQL Dialect";
                 case "target_dialect":
                     return "Target SQL Dialect";
+                case "source_dialect":
+                    return "Source SQL Dialect";
                 case "table":
                     return "Table Metadata";
                 case "table_name":
@@ -372,7 +374,7 @@ namespace NppDB.Core
                 return "Paste or type the query here.";
 
             if (placeholderName.IndexOf("dialect", StringComparison.OrdinalIgnoreCase) >= 0)
-                return "Enter the target SQL dialect here.";
+                return "Enter the SQL dialect here.";
 
             if (placeholderName.IndexOf("description", StringComparison.OrdinalIgnoreCase) >= 0)
                 return "Describe the issue or request here.";
