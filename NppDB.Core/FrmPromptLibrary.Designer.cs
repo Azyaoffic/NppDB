@@ -490,15 +490,17 @@ namespace NppDB.Core
             this.lblPromptCapabilities.TabIndex = 1;
             this.lblPromptCapabilities.Text = "No table selected";
             this.lblPromptCapabilities.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblPromptCapabilities.Visible = false;
             // 
             // lblPromptType
             // 
-            this.lblPromptType.Dock = System.Windows.Forms.DockStyle.Left;
+            this.lblPromptType.AutoEllipsis = true;
+            this.lblPromptType.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblPromptType.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblPromptType.Location = new System.Drawing.Point(0, 0);
             this.lblPromptType.Name = "lblPromptType";
             this.lblPromptType.Padding = new System.Windows.Forms.Padding(0, 0, 6, 0);
-            this.lblPromptType.Size = new System.Drawing.Size(190, 24);
+            this.lblPromptType.Size = new System.Drawing.Size(435, 24);
             this.lblPromptType.TabIndex = 0;
             this.lblPromptType.Text = "No database selected";
             this.lblPromptType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;

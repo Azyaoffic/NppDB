@@ -808,11 +808,17 @@ namespace NppDB.Core
             var databaseName = GetPlaceholderValue("database_name");
             var tableName = GetPlaceholderValue("table_name");
 
-            lblPromptType.Text = !string.IsNullOrWhiteSpace(databaseName) ? "Database: " + databaseName : "No database selected";
-            lblPromptCapabilities.Text = !string.IsNullOrWhiteSpace(tableName) ? "Table: " + tableName : "No table selected";
+            if (!string.IsNullOrWhiteSpace(databaseName) && !string.IsNullOrWhiteSpace(tableName))
+                lblPromptType.Text = $"Database: {databaseName}    Table: {tableName}";
+            else if (!string.IsNullOrWhiteSpace(databaseName))
+                lblPromptType.Text = $"Database: {databaseName}";
+            else
+                lblPromptType.Text = "No database selected";
+
+            lblPromptCapabilities.Visible = false;
+            lblPromptCapabilities.Text = string.Empty;
 
             _actionToolTip.SetToolTip(lblPromptType, lblPromptType.Text);
-            _actionToolTip.SetToolTip(lblPromptCapabilities, lblPromptCapabilities.Text);
         }
 
         private void promptsListView_SelectedIndexChanged(object sender, EventArgs e)
@@ -940,6 +946,22 @@ namespace NppDB.Core
                 return prompt;
             });
         }
+        
+        private bool HasMeaningfulPlaceholderValue(string placeholderName, string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return false;
+
+            var trimmed = value.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed))
+                return false;
+
+            var hint = GetDefaultPlaceholderText(placeholderName);
+            if (!string.IsNullOrEmpty(hint) && string.Equals(trimmed, hint, StringComparison.Ordinal))
+                return false;
+
+            return true;
+        }
 
         private void GeneratePlaceholderControls(PromptItem prompt)
         {
@@ -1008,7 +1030,7 @@ namespace NppDB.Core
 
                     var initialValue = string.Empty;
                     var hasInitialValue = Placeholders.TryGetValue(placeholder.Name, out initialValue)
-                        && !string.IsNullOrWhiteSpace(initialValue);
+                                          && HasMeaningfulPlaceholderValue(placeholder.Name, initialValue);
 
                     var statusLabel = new Label
                     {
@@ -1187,7 +1209,7 @@ namespace NppDB.Core
             if (string.IsNullOrEmpty(key))
                 return;
 
-            Placeholders[key] = IsPlaceholderHint(control) ? string.Empty : control.Text;
+            Placeholders[key] = IsPlaceholderHint(control) ? string.Empty : (control.Text ?? string.Empty).Trim();
 
             if (promptsGridView.SelectedRows.Count > 0)
             {
@@ -1752,7 +1774,7 @@ namespace NppDB.Core
             {
                 foreach (var ph in prompt.Placeholders)
                 {
-                    if (Placeholders.TryGetValue(ph.Name, out var val) && !string.IsNullOrWhiteSpace(val))
+                    if (Placeholders.TryGetValue(ph.Name, out var val) && HasMeaningfulPlaceholderValue(ph.Name, val))
                         continue;
 
                     isValid = false;
@@ -1787,8 +1809,8 @@ namespace NppDB.Core
 
                 var placeholderName = container.Tag as string;
                 var hasValue = !string.IsNullOrWhiteSpace(placeholderName)
-                    && Placeholders.TryGetValue(placeholderName, out var value)
-                    && !string.IsNullOrWhiteSpace(value);
+                               && Placeholders.TryGetValue(placeholderName, out var value)
+                               && HasMeaningfulPlaceholderValue(placeholderName, value);
                 var showBlockingState = !hasValue && _showBlockingValidation;
 
                 var titleLabel = container.Controls.Find("lblFieldTitle", false).OfType<Label>().FirstOrDefault();
