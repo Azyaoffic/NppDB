@@ -800,6 +800,29 @@ namespace NppDB.Core
             txtPromptName.Focus();
             txtPromptName.SelectAll();
         }
+        
+        private PromptItem? GetSelectedPrompt()
+        {
+            if (promptsGridView.SelectedRows.Count == 0)
+                return null;
+
+            return promptsGridView.SelectedRows[0].Tag is PromptItem prompt
+                ? prompt
+                : (PromptItem?)null;
+        }
+
+        private void UpdatePreviewTitle(PromptItem? prompt = null)
+        {
+            if (!prompt.HasValue)
+                prompt = GetSelectedPrompt();
+
+            var baseTitle = _isEditingTemplate ? "Edit Template (Auto-Save)" : "Prompt Details";
+            var promptTitle = prompt.HasValue ? (prompt.Value.Title ?? string.Empty).Trim() : string.Empty;
+
+            grpPreview.Text = string.IsNullOrWhiteSpace(promptTitle)
+                ? baseTitle
+                : $"{baseTitle} - {promptTitle}";
+        }
 
         private void UpdatePromptMeta(PromptItem? prompt)
         {
@@ -841,6 +864,7 @@ namespace NppDB.Core
                 UpdatePromptMeta(prompt);
                 UpdateTagsBox(prompt);
                 UpdatePromptInfoFields(prompt);
+                UpdatePreviewTitle(prompt);
             }
             else
             {
@@ -851,6 +875,7 @@ namespace NppDB.Core
                 UpdatePromptInfoFields(null);
                 UpdateCopyButtonState(false, "No prompt selected");
                 UpdatePromptMeta(null);
+                UpdatePreviewTitle();
             }
         }
 
@@ -921,6 +946,7 @@ namespace NppDB.Core
             selectedRow.Cells[colPromptName.Index].Value = prompt.Title;
             selectedRow.Cells[colPromptDesc.Index].Value = prompt.Description;
             ReplacePromptInCollections(prompt);
+            UpdatePreviewTitle(prompt);
 
             _pendingAutoSavePrompt = prompt;
             _templateAutoSaveTimer.Stop();
@@ -1328,7 +1354,7 @@ namespace NppDB.Core
 
             _isEditingTemplate = isEditing;
 
-            grpPreview.Text = _isEditingTemplate ? "Edit Template (Auto-Save)" : "Prompt Details";
+            UpdatePreviewTitle();
             promptTextBox.BorderStyle = BorderStyle.FixedSingle;
             txtTags.BorderStyle = BorderStyle.FixedSingle;
             
