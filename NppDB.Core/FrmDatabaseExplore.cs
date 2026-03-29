@@ -126,8 +126,8 @@ namespace NppDB.Core
             AddTreeIcon("Group", Resources.Folder);
             AddTreeIcon("Table", Resources.Table);
 
-            AddTreeIcon("View", Resources.page_file);
-            AddTreeIcon("MaterializedView", Resources.page_file);
+            AddTreeIcon("View", Resources.Table);
+            AddTreeIcon("MaterializedView", Resources.Table);
             AddTreeIcon("Function", Resources.bullet);
             AddTreeIcon("ForeignTable", Resources.shortcuts6);
 
