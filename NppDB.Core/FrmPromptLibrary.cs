@@ -1748,7 +1748,7 @@ namespace NppDB.Core
         private string GetPlaceholderStatusText(string placeholderName, bool hasInitialValue)
         {
             if (hasInitialValue)
-                return "Value available.";
+                return "Ready!";
 
             if (string.Equals(placeholderName, "selected_sql", StringComparison.OrdinalIgnoreCase))
                 return "Select SQL in the editor to auto-fill, or type it manually.";
