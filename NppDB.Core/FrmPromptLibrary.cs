@@ -140,6 +140,9 @@ namespace NppDB.Core
         private void RestoreLayoutFromSettings()
         {
             var workingArea = Screen.FromControl(this).WorkingArea;
+            var defaultSize = GetDefaultPromptLibrarySize(workingArea);
+
+            MinimumSize = defaultSize;
 
             var rawSize = Properties.Settings.Default["PromptLibrary_Size"];
             var savedSize = rawSize is Size s ? s : Size.Empty;
@@ -147,7 +150,7 @@ namespace NppDB.Core
 
             Size = hasSavedSize
                 ? ClampSizeToWorkingArea(savedSize, workingArea)
-                : GetDefaultPromptLibrarySize(workingArea);
+                : defaultSize;
 
             var rawLocation = Properties.Settings.Default["PromptLibrary_Location"];
             var savedLocation = rawLocation is Point p ? p : Point.Empty;
@@ -205,11 +208,11 @@ namespace NppDB.Core
                 Math.Max(MinimumSize.Height, preferredHeight));
         }
 
-        private static Size ClampSizeToWorkingArea(Size size, Rectangle workingArea)
+        private Size ClampSizeToWorkingArea(Size size, Rectangle workingArea)
         {
             return new Size(
-                Math.Max(820, Math.Min(size.Width, workingArea.Width)),
-                Math.Max(520, Math.Min(size.Height, workingArea.Height)));
+                Math.Max(MinimumSize.Width, Math.Min(size.Width, workingArea.Width)),
+                Math.Max(MinimumSize.Height, Math.Min(size.Height, workingArea.Height)));
         }
 
         private static Point ClampLocationToWorkingArea(Point location, Size size, Rectangle workingArea)

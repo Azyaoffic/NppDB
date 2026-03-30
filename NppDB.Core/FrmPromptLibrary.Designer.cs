@@ -504,6 +504,7 @@ namespace NppDB.Core
             this.lblPromptType.TabIndex = 0;
             this.lblPromptType.Text = "No database selected";
             this.lblPromptType.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblPromptType.AutoEllipsis = true;
             // 
             // splitterPreview
             // 
