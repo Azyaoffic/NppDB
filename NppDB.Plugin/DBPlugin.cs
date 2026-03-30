@@ -508,8 +508,24 @@ namespace NppDB
         {
             TryAddToolbarIcon(0, Resources.IconExecute);
             TryAddToolbarIcon(1, Resources.IconAnalyze);
+            TryAddToolbarIcon(4, CreateClearAnalysisToolbarIcon());
             TryAddToolbarIcon(7, Resources.IconPromptLibrary);
             TryAddToolbarIcon(3, Resources.DBPPManage16);
+        }
+
+        private Bitmap CreateClearAnalysisToolbarIcon()
+        {
+            var bmp = new Bitmap(Resources.IconAnalyze);
+
+            using (var g = Graphics.FromImage(bmp))
+            using (var pen = new Pen(Color.Firebrick, 2f))
+            {
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                g.DrawLine(pen, 9, 9, 14, 14);
+                g.DrawLine(pen, 14, 9, 9, 14);
+            }
+
+            return bmp;
         }
 
         private void TryAddToolbarIcon(int funcItemIndex, Bitmap bmp)

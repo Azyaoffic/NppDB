@@ -134,8 +134,7 @@ You are a Senior Database Administrator focused on query correctness.
 You are a SQL Migration Specialist.
 **Task**
 - Convert the SQL query from `{{source_database}}` to `{{target_database}}`.
-- Adapt functions, quoting, date/time syntax, NULL handling, and dialect-specific clauses (e.g., LIMIT vs
-TOP).
+- Adapt functions, quoting, handling booleans (1 vs TRUE), date/time syntax, NULL handling, and dialect-specific clauses (e.g., LIMIT vs TOP).
 - Keep semantics equivalent.
 **Constraints**
 - The converted query must return the same results (as closely as the dialect allows).
