@@ -32,7 +32,7 @@ You can also find toolbar buttons for:
    - MS Access: choose `.accdb` / `.mdb`
    - PostgreSQL: enter host / port / database / user / password
 3. Connect and expand nodes to browse schemas, tables, views, and columns
-4. Important: try right-clicking tables and columns in DB Manager. Many useful actions are there.
+4. Important: try right-clicking tables and columns in DB Manager. Many useful actions are there. You can also Ctrl + Click to select multiple tables
 
 ## Fast workflow
 1. Connect with `F10`
@@ -187,8 +187,8 @@ Notes:
 - Useful built-in placeholders:
   - `{{selected_sql}}` - selected SQL, or the whole current file if nothing is selected
   - `{{dialect}}` - current database dialect
-  - `{{table_name}}` - selected table name from DB Manager
-  - `{{table}}` - selected table metadata
+  - `{{table_name}}` - selected table name from DB Manager, or multiple selected table names separated by commas
+  - `{{table}}` - selected table metadata, or multiple selected table definitions
 - Tags should be short keywords separated by commas
 
 ## Common problems

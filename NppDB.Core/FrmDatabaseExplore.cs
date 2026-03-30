@@ -28,10 +28,12 @@ namespace NppDB.Core
         {
             public string SelectedPath { get; set; }
             public List<string> ExpandedPaths { get; set; } = new List<string>();
+            public List<string> MultiSelectedTablePaths { get; set; } = new List<string>();
         }
 
         private readonly Dictionary<IntPtr, DbTreeViewState> _treeStatesByBuffer = new Dictionary<IntPtr, DbTreeViewState>();
         private readonly Dictionary<TreeNode, string> _lastSelectedTablePathByRoot = new Dictionary<TreeNode, string>();
+        private readonly List<TreeNode> _multiSelectedTableNodes = new List<TreeNode>();
         private bool _isRestoringTreeState;
 
         private readonly INppDbCommandHost _commandHostInstance;
@@ -229,6 +231,11 @@ namespace NppDB.Core
                 CollectExpandedPaths(root, state.ExpandedPaths);
             }
 
+            state.MultiSelectedTablePaths = GetSelectedTemplateTableNodes()
+                .Select(GetNodeStatePath)
+                .Distinct(StringComparer.Ordinal)
+                .ToList();
+
             return state;
         }
         
@@ -242,6 +249,9 @@ namespace NppDB.Core
                 SelectedPath = state.SelectedPath,
                 ExpandedPaths = state.ExpandedPaths != null
                     ? new List<string>(state.ExpandedPaths)
+                    : new List<string>(),
+                MultiSelectedTablePaths = state.MultiSelectedTablePaths != null
+                    ? new List<string>(state.MultiSelectedTablePaths)
                     : new List<string>()
             };
         }
@@ -286,6 +296,7 @@ namespace NppDB.Core
 
             try
             {
+                ClearExplicitTableSelection();
                 trvDBList.SelectedNode = null;
                 trvDBList.CollapseAll();
 
@@ -312,6 +323,7 @@ namespace NppDB.Core
                     }
                 }
 
+                RestoreExplicitTableSelection(state.MultiSelectedTablePaths);
                 UpdateToolbarState(trvDBList.SelectedNode);
             }
             finally
@@ -327,6 +339,113 @@ namespace NppDB.Core
             if (icon == null) throw new ArgumentNullException(nameof(icon), $"Icon for key '{key}' is null.");
             if (!trvDBList.ImageList.Images.ContainsKey(key))
                 trvDBList.ImageList.Images.Add(key, icon);
+        }
+
+        private static bool IsTemplateTableNode(TreeNode node)
+        {
+            return node is PostgreSqlTable || node is MsAccessTable;
+        }
+
+        private void ClearExplicitTableSelection()
+        {
+            foreach (var node in _multiSelectedTableNodes)
+            {
+                if (node == null)
+                    continue;
+
+                node.BackColor = Color.Empty;
+                node.ForeColor = Color.Empty;
+            }
+
+            _multiSelectedTableNodes.Clear();
+        }
+
+        private void ApplyExplicitTableSelection(IList<TreeNode> selectedTableNodes)
+        {
+            ClearExplicitTableSelection();
+
+            if (selectedTableNodes == null || selectedTableNodes.Count == 0)
+                return;
+
+            foreach (var node in selectedTableNodes.Where(IsTemplateTableNode).Distinct())
+            {
+                node.BackColor = SystemColors.Highlight;
+                node.ForeColor = SystemColors.HighlightText;
+                _multiSelectedTableNodes.Add(node);
+            }
+
+            trvDBList.Invalidate();
+        }
+
+        private void RestoreExplicitTableSelection(IEnumerable<string> selectedTablePaths)
+        {
+            if (selectedTablePaths == null)
+            {
+                ClearExplicitTableSelection();
+                return;
+            }
+
+            var restoredNodes = new List<TreeNode>();
+            TreeNode root = null;
+
+            foreach (var tablePath in selectedTablePaths)
+            {
+                var tableNode = FindNodeByStatePath(tablePath, true);
+                if (!IsTemplateTableNode(tableNode))
+                    continue;
+
+                var nodeRoot = GetRootParent(tableNode);
+                if (root == null)
+                    root = nodeRoot;
+
+                if (!ReferenceEquals(root, nodeRoot))
+                    continue;
+
+                restoredNodes.Add(tableNode);
+            }
+
+            ApplyExplicitTableSelection(restoredNodes);
+        }
+
+        private List<TreeNode> GetSelectedTemplateTableNodes()
+        {
+            if (_multiSelectedTableNodes.Count > 0)
+                return _multiSelectedTableNodes.Where(IsTemplateTableNode).Distinct().ToList();
+
+            var effectiveTableNode = GetEffectiveTableNode(trvDBList.SelectedNode);
+            if (IsTemplateTableNode(effectiveTableNode))
+                return new List<TreeNode> { effectiveTableNode };
+
+            return new List<TreeNode>();
+        }
+
+        private void ToggleTableSelection(TreeNode tableNode)
+        {
+            if (!IsTemplateTableNode(tableNode))
+                return;
+
+            var selectedTableNodes = GetSelectedTemplateTableNodes();
+            var selectionRoot = selectedTableNodes.Count > 0 ? GetRootParent(selectedTableNodes[0]) : null;
+            var clickedRoot = GetRootParent(tableNode);
+
+            if (selectionRoot != null && !ReferenceEquals(selectionRoot, clickedRoot))
+            {
+                ApplyExplicitTableSelection(new List<TreeNode> { tableNode });
+                return;
+            }
+
+            if (selectedTableNodes.Contains(tableNode))
+            {
+                if (selectedTableNodes.Count == 1)
+                    return;
+
+                selectedTableNodes.Remove(tableNode);
+                ApplyExplicitTableSelection(selectedTableNodes);
+                return;
+            }
+
+            selectedTableNodes.Add(tableNode);
+            ApplyExplicitTableSelection(selectedTableNodes);
         }
 
         private readonly List<NotifyHandler> _notifyHandlers = new List<NotifyHandler>();
@@ -583,8 +702,41 @@ namespace NppDB.Core
 
         private void trvDBList_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
+            if (e.Node == null)
+                return;
+
+            if (e.Button == MouseButtons.Left)
+            {
+                if ((ModifierKeys & Keys.Control) == Keys.Control && IsTemplateTableNode(e.Node))
+                {
+                    ToggleTableSelection(e.Node);
+                }
+                else if (IsTemplateTableNode(e.Node))
+                {
+                    ApplyExplicitTableSelection(new List<TreeNode> { e.Node });
+                }
+                else
+                {
+                    ClearExplicitTableSelection();
+                }
+
+                return;
+            }
+
             if (e.Button != MouseButtons.Right) return;
+
             trvDBList.SelectedNode = e.Node;
+
+            if (IsTemplateTableNode(e.Node))
+            {
+                if (!_multiSelectedTableNodes.Contains(e.Node))
+                    ApplyExplicitTableSelection(new List<TreeNode> { e.Node });
+            }
+            else
+            {
+                ClearExplicitTableSelection();
+            }
+
             e.Node.ContextMenuStrip = CreateMenu(e.Node);
         }
 
@@ -750,6 +902,7 @@ namespace NppDB.Core
                 return null;
         
             var context = new DbTemplateContext();
+            var selectedTableNodes = GetSelectedTemplateTableNodes();
         
             var root = node;
             while (root.Parent != null)
@@ -794,6 +947,20 @@ namespace NppDB.Core
                 {
                     context.DatabaseName = dbConn.Title;
                 }
+            }
+
+            if (selectedTableNodes.Count > 1)
+            {
+                foreach (var selectedTableNode in selectedTableNodes)
+                {
+                    EnsureTemplateMetadataLoaded(selectedTableNode);
+                }
+
+                context.TableName = string.Join(", ", selectedTableNodes.Select(x => x.Text));
+                context.ColumnsWithTypes = string.Join(
+                    Environment.NewLine + Environment.NewLine,
+                    selectedTableNodes.Select(x => $"Table: {x.Text}{Environment.NewLine}{GetColumnsWithTypesFromTree(x)}"));
+                return context;
             }
 
             var tableNode = GetEffectiveTableNode(node);

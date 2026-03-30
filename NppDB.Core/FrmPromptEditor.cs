@@ -107,9 +107,9 @@ namespace NppDB.Core
                 else if (string.Equals(placeholder, "dialect", StringComparison.OrdinalIgnoreCase))
                     description = "current database dialect";
                 else if (string.Equals(placeholder, "table_name", StringComparison.OrdinalIgnoreCase))
-                    description = "selected table name from DB Manager";
+                    description = "selected table name from DB Manager, or multiple table names separated by commas";
                 else if (string.Equals(placeholder, "table", StringComparison.OrdinalIgnoreCase))
-                    description = "selected table metadata";
+                    description = "selected table metadata, or multiple selected table definitions";
 
                 lines.Add($"{{{{{placeholder}}}}} - {description}");
             }
