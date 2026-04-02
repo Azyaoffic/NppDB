@@ -550,9 +550,9 @@ namespace NppDB.Core
             this.lblPlaceholders.ForeColor = System.Drawing.SystemColors.ControlText;
             this.lblPlaceholders.Location = new System.Drawing.Point(3, 3);
             this.lblPlaceholders.Name = "lblPlaceholders";
-            this.lblPlaceholders.Size = new System.Drawing.Size(520, 17);
+            this.lblPlaceholders.Size = new System.Drawing.Size(297, 17);
             this.lblPlaceholders.TabIndex = 5;
-            this.lblPlaceholders.Text = "Prompt Inputs (* required. Auto-filled fields come from the editor or DB Manager).";
+            this.lblPlaceholders.Text = "Prompt Inputs (all required, scroll if needed).";
             // 
             // panelRightActions
             // 

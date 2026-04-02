@@ -362,16 +362,16 @@ namespace NppDB.Core
                 return "Enter the value here.";
 
             if (string.Equals(placeholderName, "selected_sql", StringComparison.OrdinalIgnoreCase))
-                return "Select SQL in the editor or type it manually.";
+                return "Select SQL code in the Notepad++ editor to auto-fill, or type it manually.";
 
             if (string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase))
-                return "Connect to a database to auto-fill, or type it manually.";
+                return "Auto-fills from the active database connection, or type it manually.";
 
             if (string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase))
-                return "Select a table in the DB Manager to auto-fill, or type it manually.";
+                return "Select a table in the DB Connect Manager to auto-fill, or type it manually.";
 
             if (string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
-                return "Select a table in the DB Manager to auto-fill, or enter the metadata manually.";
+                return "Select a table in the DB Connect Manager to auto-fill, or enter the metadata manually.";
 
             if (placeholderName.IndexOf("query", StringComparison.OrdinalIgnoreCase) >= 0)
                 return "Paste or type the query here.";
@@ -387,6 +387,37 @@ namespace NppDB.Core
                 return "Enter the name here.";
 
             return "Enter the value here.";
+        }
+
+        private static string GetAutoFillBadgeText(string placeholderName)
+        {
+            return SupportsAutoFill(placeholderName) ? "AUTO-FILL" : "MANUAL";
+        }
+
+        private static string GetAutoFillTooltip(string placeholderName)
+        {
+            if (!SupportsAutoFill(placeholderName))
+                return "Type this value manually.";
+
+            if (string.Equals(placeholderName, "selected_sql", StringComparison.OrdinalIgnoreCase))
+                return "Can auto-fill from the selected SQL in the Notepad++ editor.";
+
+            if (string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase))
+                return "Can auto-fill from the active database connection.";
+
+            if (string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase))
+                return "Can auto-fill from the selected table in the DB Connect Manager.";
+
+            if (string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
+                return "Can auto-fill from the selected table metadata in the DB Connect Manager.";
+
+            return "This field supports auto-fill when the required editor or DB context is available.";
+        }
+
+        private Color GetPlaceholderHintForeColor()
+        {
+            var pal = UiThemeManager.Current;
+            return pal.IsDark ? Color.FromArgb(205, 210, 216) : Color.FromArgb(89, 89, 89);
         }
 
         private Label CreatePlaceholderBadge(string name, string text)
@@ -420,35 +451,31 @@ namespace NppDB.Core
             var placeholderName = container.Tag as string;
             var modeBadge = container.Controls.Find("lblFieldModeBadge", true).OfType<Label>().FirstOrDefault();
             var valueBadge = container.Controls.Find("lblFieldValueBadge", true).OfType<Label>().FirstOrDefault();
-            var requiredBadge = container.Controls.Find("lblFieldRequiredBadge", true).OfType<Label>().FirstOrDefault();
+            var valueBadgeToolTipMissing = "This input is required but it is not filled in yet.";
+            var valueBadgeToolTipReady = "This input has a value and is ready to use.";
 
-            var requiredBack = pal.IsDark ? Color.FromArgb(82, 40, 40) : Color.FromArgb(255, 234, 234);
-            var requiredFore = pal.IsDark ? Color.FromArgb(245, 210, 210) : Color.Firebrick;
             var autoBack = pal.IsDark ? Color.FromArgb(34, 58, 84) : Color.FromArgb(229, 242, 255);
             var autoFore = pal.IsDark ? Color.FromArgb(205, 227, 255) : Color.FromArgb(20, 78, 145);
-            var manualBack = pal.IsDark ? Color.FromArgb(62, 62, 62) : Color.FromArgb(240, 240, 240);
-            var manualFore = pal.IsDark ? pal.Text : Color.DimGray;
+            var manualBack = pal.IsDark ? Color.FromArgb(62, 62, 62) : Color.FromArgb(228, 232, 237);
+            var manualFore = pal.IsDark ? pal.Text : Color.FromArgb(68, 68, 68);
             var readyBack = pal.IsDark ? Color.FromArgb(38, 74, 52) : Color.FromArgb(231, 247, 236);
             var readyFore = pal.IsDark ? Color.FromArgb(209, 245, 219) : Color.FromArgb(26, 102, 56);
-            var incompleteBack = pal.IsDark ? Color.FromArgb(58, 64, 72) : Color.FromArgb(240, 244, 248);
-            var incompleteFore = pal.IsDark ? Color.FromArgb(219, 226, 233) : Color.FromArgb(77, 91, 107);
             var missingBack = pal.IsDark ? Color.FromArgb(90, 55, 38) : Color.FromArgb(255, 244, 224);
             var missingFore = pal.IsDark ? Color.FromArgb(255, 224, 186) : Color.FromArgb(140, 88, 15);
 
-            ApplyPlaceholderBadgeState(requiredBadge, "REQUIRED", requiredBack, requiredFore);
-            ApplyPlaceholderBadgeState(modeBadge, SupportsAutoFill(placeholderName) ? "AUTO" : "MANUAL",
+            ApplyPlaceholderBadgeState(modeBadge, GetAutoFillBadgeText(placeholderName),
                 SupportsAutoFill(placeholderName) ? autoBack : manualBack,
                 SupportsAutoFill(placeholderName) ? autoFore : manualFore);
 
             if (hasValue)
             {
                 ApplyPlaceholderBadgeState(valueBadge, "READY", readyBack, readyFore);
+                _actionToolTip.SetToolTip(valueBadge, valueBadgeToolTipReady);
                 return;
             }
 
-            ApplyPlaceholderBadgeState(valueBadge, showBlockingState ? "MISSING" : "INCOMPLETE",
-                showBlockingState ? missingBack : incompleteBack,
-                showBlockingState ? missingFore : incompleteFore);
+            ApplyPlaceholderBadgeState(valueBadge, "MISSING", missingBack, missingFore);
+            _actionToolTip.SetToolTip(valueBadge, valueBadgeToolTipMissing);
         }
         
         private static string GetPlaceholderValue(string key)
@@ -1041,18 +1068,13 @@ namespace NppDB.Core
 
                     _actionToolTip.SetToolTip(label, "This prompt input is required.");
 
-                    var requiredBadge = CreatePlaceholderBadge("lblFieldRequiredBadge", "REQUIRED");
                     var modeBadge = CreatePlaceholderBadge("lblFieldModeBadge", string.Empty);
                     var valueBadge = CreatePlaceholderBadge("lblFieldValueBadge", string.Empty);
 
-                    _actionToolTip.SetToolTip(requiredBadge, "Required input.");
-                    _actionToolTip.SetToolTip(modeBadge, SupportsAutoFill(placeholder.Name)
-                        ? "Auto-filled when the required editor or DB context is available."
-                        : "Enter this value manually.");
-                    _actionToolTip.SetToolTip(valueBadge, "Shows whether this input is ready to use.");
+                    _actionToolTip.SetToolTip(modeBadge, GetAutoFillTooltip(placeholder.Name));
+                    _actionToolTip.SetToolTip(valueBadge, "This input is required but it is not filled in yet.");
 
                     headerRow.Controls.Add(label);
-                    headerRow.Controls.Add(requiredBadge);
                     headerRow.Controls.Add(modeBadge);
                     headerRow.Controls.Add(valueBadge);
                     container.Controls.Add(headerRow);
@@ -1066,7 +1088,7 @@ namespace NppDB.Core
                         AutoSize = true,
                         Margin = new Padding(0, 0, 0, 6),
                         Name = "lblFieldStatus",
-                        ForeColor = pal.IsDark ? pal.DarkerText : Color.DimGray,
+                        ForeColor = GetPlaceholderHintForeColor(),
                         Text = GetPlaceholderStatusText(placeholder.Name, hasInitialValue)
                     };
                     container.Controls.Add(statusLabel);
@@ -1661,13 +1683,13 @@ namespace NppDB.Core
                 return string.Empty;
 
             if (string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase))
-                return "Connect to a database to auto-fill, or enter the SQL dialect manually.";
+                return "Auto-fills from the active database connection, or enter the SQL dialect manually.";
 
             if (string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase))
-                return "Select a table in the DB Manager to auto-fill, or enter the table name manually.";
+                return "Select a table in the DB Connect Manager to auto-fill, or enter the table name manually.";
 
             if (string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
-                return "Select a table in the DB Manager to auto-fill, or enter the metadata manually.";
+                return "Select a table in the DB Connect Manager to auto-fill, or enter the metadata manually.";
 
             if (placeholderName.IndexOf("query", StringComparison.OrdinalIgnoreCase) >= 0)
                 return "Paste or type the query here.";
@@ -1691,7 +1713,7 @@ namespace NppDB.Core
             if (string.IsNullOrEmpty(hint))
                 return false;
 
-            var hintColor = UiThemeManager.Current.IsDark ? UiThemeManager.Current.DarkerText : Color.DimGray;
+            var hintColor = GetPlaceholderHintForeColor();
 
             return inputControl.Text == hint && inputControl.ForeColor == hintColor;
         }
@@ -1705,7 +1727,7 @@ namespace NppDB.Core
                 return;
 
             inputControl.Text = hint;
-            inputControl.ForeColor = UiThemeManager.Current.IsDark ? UiThemeManager.Current.DarkerText : Color.DimGray;
+            inputControl.ForeColor = GetPlaceholderHintForeColor();
         }
 
         private void SetPlaceholderAsValue(RichTextBox inputControl, string value)
@@ -1751,16 +1773,16 @@ namespace NppDB.Core
                 return "Ready!";
 
             if (string.Equals(placeholderName, "selected_sql", StringComparison.OrdinalIgnoreCase))
-                return "Select SQL in the editor to auto-fill, or type it manually.";
+                return "Select SQL code in the Notepad++ editor to auto-fill, or type it manually.";
 
             if (string.Equals(placeholderName, "dialect", StringComparison.OrdinalIgnoreCase))
-                return "Available from the current database connection, or enter it manually.";
+                return "Auto-fills from the active database connection, or type it manually.";
 
             if (string.Equals(placeholderName, "table_name", StringComparison.OrdinalIgnoreCase))
-                return "Select a table in the DB Manager to auto-fill, or type it manually.";
+                return "Select a table in the DB Connect Manager to auto-fill, or type it manually.";
 
             if (string.Equals(placeholderName, "table", StringComparison.OrdinalIgnoreCase))
-                return "Select a table in the DB Manager to auto-fill, or enter the metadata manually.";
+                return "Select a table in the DB Connect Manager to auto-fill, or enter the metadata manually.";
 
             if (placeholderName.IndexOf("query", StringComparison.OrdinalIgnoreCase) >= 0)
                 return "Paste or type the query here.";
@@ -1825,7 +1847,7 @@ namespace NppDB.Core
             var invalidBackColor = pal.IsDark ? pal.PureBackground : Color.FromArgb(255, 244, 244);
             var validTitleColor = pal.IsDark ? pal.Text : Color.Black;
             var invalidTitleColor = pal.IsDark ? Color.FromArgb(255, 182, 182) : Color.Firebrick;
-            var validStatusColor = pal.IsDark ? pal.DarkerText : Color.DimGray;
+            var validStatusColor = GetPlaceholderHintForeColor();
             var invalidStatusColor = pal.IsDark ? Color.FromArgb(255, 214, 214) : Color.Firebrick;
             var validAccentColor = pal.IsDark ? Color.FromArgb(82, 163, 118) : Color.FromArgb(55, 122, 72);
             var incompleteAccentColor = pal.IsDark ? Color.FromArgb(88, 103, 120) : Color.FromArgb(150, 163, 177);
