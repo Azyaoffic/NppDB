@@ -1068,7 +1068,7 @@ namespace NppDB
             try
             {
                 Clipboard.SetText(generatedPrompt);
-                var dialogMessage = "AI debug prompt (issue at caret) copied to clipboard!\n\n" +
+                var dialogMessage = "AI debug prompt (query at text cursor) copied to clipboard!\n\n" +
                                     "--- Prompt Content: ---\n" +
                                     generatedPrompt;
 

@@ -16,7 +16,7 @@
 - `Shift + F9` - Analyze SQL
 - `Ctrl + Shift + F9` - Clear analysis highlights/messages
 - `Ctrl + F9` - Analyze + AI prompt (all queries)
-- `Alt + F9` - Analyze + AI prompt (query at caret (text mouse cursor))
+- `Alt + F9` - Analyze + AI prompt (query at text cursor)
 - `Ctrl + F10` - Prompt Library
 
 You can also find toolbar buttons for:
@@ -110,7 +110,7 @@ Important!
 
 ## SQL analysis behavior
 When you press `Shift + F9`, the entire tab is analyzed.
-If you wish to analyze only the issue at caret, use `Alt + F9`, or `Analyze and Create Prompt (query at text cursor)` option in the menu. 
+If you wish to analyze only the issue at text cursor, use `Alt + F9`, or `Analyze and Create Prompt (query at text cursor)` option in the menu. 
 
 Useful related shortcuts:
 - `Ctrl + Shift + F9`: clear analysis highlights and messages

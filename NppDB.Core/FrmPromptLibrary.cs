@@ -329,7 +329,7 @@ namespace NppDB.Core
                 case "table":
                     return "Table Metadata";
                 case "table_name":
-                    return "Table Name";
+                    return "Table Name(s)";
                 case "issue_description":
                     return "Issue Description";
             }
