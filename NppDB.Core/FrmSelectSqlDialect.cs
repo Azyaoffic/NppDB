@@ -55,7 +55,9 @@ namespace NppDB.Core
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-             SelectedDialect = SqlDialect.NONE;
+            SelectedDialect = SqlDialect.NONE;
+            DialogResult = DialogResult.Cancel;
+            Close();
         }
     }
 }

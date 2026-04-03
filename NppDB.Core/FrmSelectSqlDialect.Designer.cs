@@ -47,7 +47,6 @@ namespace NppDB.Core
             // 
             // btnOK
             // 
-            this.btnOK.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnOK.Location = new System.Drawing.Point(52, 105);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(69, 40);

@@ -596,6 +596,15 @@ namespace NppDB
         }
         #endregion
 
+
+        private void ResetLastAnalysisState()
+        {
+            _lastAnalysisResult = null;
+            _lastAnalyzedText = null;
+            _lastUsedDialect = SqlDialect.NONE;
+            _lastEditor = null;
+        }
+
         private void Analyze()
         {
             AnalyzeAndExecute(true, true);
@@ -618,12 +627,17 @@ namespace NppDB
             try
             {
                 var bufId = GetCurrentBufferId();
-                if (bufId == IntPtr.Zero) return;
+                if (bufId == IntPtr.Zero)
+                {
+                    ResetLastAnalysisState();
+                    return;
+                }
 
                 editor = _getCurrentEditor();
                 if (editor == null)
                 {
                     MessageBox.Show(@"Could not get editor instance.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    ResetLastAnalysisState();
                     return;
                 }
 
@@ -640,10 +654,7 @@ namespace NppDB
                 if (string.IsNullOrWhiteSpace(textToParse))
                 {
                     ClearAnalysisIndicators(editor);
-                    _lastAnalysisResult = null;
-                    _lastAnalyzedText = null;
-                    _lastUsedDialect = SqlDialect.NONE;
-                    _lastEditor = null;
+                    ResetLastAnalysisState();
                     return;
                 }
                 textToParse = textToParse.Replace("\t", "    ");
@@ -663,6 +674,7 @@ namespace NppDB
                     if (!attachedResult.LinkedDbConnect.IsOpened && !onlyAnalyze)
                     {
                         MessageBox.Show(@"Database connection is closed. Cannot execute.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        ResetLastAnalysisState();
                         return;
                     }
 
@@ -677,6 +689,7 @@ namespace NppDB
                     if (!onlyAnalyze)
                     {
                         MessageBox.Show("No database connection attached for execution.\nPlease attach a connection first.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        ResetLastAnalysisState();
                         return;
                     }
 
@@ -684,8 +697,10 @@ namespace NppDB
                     using (var dialectDlg = new FrmSelectSqlDialect())
                     {
                         IWin32Window owner = Control.FromHandle(nppData._nppHandle);
-                        if (dialectDlg.ShowDialog(owner) != DialogResult.OK)
+                        var dialogResult = dialectDlg.ShowDialog(owner);
+                        if (dialogResult != DialogResult.OK || dialectDlg.SelectedDialect == SqlDialect.NONE)
                         {
+                            ResetLastAnalysisState();
                             return;
                         }
 
@@ -702,6 +717,7 @@ namespace NppDB
                             case SqlDialect.NONE:
                             default:
                                 MessageBox.Show("No SQL dialect selected for analysis.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                ResetLastAnalysisState();
                                 return;
                         }
                     }
@@ -798,10 +814,7 @@ namespace NppDB
                 attachedResult?.SetError($"Unexpected Error: {ex.Message}");
                 if (editor != null) ClearAnalysisIndicators(editor);
 
-                _lastAnalysisResult = null;
-                _lastAnalyzedText = null;
-                _lastUsedDialect = SqlDialect.NONE;
-                _lastEditor = null;
+                ResetLastAnalysisState();
             }
         }
 
