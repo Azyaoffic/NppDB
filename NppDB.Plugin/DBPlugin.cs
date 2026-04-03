@@ -828,7 +828,7 @@ namespace NppDB
         {
             if (analysisResult == null || string.IsNullOrEmpty(fullQuery) || editor == null)
             {
-                MessageBox.Show("Not enough information to generate an analysis prompt.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Analysis aborted (cancelled by user or an error occured)", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -2565,7 +2565,7 @@ namespace NppDB
         {
             if (analysisResult == null || string.IsNullOrEmpty(fullQuery) || editor == null)
             {
-                MessageBox.Show("Not enough information to generate an analysis prompt.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Analysis aborted (cancelled by user or an error occured)", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
