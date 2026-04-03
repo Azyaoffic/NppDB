@@ -74,6 +74,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DBConnectManager.cs" />
+    <Compile Include="frmAnalysisPromptDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAnalysisPromptDialog.Designer.cs">
+      <DependentUpon>frmAnalysisPromptDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="FrmDatabaseExplore.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -136,6 +142,9 @@
     <Compile Include="UiThemeColorTable.cs" />
     <Compile Include="UiThemeManager.cs" />
     <Compile Include="UiThemePalette.cs" />
+    <EmbeddedResource Include="frmAnalysisPromptDialog.resx">
+      <DependentUpon>frmAnalysisPromptDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrmDatabaseExplore.resx">
       <DependentUpon>FrmDatabaseExplore.cs</DependentUpon>
     </EmbeddedResource>

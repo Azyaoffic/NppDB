@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -814,7 +815,7 @@ namespace NppDB
         {
             if (analysisResult == null || string.IsNullOrEmpty(fullQuery) || editor == null)
             {
-                MessageBox.Show("Not enough information to generate AI debug prompt (Initial check failed).", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Not enough information to generate an analysis prompt.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -1036,49 +1037,24 @@ namespace NppDB
 
             try
             {
-                var templateFilePath = Path.Combine(_nppDbPluginDir, "AIPromptTemplate.txt");
+                var promptTemplate = NppDbSettingsStore.Get().AiPromptTemplate;
+                if (string.IsNullOrWhiteSpace(promptTemplate))
+                    promptTemplate = NppDbSettings.DefaultAiPromptTemplate;
 
-                if (!File.Exists(templateFilePath))
-                {
-                    MessageBox.Show($"AI prompt template file not found: {templateFilePath}\nUsing default prompt structure.",
-                        PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-
-                    generatedPrompt = GenerateDefaultAiPromptOptionB(dbDialectString, commandText, analysisIssuesWithDetailsListString);
-                    if (string.IsNullOrEmpty(generatedPrompt)) return;
-                }
-                else
-                {
-                    var promptTemplate = File.ReadAllText(templateFilePath);
-
-                    generatedPrompt = promptTemplate
-                        .Replace("{DATABASE_DIALECT}", dbDialectString)
-                        .Replace("{SQL_QUERY}", commandText.Trim())
-                        .Replace("{ANALYSIS_ISSUES_WITH_DETAILS_LIST}", analysisIssuesWithDetailsListString);
-                }
+                generatedPrompt = promptTemplate
+                    .Replace("{DATABASE_DIALECT}", dbDialectString)
+                    .Replace("{SQL_QUERY}", commandText.Trim())
+                    .Replace("{ANALYSIS_ISSUES_WITH_DETAILS_LIST}", analysisIssuesWithDetailsListString);
             }
             catch (Exception exReadTemplate)
             {
-                MessageBox.Show($"Error reading or processing AI prompt template: {exReadTemplate.Message}\nFalling back to default prompt structure.",
+                MessageBox.Show($"Error reading or processing analysis prompt template: {exReadTemplate.Message}\nFalling back to default prompt structure.",
                     PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 generatedPrompt = GenerateDefaultAiPromptOptionB(dbDialectString, commandText, analysisIssuesWithDetailsListString);
                 if (string.IsNullOrEmpty(generatedPrompt)) return;
             }
-
-            try
-            {
-                Clipboard.SetText(generatedPrompt);
-                var dialogMessage = "AI debug prompt (query at text cursor) copied to clipboard!\n\n" +
-                                    "--- Prompt Content: ---\n" +
-                                    generatedPrompt;
-
-                MessageBox.Show(dialogMessage, PLUGIN_NAME + " - AI Prompt Generated", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception exClipboard)
-            {
-                MessageBox.Show($"Error copying prompt to clipboard or displaying prompt: {exClipboard.Message}",
-                    PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            ShowAnalysisPromptDialog(generatedPrompt);
         }
 
         private void HandleSqlAutocomplete(ScNotification notification)
@@ -2549,7 +2525,7 @@ namespace NppDB
         {
             if (analysisResult == null || string.IsNullOrEmpty(fullQuery) || editor == null)
             {
-                MessageBox.Show("Not enough information to generate AI debug prompt (Initial check failed).", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Not enough information to generate an analysis prompt.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -2637,19 +2613,69 @@ namespace NppDB
                 generatedPrompt = GenerateDefaultAiPromptOptionB(dbDialectString, fullQuery, analysisIssuesWithDetailsListString);
                 if (string.IsNullOrEmpty(generatedPrompt)) return;
             }
+            ShowAnalysisPromptDialog(generatedPrompt);
+        }
+
+        private void ShowAnalysisPromptDialog(string generatedPrompt)
+        {
+            if (string.IsNullOrWhiteSpace(generatedPrompt))
+            {
+                MessageBox.Show("Generated analysis prompt is empty.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             try
             {
                 Clipboard.SetText(generatedPrompt);
-                var dialogMessage = "AI debug prompt copied to clipboard!\n\n" +
-                                    "--- Prompt Content: ---\n" +
-                                    generatedPrompt;
-                MessageBox.Show(dialogMessage, PLUGIN_NAME + " - AI Prompt Generated", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception exClipboard)
             {
-                MessageBox.Show($"Error copying prompt to clipboard or displaying prompt: {exClipboard.Message}",
-                                PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error copying prompt to clipboard: {exClipboard.Message}",
+                    PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            try
+            {
+                using (var dialog = new frmAnalysisPromptDialog(
+                           generatedPrompt,
+                           OpenGeneratedAnalysisPromptInLlm,
+                           () => ShowSettingsInternal(FrmSettings.SettingsTab.AiPromptTemplate)))
+                {
+                    if (_frmDbExplorer != null && !_frmDbExplorer.IsDisposed)
+                        dialog.ShowDialog(_frmDbExplorer);
+                    else
+                        dialog.ShowDialog();
+                }
+            }
+            catch (Exception exDialog)
+            {
+                MessageBox.Show($"Error displaying analysis prompt dialog: {exDialog.Message}",
+                    PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void OpenGeneratedAnalysisPromptInLlm(string promptText)
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(promptText))
+                    Clipboard.SetText(promptText);
+
+                var url = NppDbSettingsStore.Get().Prompt?.OpenLlmUrl?.Trim();
+                if (string.IsNullOrWhiteSpace(url))
+                    url = "https://chatgpt.com/";
+
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Could not open the configured LLM URL: {ex.Message}",
+                    PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

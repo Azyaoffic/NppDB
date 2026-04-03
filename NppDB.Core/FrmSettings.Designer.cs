@@ -477,7 +477,7 @@ namespace NppDB.Core
             this.btnRestoreDefaultTemplate.Name = "btnRestoreDefaultTemplate";
             this.btnRestoreDefaultTemplate.Size = new System.Drawing.Size(140, 23);
             this.btnRestoreDefaultTemplate.TabIndex = 2;
-            this.btnRestoreDefaultTemplate.Text = "Restore default";
+            this.btnRestoreDefaultTemplate.Text = "Restore Default";
             this.btnRestoreDefaultTemplate.UseVisualStyleBackColor = true;
             this.btnRestoreDefaultTemplate.Click += new System.EventHandler(this.btnRestoreDefaultTemplate_Click);
             // 

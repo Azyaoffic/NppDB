@@ -399,6 +399,7 @@ namespace NppDB.Core
         {
             if (lblError == null) return;
 
+            SetError(string.Empty);
             lblError.Text = string.Empty;
             lblError.Visible = false;
 
