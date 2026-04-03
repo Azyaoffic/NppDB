@@ -845,7 +845,6 @@ namespace NppDB
                 var mStopLine = (m.StopLine > 0) ? m.StopLine : m.StartLine;
                 if (caretLine < m.StartLine || caretLine > mStopLine) return false;
 
-                // Same-line column checks (best-effort; StopColumn is often -1)
                 if (caretLine == m.StartLine && m.StartColumn >= 0 && caretCol < m.StartColumn) return false;
                 if (caretLine == mStopLine && m.StopColumn >= 0 && caretCol > m.StopColumn) return false;
 
@@ -990,44 +989,71 @@ namespace NppDB
                 ? caretCommand.Text
                 : fullQuery;
 
-            var translatedMessage = _warningMessages.TryGetValue(chosenMessage.Type, out var translated)
-                ? translated
-                : chosenMessage.Text;
-
-            if (string.IsNullOrEmpty(translatedMessage))
-                translatedMessage = chosenMessage.Text ?? "N/A";
-
-            var issueType = chosenMessage is ParserError ? "Error" : "Warning";
+            var promptMessages = scopedMessages
+                .Where(m => m != null)
+                .GroupBy(m => new
+                {
+                    Type = m.GetType().FullName,
+                    MessageType = m.Type,
+                    MessageText = m.Text,
+                    m.StartLine,
+                    m.StartColumn,
+                    m.StopLine,
+                    m.StopColumn
+                })
+                .Select(g => g.First())
+                .OrderBy(m => m.StartLine > 0 ? m.StartLine : int.MaxValue)
+                .ThenBy(m => m.StartColumn >= 0 ? m.StartColumn : int.MaxValue)
+                .ThenByDescending(m => m is ParserError)
+                .ToList();
 
             var issuesDetailedListBuilder = new StringBuilder();
-            issuesDetailedListBuilder.AppendLine("    Issue 1:");
-            issuesDetailedListBuilder.AppendLine($"      Type: {issueType}");
-            issuesDetailedListBuilder.AppendLine($"      Message: \"{translatedMessage}\"");
-
-            if (chosenMessage.StartLine > 0 && chosenMessage.StartColumn >= 0)
-                issuesDetailedListBuilder.AppendLine($"      Location: Line {chosenMessage.StartLine}, Column {chosenMessage.StartColumn + 1}");
-            else
-                issuesDetailedListBuilder.AppendLine("      Location: N/A");
-
-            if (chosenMessage.StartLine > 0)
+            for (var issueIndex = 0; issueIndex < promptMessages.Count; issueIndex++)
             {
-                var msgLineZeroBased = chosenMessage.StartLine - 1;
-                var snippetBuilderForMsg = new StringBuilder();
-                var startSnippetLine = Math.Max(0, msgLineZeroBased - 1);
-                var endSnippetLine = Math.Min(editor.GetLineCount() - 1, msgLineZeroBased + 1);
+                var promptMessage = promptMessages[issueIndex];
+                var translatedMessage = _warningMessages.TryGetValue(promptMessage.Type, out var translated)
+                    ? translated
+                    : promptMessage.Text;
 
-                for (var i = startSnippetLine; i <= endSnippetLine; i++)
+                if (string.IsNullOrEmpty(translatedMessage))
+                    translatedMessage = promptMessage.Text ?? "N/A";
+
+                var issueType = promptMessage is ParserError ? "Error" : "Warning";
+
+                issuesDetailedListBuilder.AppendLine($"    Issue {issueIndex + 1}:");
+                issuesDetailedListBuilder.AppendLine($"      Type: {issueType}");
+                issuesDetailedListBuilder.AppendLine($"      Message: \"{translatedMessage}\"");
+
+                if (promptMessage.StartLine > 0 && promptMessage.StartColumn >= 0)
+                    issuesDetailedListBuilder.AppendLine($"      Location: Line {promptMessage.StartLine}, Column {promptMessage.StartColumn + 1}");
+                else
+                    issuesDetailedListBuilder.AppendLine("      Location: N/A");
+
+                if (promptMessage.StartLine > 0)
                 {
-                    var lineText = editor.GetLine(i);
-                    snippetBuilderForMsg.AppendLine($"          {i + 1:D3}: {lineText.TrimEnd('\r', '\n')}");
+                    var msgLineZeroBased = promptMessage.StartLine - 1;
+                    var snippetBuilderForMsg = new StringBuilder();
+                    var startSnippetLine = Math.Max(0, msgLineZeroBased - 1);
+                    var endSnippetLine = Math.Min(editor.GetLineCount() - 1, msgLineZeroBased + 1);
+
+                    for (var i = startSnippetLine; i <= endSnippetLine; i++)
+                    {
+                        var lineText = editor.GetLine(i);
+                        snippetBuilderForMsg.AppendLine($"          {i + 1:D3}: {lineText.TrimEnd('\r', '\n')}");
+                    }
+
+                    var codeSnippetForMsg = snippetBuilderForMsg.ToString().Trim();
+                    if (string.IsNullOrWhiteSpace(codeSnippetForMsg))
+                        codeSnippetForMsg = "        Could not retrieve code snippet.";
+
+                    issuesDetailedListBuilder.AppendLine("      Code Context:");
+                    issuesDetailedListBuilder.AppendLine(codeSnippetForMsg);
                 }
 
-                var codeSnippetForMsg = snippetBuilderForMsg.ToString().Trim();
-                if (string.IsNullOrWhiteSpace(codeSnippetForMsg))
-                    codeSnippetForMsg = "        Could not retrieve code snippet.";
-
-                issuesDetailedListBuilder.AppendLine("      Code Context:");
-                issuesDetailedListBuilder.AppendLine(codeSnippetForMsg);
+                if (issueIndex < promptMessages.Count - 1)
+                {
+                    issuesDetailedListBuilder.AppendLine("    --------------------");
+                }
             }
 
             var analysisIssuesWithDetailsListString = issuesDetailedListBuilder.ToString().TrimEnd('\r', '\n');
@@ -1054,6 +1080,7 @@ namespace NppDB
                 generatedPrompt = GenerateDefaultAiPromptOptionB(dbDialectString, commandText, analysisIssuesWithDetailsListString);
                 if (string.IsNullOrEmpty(generatedPrompt)) return;
             }
+
             ShowAnalysisPromptDialog(generatedPrompt);
         }
 
