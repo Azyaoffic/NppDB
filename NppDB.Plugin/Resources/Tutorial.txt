@@ -6,7 +6,7 @@
 - Connect to MS Access or PostgreSQL inside Notepad++
 - Run SQL from the editor and view results
 - Analyze SQL (warnings/errors + highlights)
-- Generate copy-paste AI prompts from analysis
+- Create copy-paste analysis prompts from analysis
 - Use reusable prompts from Prompt Library
 
 ## Most useful shortcuts
@@ -15,8 +15,8 @@
 - `F9` - Execute SQL
 - `Shift + F9` - Analyze SQL
 - `Ctrl + Shift + F9` - Clear analysis highlights/messages
-- `Ctrl + F9` - Analyze + AI prompt (all queries)
-- `Alt + F9` - Analyze + AI prompt (query at text cursor)
+- `Ctrl + F9` - Create analysis prompt (for all queries in editor)
+- `Alt + F9` - Create analysis prompt (for issue at text cursor)
 - `Ctrl + F10` - Prompt Library
 
 You can also find toolbar buttons for:
@@ -37,13 +37,14 @@ You can also find toolbar buttons for:
 ## Fast workflow
 1. Connect with `F10`
 2. Browse tables in DB Manager
-3. Expand the table you need to so metadata loads
-4. Open Prompt Library with `Ctrl + F10`
-5. Pick a prompt, fill any extra placeholders, then copy it
+3. Select the table you want to work with (or multiple tables with Ctrl + Click)
 4. Write or paste SQL in the editor
-5. Select the exact block you want to run
-6. Press `F9` to execute
-7. Press `Shift + F9` to analyze if needed
+5. Open Prompt Library with `Ctrl + F10`
+6. Pick a prompt, fill any extra placeholders, then copy it
+
+To run an SQL query, do steps 1-4, then:
+5. Press `F9` to execute
+6. Press `Shift + F9` to analyze if needed
 
 ## Run SQL (`F9`)
 - If text is selected: executes statements inside the selection
@@ -55,33 +56,34 @@ Results appear in NppDB's result/messages panel at the bottom of Notepad++.
 ## Analyze SQL (`Shift + F9`)
 - If text is selected: analyzes the selection
 - If nothing is selected: analyzes the whole document
+- If the editor is empty: NppDB shows a message asking you to type an SQL query first
 - Issues show as highlights as well as in the analysis output
 
-Clear analysis with `Ctrl + Shift + F9`.
+Clear analysis with `Ctrl + Shift + F9` or with a button in toolbar.
 
 ## Prompt Library
 - Open via plugin menu or `Ctrl + F10`
 - Pick a prompt, fill missing placeholders, then press copy
-- Required fields are marked with `*`
 - Tags help describe prompts and make them easier to find
+- You can also use the `Open AI Chat` button
 
 ## Part 2 - Detailed tutorial
 
 ## Settings / Preferences
 There are three tabs for settings:
 
-- `Behavior`, which control specific aspects of plugin behavior, such as:
-  - Opening new tab on query append and other contextual actions
+- `Behavior`, which controls specific aspects of plugin behavior, such as:
+  - Opening a new tab on query append and other contextual actions
   - Enabling destructive `SELECT INTO` statements for MS Access
   - Setting scale of text in Database Manager
   - Picking the color theme
 
-- `LLM`, which contains settings for how AI responses are formatted and what info they include. This includes:
+- `LLM Response Preferences`, which contains settings for how AI responses are formatted and what info they include. This includes:
   - Response language
   - Custom instructions for a model (appended at the end of every prompt)
-  - Option to change the URL pointed to by the `Open AI Chat` button in Prompt Library
-  
-- `AI Prompt Template`, where you can modify the template for 'Analyze + AI Prompt' feature
+  - Option to change the URL pointed to by the `Open AI Chat` button
+
+- `Analysis Prompt Template`, where you can modify the template used by analysis prompt creation
 
 ## DB Manager right-click actions
 Do not treat DB Manager as only a tree view.
@@ -105,18 +107,31 @@ When you press `F9`:
 - If text is selected: NppDB runs the selected text
 - If nothing is selected: NppDB runs the statement at the caret
 
-Important!
+Important:
 - If you want to run multiple statements, select the whole block first
 
 ## SQL analysis behavior
-When you press `Shift + F9`, the entire tab is analyzed.
-If you wish to analyze only the issue at text cursor, use `Alt + F9`, or `Analyze and Create Prompt (query at text cursor)` option in the menu. 
+When you press `Shift + F9`:
+- If text is selected: NppDB analyzes the selection
+- If nothing is selected: NppDB analyzes the whole current document
+- If the editor is empty: NppDB shows a message asking you to type an SQL query first
 
 Useful related shortcuts:
 - `Ctrl + Shift + F9`: clear analysis highlights and messages
-- `Ctrl + F9`: create one AI prompt from all detected issues
+- `Ctrl + F9`: create analysis prompt for all queries in the current editor
+- `Alt + F9`: create analysis prompt for the issue at the text cursor
 
-Generated prompts are copied to the clipboard automatically.
+Analysis prompt creation first runs analysis.
+If a database connection is attached, NppDB uses that dialect automatically.
+If no database connection is attached, NppDB asks you to choose a dialect first.
+If you cancel the dialect dialog, nothing happens.
+
+Generated analysis prompts are copied to the clipboard automatically and shown in an editable prompt window.
+From that window you can:
+- copy again
+- open `Open AI Chat`
+- close the window
+- jump to `Settings -> Analysis Prompt Template`
 
 ## Prompt Library - what it is for
 Prompt Library contains reusable prompts such as:
@@ -142,7 +157,7 @@ Prompt Library prompts can use:
 Important behavior:
 - If no SQL is selected, prompts using selected SQL use the whole current editor text
 - Some fields may be auto-filled and read-only
-- `{{table_name}}` is filled from the selected table in DB Manager
+- `{{table_name}}` is filled from the selected table in DB Manager, or multiple selected table names separated by commas
 - `{{table}}` is filled from table metadata; expand the table once in DB Manager first
 - Copy stays disabled until required fields are filled
 
@@ -195,14 +210,14 @@ Notes:
 - "No database connection attached"
   - Open `F10`, connect to a database, then retry `F9`
 
-- Prompt says `Please expand table in DB Manager`
-  - Expand the table node once so column metadata loads, then retry
+- "To use analysis, please type an SQL query first."
+  - Type or paste an SQL query into the editor, then retry analysis or prompt creation
 
 - Copy button in Prompt Library looks unavailable
   - Usually no prompt is selected, an editable placeholder like `{{user_request}}` is empty, or required auto-filled context is missing
 
 - Several statements did not all run
   - Select the whole block first, then press `F9`
-  
+
 - Tab colors are all messed up! I can't read tutorial like this!
-  - Connecting to database or performing analysis changes tab language to SQL. Change it back in Notepad++ in "Language -> Markdown"
+  - Connecting to a database or performing analysis changes tab language to SQL. Change it back in Notepad++ in `Language -> Markdown`
