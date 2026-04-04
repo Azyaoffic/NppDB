@@ -890,6 +890,7 @@ namespace NppDB.Core
                 dlg.AcceptButton = btnOk;
                 dlg.Controls.Add(txt);
                 dlg.Controls.Add(btnOk);
+                dlg.StartPosition = FormStartPosition.CenterScreen;
 
                 dlg.ShowDialog(this);
             }

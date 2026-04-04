@@ -329,7 +329,7 @@ namespace NppDB.Core
             this.lblOpenUrl.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
             this.lblOpenUrl.Size = new System.Drawing.Size(154, 34);
             this.lblOpenUrl.TabIndex = 2;
-            this.lblOpenUrl.Text = "Open LLM URL";
+            this.lblOpenUrl.Text = "Open AI Chat";
             // 
             // txtOpenLlmUrl
             // 

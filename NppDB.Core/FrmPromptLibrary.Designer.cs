@@ -401,7 +401,7 @@ namespace NppDB.Core
             this.lblWorkflowHint.Name = "lblWorkflowHint";
             this.lblWorkflowHint.Size = new System.Drawing.Size(855, 20);
             this.lblWorkflowHint.TabIndex = 0;
-            this.lblWorkflowHint.Text = "1. Select a prompt   2. Fill missing inputs   3. Copy prompt / Open in LLM";
+            this.lblWorkflowHint.Text = "1. Select a prompt   2. Fill missing inputs   3. Copy prompt / Open AI Chat";
             this.lblWorkflowHint.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // panelPromptMeta
@@ -464,7 +464,7 @@ namespace NppDB.Core
             this.buttonAiStudio.Name = "buttonAiStudio";
             this.buttonAiStudio.Size = new System.Drawing.Size(120, 24);
             this.buttonAiStudio.TabIndex = 2;
-            this.buttonAiStudio.Text = "Open in LLM";
+            this.buttonAiStudio.Text = "Open AI Chat";
             this.buttonAiStudio.UseVisualStyleBackColor = true;
             this.buttonAiStudio.Click += new System.EventHandler(this.buttonAiStudio_Click);
             // 

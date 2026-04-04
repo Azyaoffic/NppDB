@@ -78,6 +78,7 @@ namespace NppDB.Core
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.cbxDbTypescbxDbTypescbxDbTypescbxDbTypessss);
             this.Name = "FrmSelectSqlDialect";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Select SQL Dialect for Analysis:";
             this.ResumeLayout(false);
         }

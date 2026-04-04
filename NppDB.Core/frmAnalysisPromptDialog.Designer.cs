@@ -101,7 +101,7 @@ namespace NppDB.Core
             this.btnOpenLlm.Name = "btnOpenLlm";
             this.btnOpenLlm.Size = new System.Drawing.Size(170, 38);
             this.btnOpenLlm.TabIndex = 5;
-            this.btnOpenLlm.Text = "Open LLM";
+            this.btnOpenLlm.Text = "Open AI Chat";
             this.btnOpenLlm.UseVisualStyleBackColor = true;
             this.btnOpenLlm.Click += new System.EventHandler(this.btnOpenLlm_Click);
             // 
@@ -134,7 +134,7 @@ namespace NppDB.Core
             this.MinimumSize = new System.Drawing.Size(1040, 620);
             this.Name = "AnalysisPromptDialog";
             this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Analysis Prompt";
             this.ShowIcon = false;
             this.ResumeLayout(false);

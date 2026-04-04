@@ -79,7 +79,7 @@ There are three tabs for settings:
 - `LLM`, which contains settings for how AI responses are formatted and what info they include. This includes:
   - Response language
   - Custom instructions for a model (appended at the end of every prompt)
-  - Option to change the URL pointed to by the `Open LLM` button in Prompt Library
+  - Option to change the URL pointed to by the `Open AI Chat` button in Prompt Library
   
 - `AI Prompt Template`, where you can modify the template for 'Analyze + AI Prompt' feature
 

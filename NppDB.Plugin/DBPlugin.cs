@@ -68,6 +68,8 @@ namespace NppDB
         private string _lastAnalyzedText;
         private SqlDialect _lastUsedDialect;
         private IScintillaGateway _lastEditor;
+        private bool _lastAnalysisWasCancelledByUser;
+        private bool _lastAnalysisInputWasEmpty;
         private readonly DbPluginMenuBuilder _menuBuilder = new DbPluginMenuBuilder(PLUGIN_NAME);
         private IntPtr _lastActivatedBufferId = IntPtr.Zero;
         
@@ -603,6 +605,8 @@ namespace NppDB
             _lastAnalyzedText = null;
             _lastUsedDialect = SqlDialect.NONE;
             _lastEditor = null;
+            _lastAnalysisWasCancelledByUser = false;
+            _lastAnalysisInputWasEmpty = false;
         }
 
         private void Analyze()
@@ -623,6 +627,9 @@ namespace NppDB
             IScintillaGateway editor = null;
             var baseLine = 0;
             var selectionOnly = !forceFullDocument;
+
+            _lastAnalysisWasCancelledByUser = false;
+            _lastAnalysisInputWasEmpty = false;
 
             try
             {
@@ -655,6 +662,13 @@ namespace NppDB
                 {
                     ClearAnalysisIndicators(editor);
                     ResetLastAnalysisState();
+                    _lastAnalysisInputWasEmpty = true;
+
+                    var emptyMessage = onlyAnalyze
+                        ? "To use analysis, please type an SQL query first."
+                        : "To execute SQL, please type an SQL query first.";
+
+                    MessageBox.Show(emptyMessage, PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
                 textToParse = textToParse.Replace("\t", "    ");
@@ -701,6 +715,7 @@ namespace NppDB
                         if (dialogResult != DialogResult.OK || dialectDlg.SelectedDialect == SqlDialect.NONE)
                         {
                             ResetLastAnalysisState();
+                            _lastAnalysisWasCancelledByUser = true;
                             return;
                         }
 
@@ -826,9 +841,20 @@ namespace NppDB
 
         private void GenerateAiPromptForIssueAtCaret(ParserResult analysisResult, string fullQuery, SqlDialect dialect, IScintillaGateway editor)
         {
+            if (_lastAnalysisWasCancelledByUser)
+            {
+                return;
+            }
+
+            if (_lastAnalysisInputWasEmpty)
+            {
+                MessageBox.Show("To use analysis, please type an SQL query first.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
             if (analysisResult == null || string.IsNullOrEmpty(fullQuery) || editor == null)
             {
-                MessageBox.Show("Analysis aborted (cancelled by user or an error occured)", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("The following error occurred: analysis did not produce a valid result.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -2563,9 +2589,20 @@ namespace NppDB
 
         private void GenerateAiPromptForAllIssues(ParserResult analysisResult, string fullQuery, SqlDialect dialect, IScintillaGateway editor)
         {
+            if (_lastAnalysisWasCancelledByUser)
+            {
+                return;
+            }
+
+            if (_lastAnalysisInputWasEmpty)
+            {
+                MessageBox.Show("To use analysis, please type an SQL query first.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
             if (analysisResult == null || string.IsNullOrEmpty(fullQuery) || editor == null)
             {
-                MessageBox.Show("Analysis aborted (cancelled by user or an error occured)", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("The following error occurred: analysis did not produce a valid result.", PLUGIN_NAME, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
