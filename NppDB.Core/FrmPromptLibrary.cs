@@ -430,7 +430,7 @@ namespace NppDB.Core
                 Name = name,
                 Text = text,
                 TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font(SystemFonts.DefaultFont.FontFamily, 7.5f, FontStyle.Bold)
+                Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold)
             };
         }
 
@@ -1059,11 +1059,13 @@ namespace NppDB.Core
                     var label = new Label
                     {
                         AutoSize = true,
-                        Margin = new Padding(0, 1, 8, 0),
+                        Margin = new Padding(0, 0, 8, 0),
+                        Padding = new Padding(0, 2, 0, 2),
                         Name = "lblFieldTitle",
                         Text = GetPlaceholderDisplayName(placeholder.Name),
                         Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold),
-                        ForeColor = pal.IsDark ? pal.Text : Color.Black
+                        ForeColor = pal.IsDark ? pal.Text : Color.Black,
+                        TextAlign = ContentAlignment.MiddleLeft
                     };
 
                     _actionToolTip.SetToolTip(label, "This prompt input is required.");
