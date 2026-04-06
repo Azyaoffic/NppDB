@@ -12,6 +12,13 @@ namespace NppDB.Core
         private readonly Color _defaultCopyButtonBackColor;
         private readonly Color _defaultCopyButtonForeColor;
 
+        private const int BasePreferredWidth = 1152;
+        private const int BasePreferredHeight = 684;
+        private const int BaseMinimumWidth = 1040;
+        private const int BaseMinimumHeight = 620;
+        private const int BaseScreenMargin = 60;
+        private float _uiScale = 1f;
+
         public string PromptText => txtPrompt.Text;
 
         public frmAnalysisPromptDialog(string promptText, Action<string> openLlmAction, Action editTemplateAction)
@@ -20,6 +27,8 @@ namespace NppDB.Core
             _editTemplateAction = editTemplateAction;
 
             InitializeComponent();
+            _uiScale = GetUiScale();
+            ApplyScaledWindowBounds();
             UiThemeManager.Register(this);
 
             _defaultCopyButtonText = btnCopy.Text;
@@ -28,6 +37,38 @@ namespace NppDB.Core
 
             SetPromptText(promptText ?? string.Empty);
             btnOpenLlm.Enabled = _openLlmAction != null;
+        }
+
+        private float GetUiScale()
+        {
+            try
+            {
+                using (var graphics = CreateGraphics())
+                {
+                    var scale = graphics.DpiY / 96f;
+                    return scale > 0.1f ? scale : 1f;
+                }
+            }
+            catch
+            {
+                return 1f;
+            }
+        }
+
+        private int ScaleUi(int value)
+        {
+            return Math.Max(1, (int)Math.Round(value * _uiScale));
+        }
+
+        private void ApplyScaledWindowBounds()
+        {
+            var workingArea = Screen.FromControl(this).WorkingArea;
+            var preferredWidth = Math.Min(workingArea.Width, Math.Max(ScaleUi(BaseMinimumWidth), Math.Min(ScaleUi(BasePreferredWidth), workingArea.Width - ScaleUi(BaseScreenMargin))));
+            var preferredHeight = Math.Min(workingArea.Height, Math.Max(ScaleUi(BaseMinimumHeight), Math.Min(ScaleUi(BasePreferredHeight), workingArea.Height - ScaleUi(BaseScreenMargin))));
+
+            MinimumSize = new Size(Math.Min(workingArea.Width, ScaleUi(BaseMinimumWidth)), Math.Min(workingArea.Height, ScaleUi(BaseMinimumHeight)));
+            Size = new Size(preferredWidth, preferredHeight);
+            StartPosition = FormStartPosition.CenterScreen;
         }
 
         private void btnCopy_Click(object sender, EventArgs e)

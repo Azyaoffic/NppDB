@@ -34,9 +34,37 @@ namespace NppDB.Core
 
         private HashSet<string> _placeholdersInCurrentView = new HashSet<string>();
         
-        private const int MinPlaceholdersHeight = 80;
-        private const int MinPreviewTextHeight = 120;
-        private const int LegacyDefaultPlaceholdersHeight = 138;
+        private const int BaseMinPlaceholdersHeight = 80;
+        private const int BaseMinPreviewTextHeight = 120;
+        private const int BaseLegacyDefaultPlaceholdersHeight = 138;
+        private const int BasePlaceholderInputHeight = 92;
+        private const int BasePlaceholderGripHeight = 5;
+        private const int BaseSearchPanelHeight = 42;
+        private const int BasePromptTypeWidth = 190;
+        private const int BasePromptGridTagFontDelta = 0;
+        private const int BasePromptGridTagPaddingX = 8;
+        private const int BasePromptGridTagPaddingY = 4;
+        private const int BasePromptGridTagMinHeight = 16;
+        private const int BasePromptGridTagMinWidth = 24;
+        private const int BasePromptGridTagGap = 6;
+        private const int BasePromptGridTagOverflowWidth = 16;
+        private const int BasePromptGridLineInset = 6;
+        private const int BasePromptGridAccentWidth = 4;
+        private const int BasePromptGridInputGap = 4;
+        private const int BasePromptGridMinInputWidth = 40;
+        private const int BasePromptGridMinContainerWidth = 200;
+        private const int BaseSplitterGripWidth = 72;
+        private const int BaseWindowMargin = 80;
+        private const int BasePreferredWindowWidth = 1500;
+        private const int BasePreferredWindowHeight = 900;
+        private const int BaseMinimumWindowWidth = 1180;
+        private const int BaseMinimumWindowHeight = 680;
+
+        private float _uiScale = 1f;
+
+        private int MinPlaceholdersHeight => ScaleUi(BaseMinPlaceholdersHeight);
+        private int MinPreviewTextHeight => ScaleUi(BaseMinPreviewTextHeight);
+        private int LegacyDefaultPlaceholdersHeight => ScaleUi(BaseLegacyDefaultPlaceholdersHeight);
 
         private bool _suppressPromptGridSelectionChanged;
 
@@ -55,7 +83,7 @@ namespace NppDB.Core
         private bool _previewCollapsed;
         private bool _showBlockingValidation;
         private bool _restoreCollapsedAfterEditing;
-        private int _lastExpandedPlaceholdersHeight = LegacyDefaultPlaceholdersHeight;
+        private int _lastExpandedPlaceholdersHeight = BaseLegacyDefaultPlaceholdersHeight;
 
         private const int TemplateAutoSaveDebounceMs = 650;
 
@@ -80,6 +108,8 @@ namespace NppDB.Core
             Placeholders = new Dictionary<string, string>(placeholders);
 
             InitializeComponent();
+            _uiScale = GetUiScale();
+            _lastExpandedPlaceholdersHeight = LegacyDefaultPlaceholdersHeight;
             UiThemeManager.Register(this);
             
             promptsGridView.CellDoubleClick += promptsGridView_CellDoubleClick; 
@@ -98,11 +128,14 @@ namespace NppDB.Core
             splitterPreview.MouseDoubleClick += splitterPreview_MouseDoubleClick;
             splitterPreview.Cursor = Cursors.HSplit;
             grpPreview.Resize += grpPreview_Resize;
+            panelPreviewBottom.Resize += panelPreviewBottom_Resize;
             _actionToolTip.SetToolTip(splitterPreview, "Drag to resize the preview and prompt inputs. Double-click to reset.");
             _actionToolTip.SetToolTip(buttonTogglePreview, "Collapse the preview to focus on prompt inputs.");
 
+            ApplyScaledLayoutMetrics();
             SetEditingMode(false);
             ConfigureSourceFilter();
+            ApplyScaledGridMetrics();
             RefreshPromptList();
         }
 
@@ -110,7 +143,7 @@ namespace NppDB.Core
         {
             cmbPromptSource.Visible = false;
             lblSource.Visible = false;
-            panelSearch.Height = 42;
+            panelSearch.Height = ScaleUi(BaseSearchPanelHeight);
 
             colPromptType.Visible = false;
 
@@ -119,9 +152,102 @@ namespace NppDB.Core
 
             lblPromptType.Text = "No database selected";
             lblPromptCapabilities.Text = "No table selected";
-            lblPromptType.Width = 190;
+            lblPromptType.Width = ScaleUi(BasePromptTypeWidth);
 
             _actionToolTip.SetToolTip(buttonDuplicate, "Select a prompt to duplicate.");
+        }
+
+        private void ApplyScaledGridMetrics()
+        {
+            promptsGridView.ColumnHeadersHeight = ScaleUi(30);
+            promptsGridView.RowTemplate.Height = ScaleUi(58);
+            promptsGridView.RowTemplate.DividerHeight = 0;
+            if (colPromptName != null)
+                colPromptName.Width = ScaleUi(170);
+            if (colPromptType != null)
+                colPromptType.Width = ScaleUi(95);
+        }
+
+        private int MeasureSingleLineHeight(Font font, int verticalPadding)
+        {
+            return Math.Max(ScaleUi(18), TextRenderer.MeasureText("Ag", font).Height + verticalPadding);
+        }
+
+        private int MeasureTextWidth(string text, Font font, int horizontalPadding)
+        {
+            var measured = TextRenderer.MeasureText(text ?? string.Empty, font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.SingleLine | TextFormatFlags.NoPadding);
+            return Math.Max(ScaleUi(24), measured.Width + horizontalPadding);
+        }
+
+        private void ApplyScaledLayoutMetrics()
+        {
+            var metaHeight = MeasureSingleLineHeight(lblEditingBadge.Font, ScaleUi(8));
+            var workflowHeight = MeasureSingleLineHeight(lblWorkflowHint.Font, ScaleUi(6));
+            var tagsHeight = MeasureSingleLineHeight(txtTags.Font, ScaleUi(10));
+            var placeholderHeaderHeight = MeasureSingleLineHeight(lblPlaceholders.Font, ScaleUi(6));
+            var actionButtonHeight = MeasureSingleLineHeight(buttonAdd.Font, ScaleUi(12));
+
+            panelPromptMeta.Height = metaHeight;
+            panelMetaRight.Height = metaHeight;
+            lblPromptType.Height = metaHeight;
+            lblPromptCapabilities.Height = metaHeight;
+
+            lblEditingBadge.AutoSize = false;
+            lblEditingBadge.Padding = new Padding(ScaleUi(6), 0, ScaleUi(6), 0);
+            lblEditingBadge.Width = MeasureTextWidth(lblEditingBadge.Text, lblEditingBadge.Font, ScaleUi(18));
+            lblEditingBadge.Height = metaHeight;
+
+            editingModeCheckbox.Width = MeasureTextWidth(editingModeCheckbox.Text, editingModeCheckbox.Font, ScaleUi(24));
+            editingModeCheckbox.Height = metaHeight;
+
+            buttonTogglePreview.Width = MeasureTextWidth(buttonTogglePreview.Text, buttonTogglePreview.Font, ScaleUi(24));
+            buttonTogglePreview.Height = metaHeight;
+
+            buttonAiStudio.Width = MeasureTextWidth(buttonAiStudio.Text, buttonAiStudio.Font, ScaleUi(24));
+            buttonAiStudio.Height = metaHeight;
+
+            panelMetaRight.Width = lblEditingBadge.Width + editingModeCheckbox.Width + buttonTogglePreview.Width + buttonAiStudio.Width;
+
+            panelWorkflowHint.Padding = new Padding(0, ScaleUi(3), 0, ScaleUi(1));
+            panelWorkflowHint.Height = workflowHeight + panelWorkflowHint.Padding.Top + panelWorkflowHint.Padding.Bottom;
+            lblWorkflowHint.Height = workflowHeight;
+
+            panelPromptTags.Height = tagsHeight + ScaleUi(12);
+            lblTags.Location = new Point(0, ScaleUi(7));
+            txtTags.Location = new Point(ScaleUi(47), ScaleUi(7));
+            txtTags.Height = tagsHeight;
+
+            var editFieldHeight = MeasureSingleLineHeight(txtPromptName.Font, ScaleUi(10));
+            panelEditFields.Height = editFieldHeight * 2 + ScaleUi(18);
+            txtPromptName.Height = editFieldHeight;
+            txtPromptDescription.Height = editFieldHeight;
+
+            panelLeftActions.Padding = new Padding(0, ScaleUi(8), 0, 0);
+            panelLeftActions.Height = actionButtonHeight + panelLeftActions.Padding.Top + ScaleUi(10);
+            buttonAdd.Height = actionButtonHeight;
+            buttonDuplicate.Height = actionButtonHeight;
+            buttonDelete.Height = actionButtonHeight;
+
+            panelRightActions.Padding = new Padding(ScaleUi(6));
+            panelRightActions.Height = actionButtonHeight + panelRightActions.Padding.Vertical;
+            buttonCopy.Height = actionButtonHeight;
+
+            lblPlaceholders.AutoSize = false;
+            lblPlaceholders.Location = new Point(ScaleUi(3), ScaleUi(3));
+            lblPlaceholders.Height = placeholderHeaderHeight;
+            lblPlaceholders.Width = Math.Max(ScaleUi(220), panelPreviewBottom.ClientSize.Width - ScaleUi(6));
+
+            flowLayoutPanelPlaceholders.Location = new Point(ScaleUi(3), lblPlaceholders.Bottom + ScaleUi(4));
+            flowLayoutPanelPlaceholders.MinimumSize = new Size(ScaleUi(200), MinPlaceholdersHeight);
+            flowLayoutPanelPlaceholders.Padding = new Padding(ScaleUi(6));
+            flowLayoutPanelPlaceholders.Size = new Size(
+                Math.Max(ScaleUi(200), panelPreviewBottom.ClientSize.Width - ScaleUi(6)),
+                Math.Max(MinPlaceholdersHeight, panelPreviewBottom.ClientSize.Height - flowLayoutPanelPlaceholders.Top - ScaleUi(3)));
+        }
+
+        private void panelPreviewBottom_Resize(object sender, EventArgs e)
+        {
+            ApplyScaledLayoutMetrics();
         }
 
         protected override void OnShown(EventArgs e)
@@ -136,6 +262,28 @@ namespace NppDB.Core
             SaveLayoutToSettings();
             base.OnFormClosing(e);
         }
+
+        private float GetUiScale()
+        {
+            try
+            {
+                using (var graphics = CreateGraphics())
+                {
+                    var scale = graphics.DpiY / 96f;
+                    return scale > 0.1f ? scale : 1f;
+                }
+            }
+            catch
+            {
+                return 1f;
+            }
+        }
+
+        private int ScaleUi(int value)
+        {
+            return Math.Max(1, (int)Math.Round(value * _uiScale));
+        }
+
 
         private void RestoreLayoutFromSettings()
         {
@@ -161,9 +309,9 @@ namespace NppDB.Core
                 : GetCenteredLocation(workingArea, Size);
 
             var rawHeight = Properties.Settings.Default["PromptLibrary_PlaceholdersHeight"];
-            var savedPlaceholdersHeight = rawHeight is int h && h > 0 ? h : LegacyDefaultPlaceholdersHeight;
-            var desiredPlaceholdersHeight = (!hasSavedSize && savedPlaceholdersHeight <= LegacyDefaultPlaceholdersHeight)
-                ? GetDefaultPlaceholdersHeight()
+            var savedPlaceholdersHeight = rawHeight is int h && h > 0 ? h : BaseLegacyDefaultPlaceholdersHeight;
+            var desiredPlaceholdersHeight = !hasSavedSize
+                ? Math.Max(GetDefaultPlaceholdersHeight(), ScaleUi(savedPlaceholdersHeight))
                 : savedPlaceholdersHeight;
 
             ApplyPreviewBottomHeight(desiredPlaceholdersHeight);
@@ -197,8 +345,10 @@ namespace NppDB.Core
 
         private Size GetDefaultPromptLibrarySize(Rectangle workingArea)
         {
-            var preferredWidth = Math.Min(1500, Math.Max(1180, workingArea.Width - 80));
-            var preferredHeight = Math.Min(900, Math.Max(680, workingArea.Height - 80));
+            var minWidth = ScaleUi(BaseMinimumWindowWidth);
+            var minHeight = ScaleUi(BaseMinimumWindowHeight);
+            var preferredWidth = Math.Min(ScaleUi(BasePreferredWindowWidth), Math.Max(minWidth, workingArea.Width - ScaleUi(BaseWindowMargin)));
+            var preferredHeight = Math.Min(ScaleUi(BasePreferredWindowHeight), Math.Max(minHeight, workingArea.Height - ScaleUi(BaseWindowMargin)));
 
             preferredWidth = Math.Min(preferredWidth, workingArea.Width);
             preferredHeight = Math.Min(preferredHeight, workingArea.Height);
@@ -234,8 +384,8 @@ namespace NppDB.Core
 
         private int GetDefaultPlaceholdersHeight()
         {
-            var preferredHeight = Math.Max(250, grpPreview.ClientSize.Height * 46 / 100);
-            return Math.Min(380, preferredHeight);
+            var preferredHeight = Math.Max(ScaleUi(250), grpPreview.ClientSize.Height * 46 / 100);
+            return Math.Min(ScaleUi(380), preferredHeight);
         }
 
         private void ApplyPreviewBottomHeight(int desiredHeight)
@@ -266,6 +416,7 @@ namespace NppDB.Core
         private void UpdatePreviewToggleState()
         {
             buttonTogglePreview.Text = _previewCollapsed ? "Show Preview" : "Collapse Preview";
+            ApplyScaledLayoutMetrics();
             _actionToolTip.SetToolTip(buttonTogglePreview,
                 _previewCollapsed
                     ? "Show the prompt preview again."
@@ -425,8 +576,8 @@ namespace NppDB.Core
             return new Label
             {
                 AutoSize = true,
-                Margin = new Padding(0, 0, 8, 0),
-                Padding = new Padding(6, 2, 6, 2),
+                Margin = new Padding(0, 0, ScaleUi(8), 0),
+                Padding = new Padding(ScaleUi(6), ScaleUi(2), ScaleUi(6), ScaleUi(2)),
                 Name = name,
                 Text = text,
                 TextAlign = ContentAlignment.MiddleCenter,
@@ -670,7 +821,7 @@ namespace NppDB.Core
                     var rowIndex = promptsGridView.Rows.Add(prompt.Title, prompt.Description, string.Empty);
                     var row = promptsGridView.Rows[rowIndex];
                     row.Tag = prompt;
-                    row.DividerHeight = GetVisibleTags(prompt.Tags).Length > 0 ? 28 : 10;
+                    row.DividerHeight = GetVisibleTags(prompt.Tags).Length > 0 ? ScaleUi(28) : ScaleUi(10);
                     ApplyRowStyling(row, prompt);
                 }
 
@@ -734,12 +885,12 @@ namespace NppDB.Core
 
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-                using (var font = new Font(promptsGridView.Font.FontFamily, 8.0f, FontStyle.Regular))
+                using (var font = new Font(promptsGridView.Font.FontFamily, Math.Max(1f, promptsGridView.Font.SizeInPoints + BasePromptGridTagFontDelta), FontStyle.Regular))
                 {
-                    var pillX = rect.Left + 8;
-                    var pillY = rect.Top + 4;
-                    var pillHeight = Math.Max(16, rect.Height - 8);
-                    var availableRight = rect.Right - 8;
+                    var pillX = rect.Left + ScaleUi(BasePromptGridTagPaddingX);
+                    var pillY = rect.Top + ScaleUi(BasePromptGridTagPaddingY);
+                    var pillHeight = Math.Max(ScaleUi(BasePromptGridTagMinHeight), rect.Height - ScaleUi(BasePromptGridTagPaddingY * 2));
+                    var availableRight = rect.Right - ScaleUi(BasePromptGridTagPaddingX);
                     var pillTextColor = isSelected ? row.DefaultCellStyle.SelectionForeColor : (pal.IsDark ? pal.Text : SystemColors.ControlText);
                     var pillFillColor = isSelected
                         ? BlendColor(bgColor, Color.White, pal.IsDark ? 0.18f : 0.30f)
@@ -755,15 +906,15 @@ namespace NppDB.Core
                     foreach (var tag in tags)
                     {
                         var textSize = TextRenderer.MeasureText(e.Graphics, tag, font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding);
-                        var pillWidth = Math.Max(24, textSize.Width + 16);
+                        var pillWidth = Math.Max(ScaleUi(BasePromptGridTagMinWidth), textSize.Width + ScaleUi(BasePromptGridTagOverflowWidth));
 
                         if (pillX + pillWidth > availableRight)
                         {
-                            var overflowWidth = TextRenderer.MeasureText(e.Graphics, "…", font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width + 16;
+                            var overflowWidth = TextRenderer.MeasureText(e.Graphics, "…", font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width + ScaleUi(BasePromptGridTagOverflowWidth);
                             if (pillX + overflowWidth <= availableRight)
                             {
                                 var overflowRect = new Rectangle(pillX, pillY, overflowWidth, pillHeight);
-                                using (var path = CreateRoundedRectangle(overflowRect, 8))
+                                using (var path = CreateRoundedRectangle(overflowRect, ScaleUi(8)))
                                 using (var fillBrush = new SolidBrush(pillFillColor))
                                 using (var borderPen = new Pen(pillBorderColor))
                                 {
@@ -778,7 +929,7 @@ namespace NppDB.Core
                         }
 
                         var pillRect = new Rectangle(pillX, pillY, pillWidth, pillHeight);
-                        using (var path = CreateRoundedRectangle(pillRect, 8))
+                        using (var path = CreateRoundedRectangle(pillRect, ScaleUi(8)))
                         using (var fillBrush = new SolidBrush(pillFillColor))
                         using (var borderPen = new Pen(pillBorderColor))
                         {
@@ -789,7 +940,7 @@ namespace NppDB.Core
                         TextRenderer.DrawText(e.Graphics, tag, font, pillRect, pillTextColor,
                             TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
 
-                        pillX += pillWidth + 6;
+                        pillX += pillWidth + ScaleUi(BasePromptGridTagGap);
                     }
                 }
 
@@ -798,7 +949,7 @@ namespace NppDB.Core
 
             using (var linePen = new Pen(lineColor))
             {
-                e.Graphics.DrawLine(linePen, startX + 6, e.RowBounds.Bottom - 1, startX + Math.Max(0, contentWidth - 6), e.RowBounds.Bottom - 1);
+                e.Graphics.DrawLine(linePen, startX + ScaleUi(BasePromptGridLineInset), e.RowBounds.Bottom - 1, startX + Math.Max(0, contentWidth - ScaleUi(BasePromptGridLineInset)), e.RowBounds.Bottom - 1);
             }
         }
 
@@ -1041,8 +1192,8 @@ namespace NppDB.Core
                     {
                         FlowDirection = FlowDirection.TopDown,
                         AutoSize = true,
-                        Width = flowLayoutPanelPlaceholders.Width - 25,
-                        Margin = new Padding(0, 0, 0, 10),
+                        Width = flowLayoutPanelPlaceholders.Width - ScaleUi(25),
+                        Margin = new Padding(0, 0, 0, ScaleUi(10)),
                         Tag = placeholder.Name
                     };
 
@@ -1051,7 +1202,7 @@ namespace NppDB.Core
                         AutoSize = true,
                         WrapContents = false,
                         FlowDirection = FlowDirection.LeftToRight,
-                        Margin = new Padding(0, 0, 0, 2),
+                        Margin = new Padding(0, 0, 0, ScaleUi(2)),
                         Name = "panelFieldHeader",
                         Width = container.Width
                     };
@@ -1059,8 +1210,8 @@ namespace NppDB.Core
                     var label = new Label
                     {
                         AutoSize = true,
-                        Margin = new Padding(0, 0, 8, 0),
-                        Padding = new Padding(0, 2, 0, 2),
+                        Margin = new Padding(0, 0, ScaleUi(8), 0),
+                        Padding = new Padding(0, ScaleUi(2), 0, ScaleUi(2)),
                         Name = "lblFieldTitle",
                         Text = GetPlaceholderDisplayName(placeholder.Name),
                         Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold),
@@ -1088,7 +1239,7 @@ namespace NppDB.Core
                     var statusLabel = new Label
                     {
                         AutoSize = true,
-                        Margin = new Padding(0, 0, 0, 6),
+                        Margin = new Padding(0, 0, 0, ScaleUi(6)),
                         Name = "lblFieldStatus",
                         ForeColor = GetPlaceholderHintForeColor(),
                         Text = GetPlaceholderStatusText(placeholder.Name, hasInitialValue)
@@ -1098,7 +1249,7 @@ namespace NppDB.Core
                     var inputHost = new Panel
                     {
                         Width = container.Width,
-                        Height = 92,
+                        Height = ScaleUi(BasePlaceholderInputHeight),
                         Margin = new Padding(0),
                         Name = "pnlInputHost",
                         BackColor = pal.IsDark ? pal.PureBackground : SystemColors.Window
@@ -1106,7 +1257,7 @@ namespace NppDB.Core
 
                     var stateAccent = new Panel
                     {
-                        Width = 4,
+                        Width = ScaleUi(BasePromptGridAccentWidth),
                         Margin = new Padding(0),
                         Name = "pnlFieldIndicator",
                         BackColor = pal.IsDark ? pal.Edge : SystemColors.ControlDark,
@@ -1124,8 +1275,8 @@ namespace NppDB.Core
                         Margin = new Padding(0),
                         Name = "rtbPlaceholderValue",
                         Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
-                        Location = new Point(stateAccent.Width + 4, 0),
-                        Width = Math.Max(40, inputHost.Width - stateAccent.Width - 4),
+                        Location = new Point(stateAccent.Width + ScaleUi(BasePromptGridInputGap), 0),
+                        Width = Math.Max(ScaleUi(BasePromptGridMinInputWidth), inputHost.Width - stateAccent.Width - ScaleUi(BasePromptGridInputGap)),
                         Height = inputHost.Height
                     };
 
@@ -1155,7 +1306,7 @@ namespace NppDB.Core
 
                     var grip = new Panel
                     {
-                        Height = 5,
+                        Height = ScaleUi(BasePlaceholderGripHeight),
                         Dock = DockStyle.Bottom,
                         Cursor = Cursors.SizeNS,
                         BackColor = pal.IsDark ? pal.Edge : SystemColors.ControlDark,
@@ -1208,7 +1359,7 @@ namespace NppDB.Core
             var lineColor = pal.IsDark ? pal.Edge : SystemColors.ControlDark;
             var centerX = splitterPreview.ClientSize.Width / 2;
             var centerY = splitterPreview.ClientSize.Height / 2;
-            const int gripWidth = 72;
+            var gripWidth = ScaleUi(BaseSplitterGripWidth);
 
             using (var pen = new Pen(lineColor))
             {
@@ -1235,7 +1386,7 @@ namespace NppDB.Core
             if (_resizingControl != null && e.Button == MouseButtons.Left)
             {
                 var delta = Cursor.Position.Y - _resizeStartY;
-                _resizingControl.Height = Math.Max(92, _resizingControl.Height + delta);
+                _resizingControl.Height = Math.Max(ScaleUi(BasePlaceholderInputHeight), _resizingControl.Height + delta);
                 _resizeStartY = Cursor.Position.Y;
 
                 if (_resizingControl.Controls.OfType<RichTextBox>().FirstOrDefault() is RichTextBox input)
@@ -1405,6 +1556,7 @@ namespace NppDB.Core
             editingModeCheckbox.Text = _isEditingTemplate ? "Done" : "Edit";
             lblEditingBadge.Text = _isEditingTemplate ? "Edit mode" : "Preview";
             lblEditingBadge.ForeColor = Color.White;
+            ApplyScaledLayoutMetrics();
 
             colPromptType.ReadOnly = true;
             colPromptName.ReadOnly = true;
@@ -2003,9 +2155,9 @@ namespace NppDB.Core
             accent.Location = new Point(0, 0);
             accent.Height = inputHost.ClientSize.Height;
 
-            var left = accent.Width + 4;
+            var left = accent.Width + ScaleUi(BasePromptGridInputGap);
             input.Location = new Point(left, 0);
-            input.Size = new Size(Math.Max(40, inputHost.ClientSize.Width - left), inputHost.ClientSize.Height);
+            input.Size = new Size(Math.Max(ScaleUi(BasePromptGridMinInputWidth), inputHost.ClientSize.Width - left), inputHost.ClientSize.Height);
         }
 
         private void flowLayoutPanelPlaceholders_SizeChanged(object sender, EventArgs e)
@@ -2015,8 +2167,8 @@ namespace NppDB.Core
 
         private void ResizePlaceholderControlWidths()
         {
-            var targetWidth = flowLayoutPanelPlaceholders.ClientSize.Width - 10 - SystemInformation.VerticalScrollBarWidth;
-            if (targetWidth < 200) targetWidth = 200;
+            var targetWidth = flowLayoutPanelPlaceholders.ClientSize.Width - ScaleUi(10) - SystemInformation.VerticalScrollBarWidth;
+            if (targetWidth < ScaleUi(BasePromptGridMinContainerWidth)) targetWidth = ScaleUi(BasePromptGridMinContainerWidth);
 
             foreach (Control c in flowLayoutPanelPlaceholders.Controls)
             {
