@@ -114,6 +114,7 @@ namespace NppDB.Core
             
             promptsGridView.CellDoubleClick += promptsGridView_CellDoubleClick; 
             promptsGridView.RowPostPaint += promptsGridView_RowPostPaint;
+            promptsGridView.MouseClick += promptsGridView_MouseClick;
             promptTextBox.TextChanged += promptTextBox_TextChanged;
             txtTags.TextChanged += txtTags_TextChanged;
             txtPromptName.TextChanged += txtPromptName_TextChanged;
@@ -478,9 +479,9 @@ namespace NppDB.Core
                 case "source_dialect":
                     return "Source SQL Dialect";
                 case "table":
-                    return "Table Metadata";
+                    return "Selected Tables' Metadata";
                 case "table_name":
-                    return "Table Name(s)";
+                    return "Selected Tables";
                 case "issue_description":
                     return "Issue Description";
             }
@@ -950,6 +951,58 @@ namespace NppDB.Core
             using (var linePen = new Pen(lineColor))
             {
                 e.Graphics.DrawLine(linePen, startX + ScaleUi(BasePromptGridLineInset), e.RowBounds.Bottom - 1, startX + Math.Max(0, contentWidth - ScaleUi(BasePromptGridLineInset)), e.RowBounds.Bottom - 1);
+            }
+        }
+        
+        private void promptsGridView_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left) return;
+
+            var hit = promptsGridView.HitTest(e.X, e.Y);
+            if (hit.RowIndex < 0) return;
+
+            var row = promptsGridView.Rows[hit.RowIndex];
+            if (row.DividerHeight <= 0) return;
+
+            var tags = row.Tag is PromptItem prompt ? GetVisibleTags(prompt.Tags) : Array.Empty<string>();
+            if (tags.Length == 0) return;
+
+            var rowBounds = promptsGridView.GetRowDisplayRectangle(hit.RowIndex, false);
+            
+            var startX = rowBounds.Left;
+            if (promptsGridView.RowHeadersVisible) startX += promptsGridView.RowHeadersWidth;
+
+            var contentWidth = rowBounds.Width - (startX - rowBounds.Left);
+            var tagsRect = new Rectangle(startX, rowBounds.Bottom - row.DividerHeight, Math.Max(0, contentWidth), row.DividerHeight);
+
+            if (!tagsRect.Contains(e.Location)) return;
+
+            using (var font = new Font(promptsGridView.Font.FontFamily, Math.Max(1f, promptsGridView.Font.SizeInPoints + BasePromptGridTagFontDelta), FontStyle.Regular))
+            {
+                var pillX = tagsRect.Left + ScaleUi(BasePromptGridTagPaddingX);
+                var pillY = tagsRect.Top + ScaleUi(BasePromptGridTagPaddingY);
+                var pillHeight = Math.Max(ScaleUi(BasePromptGridTagMinHeight), tagsRect.Height - ScaleUi(BasePromptGridTagPaddingY) * 2);
+
+                foreach (var tag in tags)
+                {
+                    var textRect = TextRenderer.MeasureText(tag, font);
+                    var pillWidth = Math.Max(ScaleUi(BasePromptGridTagMinWidth), textRect.Width + ScaleUi(12));
+
+                    if (pillX + pillWidth > tagsRect.Right - ScaleUi(BasePromptGridTagOverflowWidth))
+                        break;
+
+                    var pillRect = new Rectangle(pillX, pillY, pillWidth, pillHeight);
+                    
+                    if (pillRect.Contains(e.Location))
+                    {
+                        txtSearch.Text = $"tag:{tag}";
+                        txtSearch.Focus();
+                        txtSearch.SelectionStart = txtSearch.Text.Length;
+                        return;
+                    }
+
+                    pillX += pillWidth + ScaleUi(BasePromptGridTagGap);
+                }
             }
         }
 
