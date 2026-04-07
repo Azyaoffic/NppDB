@@ -812,6 +812,8 @@ namespace NppDB.Core
 
         private void PopulatePromptList()
         {
+            var previouslySelectedPrompt = GetSelectedPrompt();
+
             _suppressPromptGridSelectionChanged = true;
             try
             {
@@ -830,9 +832,32 @@ namespace NppDB.Core
                 if (promptsGridView.Rows.Count > 0)
                     promptsGridView.CurrentCell = null;
 
+                if (previouslySelectedPrompt.HasValue)
+                {
+                    foreach (DataGridViewRow row in promptsGridView.Rows)
+                    {
+                        if (!(row.Tag is PromptItem prompt) || prompt.Id != previouslySelectedPrompt.Value.Id)
+                            continue;
+
+                        row.Selected = true;
+                        if (row.Cells.Count > 0)
+                            promptsGridView.CurrentCell = row.Cells[0];
+
+                        _showBlockingValidation = false;
+                        GeneratePlaceholderControls(prompt);
+                        UpdatePromptTextBoxForCurrentMode(prompt);
+                        UpdatePromptMeta(prompt);
+                        UpdateTagsBox(prompt);
+                        UpdatePromptInfoFields(prompt);
+                        UpdatePreviewTitle(prompt);
+                        return;
+                    }
+                }
+
                 UpdatePromptMeta(null);
                 UpdateTagsBox(null);
                 UpdatePromptInfoFields(null);
+                UpdatePreviewTitle();
 
                 if (promptsGridView.Rows.Count == 0)
                 {
@@ -844,6 +869,9 @@ namespace NppDB.Core
                 }
                 else
                 {
+                    _showBlockingValidation = false;
+                    SetPreviewText(string.Empty, false);
+                    flowLayoutPanelPlaceholders.Controls.Clear();
                     UpdateCopyButtonState(false, "No prompt selected");
                 }
             }
