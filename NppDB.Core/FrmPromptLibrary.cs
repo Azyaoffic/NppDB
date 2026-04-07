@@ -1008,8 +1008,26 @@ namespace NppDB.Core
 
         private void txtSearch_TextChanged(object sender, EventArgs e)
         {
+            buttonClearSearch.Visible = !string.IsNullOrEmpty(txtSearch.Text);
             FlushPendingAutoSave();
             RefreshPromptList();
+        }
+
+        private void buttonClearSearch_Click(object sender, EventArgs e)
+        {
+            txtSearch.Clear();
+            txtSearch.Focus();
+        }
+
+        private void txtSearch_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Escape || string.IsNullOrEmpty(txtSearch.Text))
+                return;
+
+            txtSearch.Clear();
+            txtSearch.Focus();
+            e.Handled = true;
+            e.SuppressKeyPress = true;
         }
 
         private void cmbPromptSource_SelectedIndexChanged(object sender, EventArgs e)

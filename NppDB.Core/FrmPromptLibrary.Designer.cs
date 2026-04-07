@@ -42,6 +42,7 @@ namespace NppDB.Core
             this.cmbPromptSource = new System.Windows.Forms.ComboBox();
             this.lblSource = new System.Windows.Forms.Label();
             this.txtSearch = new System.Windows.Forms.TextBox();
+            this.buttonClearSearch = new System.Windows.Forms.Button();
             this.lblSearch = new System.Windows.Forms.Label();
             this.panelLeftActions = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonAdd = new System.Windows.Forms.Button();
@@ -174,6 +175,7 @@ namespace NppDB.Core
             // 
             this.panelSearch.Controls.Add(this.cmbPromptSource);
             this.panelSearch.Controls.Add(this.lblSource);
+            this.panelSearch.Controls.Add(this.buttonClearSearch);
             this.panelSearch.Controls.Add(this.txtSearch);
             this.panelSearch.Controls.Add(this.lblSearch);
             this.panelSearch.Dock = System.Windows.Forms.DockStyle.Top;
@@ -209,9 +211,27 @@ namespace NppDB.Core
             this.txtSearch.Location = new System.Drawing.Point(60, 10);
             this.txtSearch.MinimumSize = new System.Drawing.Size(100, 22);
             this.txtSearch.Name = "txtSearch";
-            this.txtSearch.Size = new System.Drawing.Size(320, 22);
+            this.txtSearch.Size = new System.Drawing.Size(294, 22);
             this.txtSearch.TabIndex = 1;
             this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
+            this.txtSearch.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtSearch_KeyDown);
+            // 
+            // buttonClearSearch
+            // 
+            this.buttonClearSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonClearSearch.FlatAppearance.BorderSize = 0;
+            this.buttonClearSearch.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonClearSearch.Location = new System.Drawing.Point(357, 10);
+            this.buttonClearSearch.BackgroundImage = global::NppDB.Core.Properties.Resources.x_letter1;
+            this.buttonClearSearch.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.buttonClearSearch.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonClearSearch.Name = "buttonClearSearch";
+            this.buttonClearSearch.Size = new System.Drawing.Size(23, 22);
+            this.buttonClearSearch.TabIndex = 4;
+            this.buttonClearSearch.TabStop = false;
+            this.buttonClearSearch.UseVisualStyleBackColor = true;
+            this.buttonClearSearch.Visible = false;
+            this.buttonClearSearch.Click += new System.EventHandler(this.buttonClearSearch_Click);
             // 
             // lblSearch
             // 
@@ -667,6 +687,7 @@ namespace NppDB.Core
 
         private System.Windows.Forms.Panel panelSearch;
         private System.Windows.Forms.TextBox txtSearch;
+        private System.Windows.Forms.Button buttonClearSearch;
         private System.Windows.Forms.Label lblSearch;
     }
 }
