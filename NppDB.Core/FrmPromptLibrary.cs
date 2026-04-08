@@ -84,6 +84,7 @@ namespace NppDB.Core
         private bool _showBlockingValidation;
         private bool _restoreCollapsedAfterEditing;
         private int _lastExpandedPlaceholdersHeight = BaseLegacyDefaultPlaceholdersHeight;
+        private bool _isSearchClearHover;
 
         private const int TemplateAutoSaveDebounceMs = 650;
 
@@ -1037,24 +1038,53 @@ namespace NppDB.Core
         private void txtSearch_TextChanged(object sender, EventArgs e)
         {
             buttonClearSearch.Visible = !string.IsNullOrEmpty(txtSearch.Text);
+            if (!buttonClearSearch.Visible)
+                _isSearchClearHover = false;
+            buttonClearSearch.Invalidate();
             FlushPendingAutoSave();
             RefreshPromptList();
         }
 
         private void buttonClearSearch_Click(object sender, EventArgs e)
         {
+            _isSearchClearHover = false;
             txtSearch.Clear();
             txtSearch.Focus();
         }
 
         private void buttonClearSearch_MouseEnter(object sender, EventArgs e)
         {
-            buttonClearSearch.BackColor = SystemColors.ControlLight;
+            _isSearchClearHover = true;
+            buttonClearSearch.Invalidate();
         }
 
         private void buttonClearSearch_MouseLeave(object sender, EventArgs e)
         {
-            buttonClearSearch.BackColor = Color.White;
+            _isSearchClearHover = false;
+            buttonClearSearch.Invalidate();
+        }
+
+        private void buttonClearSearch_Paint(object sender, PaintEventArgs e)
+        {
+            var pal = UiThemeManager.Current;
+            var backColor = _isSearchClearHover
+                ? (pal.IsDark ? BlendColor(txtSearch.BackColor, Color.White, 0.12f) : BlendColor(txtSearch.BackColor, Color.Black, 0.08f))
+                : txtSearch.BackColor;
+            var lineColor = _isSearchClearHover
+                ? (pal.IsDark ? Color.White : Color.Black)
+                : (pal.IsDark ? pal.Text : Color.FromArgb(70, 70, 70));
+
+            e.Graphics.Clear(backColor);
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+            var pad = 2;
+            using (var pen = new Pen(lineColor, 1.6f))
+            {
+                pen.StartCap = LineCap.Round;
+                pen.EndCap = LineCap.Round;
+                e.Graphics.DrawLine(pen, pad, pad, buttonClearSearch.Width - pad - 1, buttonClearSearch.Height - pad - 1);
+                e.Graphics.DrawLine(pen, buttonClearSearch.Width - pad - 1, pad, pad, buttonClearSearch.Height - pad - 1);
+            }
         }
 
         private void txtSearch_KeyDown(object sender, KeyEventArgs e)
