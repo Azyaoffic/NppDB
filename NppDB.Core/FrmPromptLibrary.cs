@@ -1047,6 +1047,16 @@ namespace NppDB.Core
             txtSearch.Focus();
         }
 
+        private void buttonClearSearch_MouseEnter(object sender, EventArgs e)
+        {
+            buttonClearSearch.BackColor = SystemColors.ControlLight;
+        }
+
+        private void buttonClearSearch_MouseLeave(object sender, EventArgs e)
+        {
+            buttonClearSearch.BackColor = Color.White;
+        }
+
         private void txtSearch_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode != Keys.Escape || string.IsNullOrEmpty(txtSearch.Text))
