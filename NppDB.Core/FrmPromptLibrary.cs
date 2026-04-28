@@ -133,6 +133,7 @@ namespace NppDB.Core
             panelPreviewBottom.Resize += panelPreviewBottom_Resize;
             _actionToolTip.SetToolTip(splitterPreview, "Drag to resize the preview and prompt inputs. Double-click to reset.");
             _actionToolTip.SetToolTip(buttonTogglePreview, "Collapse the preview to focus on prompt inputs.");
+            _actionToolTip.SetToolTip(buttonInsertPlaceholder, "Enable Edit, then insert a {{placeholder_name}} token at the caret.");
 
             ApplyScaledLayoutMetrics();
             SetEditingMode(false);
@@ -205,6 +206,9 @@ namespace NppDB.Core
             buttonTogglePreview.Width = MeasureTextWidth(buttonTogglePreview.Text, buttonTogglePreview.Font, ScaleUi(24));
             buttonTogglePreview.Height = metaHeight;
 
+            buttonInsertPlaceholder.Width = MeasureTextWidth(buttonInsertPlaceholder.Text, buttonInsertPlaceholder.Font, ScaleUi(24));
+            buttonInsertPlaceholder.Height = placeholderHeaderHeight;
+
             buttonAiStudio.Width = MeasureTextWidth(buttonAiStudio.Text, buttonAiStudio.Font, ScaleUi(24));
             buttonAiStudio.Height = metaHeight;
 
@@ -237,9 +241,16 @@ namespace NppDB.Core
             lblPlaceholders.AutoSize = false;
             lblPlaceholders.Location = new Point(ScaleUi(3), ScaleUi(3));
             lblPlaceholders.Height = placeholderHeaderHeight;
-            lblPlaceholders.Width = Math.Max(ScaleUi(220), panelPreviewBottom.ClientSize.Width - ScaleUi(6));
 
-            flowLayoutPanelPlaceholders.Location = new Point(ScaleUi(3), lblPlaceholders.Bottom + ScaleUi(4));
+            buttonInsertPlaceholder.Location = new Point(
+                Math.Max(ScaleUi(3), panelPreviewBottom.ClientSize.Width - buttonInsertPlaceholder.Width - ScaleUi(3)),
+                ScaleUi(1));
+
+            var placeholderLabelRight = buttonInsertPlaceholder.Left - ScaleUi(6);
+            lblPlaceholders.Width = Math.Max(ScaleUi(220), placeholderLabelRight - lblPlaceholders.Left);
+
+            var placeholderHeaderBottom = Math.Max(lblPlaceholders.Bottom, buttonInsertPlaceholder.Bottom);
+            flowLayoutPanelPlaceholders.Location = new Point(ScaleUi(3), placeholderHeaderBottom + ScaleUi(4));
             flowLayoutPanelPlaceholders.MinimumSize = new Size(ScaleUi(200), MinPlaceholdersHeight);
             flowLayoutPanelPlaceholders.Padding = new Padding(ScaleUi(6));
             flowLayoutPanelPlaceholders.Size = new Size(
@@ -1723,6 +1734,11 @@ namespace NppDB.Core
                     ? "Preview stays visible while you are editing the template."
                     : (_previewCollapsed ? "Show the prompt preview again." : "Collapse the preview to focus on prompt inputs."));
 
+            _actionToolTip.SetToolTip(buttonInsertPlaceholder,
+                isEditing
+                    ? "Insert a {{placeholder_name}} token at the caret."
+                    : "Click to switch to Edit and insert a placeholder into the template.");
+
             if (promptsGridView.SelectedRows.Count > 0)
             {
                 var prompt = (PromptItem)promptsGridView.SelectedRows[0].Tag;
@@ -2351,6 +2367,29 @@ namespace NppDB.Core
                 return;
 
             SetPreviewCollapsed(!_previewCollapsed, true);
+        }
+
+        private void buttonInsertPlaceholder_Click(object sender, EventArgs e)
+        {
+            if (promptsGridView.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Select a prompt first.", "Add Prompt Input", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (!_isEditingTemplate)
+            {
+                editingModeCheckbox.Checked = true;
+            }
+
+            if (!_isEditingTemplate)
+                return;
+
+            var placeholderName = FrmPromptEditor.AskForPlaceholderName(this);
+            if (string.IsNullOrWhiteSpace(placeholderName))
+                return;
+
+            FrmPromptEditor.InsertPlaceholderAtCaret(promptTextBox, placeholderName);
         }
 
         private void buttonAdd_Click(object sender, EventArgs e)

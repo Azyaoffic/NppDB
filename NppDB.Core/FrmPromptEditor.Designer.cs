@@ -44,7 +44,9 @@ namespace NppDB.Core
             this.lblTags = new System.Windows.Forms.Label();
             this.txtTags = new System.Windows.Forms.TextBox();
             this.lblPrompt = new System.Windows.Forms.Label();
+            this.buttonInsertPlaceholder = new System.Windows.Forms.Button();
             this.txtPrompt = new System.Windows.Forms.RichTextBox();
+            this.lblPlaceholderInfo = new System.Windows.Forms.Label();
             this.lblPlaceholders = new System.Windows.Forms.Label();
             this.panelBottom.SuspendLayout();
             this.SuspendLayout();
@@ -168,6 +170,17 @@ namespace NppDB.Core
             this.lblPrompt.TabIndex = 4;
             this.lblPrompt.Text = "Prompt:";
             // 
+            // buttonInsertPlaceholder
+            // 
+            this.buttonInsertPlaceholder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonInsertPlaceholder.Location = new System.Drawing.Point(547, 187);
+            this.buttonInsertPlaceholder.Name = "buttonInsertPlaceholder";
+            this.buttonInsertPlaceholder.Size = new System.Drawing.Size(125, 25);
+            this.buttonInsertPlaceholder.TabIndex = 11;
+            this.buttonInsertPlaceholder.Text = "Add Prompt Input";
+            this.buttonInsertPlaceholder.UseVisualStyleBackColor = true;
+            this.buttonInsertPlaceholder.Click += new System.EventHandler(this.buttonInsertPlaceholder_Click);
+            // 
             // txtPrompt
             // 
             this.txtPrompt.AcceptsTab = true;
@@ -176,9 +189,19 @@ namespace NppDB.Core
             this.txtPrompt.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtPrompt.Location = new System.Drawing.Point(15, 210);
             this.txtPrompt.Name = "txtPrompt";
-            this.txtPrompt.Size = new System.Drawing.Size(657, 254);
+            this.txtPrompt.Size = new System.Drawing.Size(657, 227);
             this.txtPrompt.TabIndex = 3;
             this.txtPrompt.Text = "";
+            // 
+            // lblPlaceholderInfo
+            // 
+            this.lblPlaceholderInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblPlaceholderInfo.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.lblPlaceholderInfo.Location = new System.Drawing.Point(15, 450);
+            this.lblPlaceholderInfo.Name = "lblPlaceholderInfo";
+            this.lblPlaceholderInfo.Size = new System.Drawing.Size(657, 20);
+            this.lblPlaceholderInfo.TabIndex = 12;
+            this.lblPlaceholderInfo.Text = "Use {{Prompt Input Name}} in the prompt's text to create a prompt input.";
             // 
             // lblPlaceholders
             // 
@@ -199,7 +222,9 @@ namespace NppDB.Core
             this.CancelButton = this.buttonDiscard;
             this.ClientSize = new System.Drawing.Size(684, 620);
             this.Controls.Add(this.lblPlaceholders);
+            this.Controls.Add(this.lblPlaceholderInfo);
             this.Controls.Add(this.txtPrompt);
+            this.Controls.Add(this.buttonInsertPlaceholder);
             this.Controls.Add(this.lblPrompt);
             this.Controls.Add(this.txtTags);
             this.Controls.Add(this.lblTags);
@@ -215,7 +240,7 @@ namespace NppDB.Core
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Edit Prompt";
+            this.Text = "Create Prompt";
             this.panelBottom.ResumeLayout(false);
             this.panelBottom.PerformLayout();
             this.ResumeLayout(false);
@@ -239,7 +264,9 @@ namespace NppDB.Core
         private System.Windows.Forms.TextBox txtTags;
         
         private System.Windows.Forms.Label lblPrompt;
+        private System.Windows.Forms.Button buttonInsertPlaceholder;
         private System.Windows.Forms.RichTextBox txtPrompt;
+        private System.Windows.Forms.Label lblPlaceholderInfo;
         
         private System.Windows.Forms.Label lblPlaceholders;
 

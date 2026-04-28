@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -90,31 +91,109 @@ namespace NppDB.Core
 
         public void LoadPlaceholders(List<string> placeholders)
         {
+            var lines = new List<string>
+            {
+                "Auto-filled placeholders:",
+            };
+
             if (placeholders == null || placeholders.Count == 0)
             {
-                lblPlaceholders.Text = "No system placeholders available.";
+                lblPlaceholders.Text = string.Join(Environment.NewLine, lines);
                 return;
             }
-
-            var lines = new List<string> { "System placeholders:" };
 
             foreach (var placeholder in placeholders)
             {
                 var description = string.Empty;
 
                 if (string.Equals(placeholder, "selected_sql", StringComparison.OrdinalIgnoreCase))
-                    description = "selected SQL, or the whole current file if nothing is selected";
+                    description = "selected SQL, or current file if nothing is selected";
                 else if (string.Equals(placeholder, "dialect", StringComparison.OrdinalIgnoreCase))
                     description = "current database dialect";
                 else if (string.Equals(placeholder, "table_name", StringComparison.OrdinalIgnoreCase))
-                    description = "selected table name from DB Manager, or multiple table names separated by commas";
+                    description = "selected table name(s)";
                 else if (string.Equals(placeholder, "table", StringComparison.OrdinalIgnoreCase))
-                    description = "selected table metadata, or multiple selected table definitions";
+                    description = "selected table metadata";
 
                 lines.Add($"{{{{{placeholder}}}}} - {description}");
             }
 
             lblPlaceholders.Text = string.Join(Environment.NewLine, lines);
+        }
+
+        private void buttonInsertPlaceholder_Click(object sender, EventArgs e)
+        {
+            var placeholderName = AskForPlaceholderName(this);
+            if (string.IsNullOrWhiteSpace(placeholderName))
+                return;
+
+            InsertPlaceholderAtCaret(txtPrompt, placeholderName);
+        }
+
+        public static string AskForPlaceholderName(IWin32Window owner)
+        {
+            using (var form = new Form())
+            using (var label = new Label())
+            using (var textBox = new TextBox())
+            using (var okButton = new Button())
+            using (var cancelButton = new Button())
+            {
+                form.Text = "Add Placeholder";
+                form.FormBorderStyle = FormBorderStyle.FixedDialog;
+                form.StartPosition = FormStartPosition.CenterParent;
+                form.MinimizeBox = false;
+                form.MaximizeBox = false;
+                form.ShowInTaskbar = false;
+                form.ClientSize = new Size(380, 120);
+
+                label.AutoSize = false;
+                label.Text = "Placeholder name:";
+                label.Location = new Point(12, 12);
+                label.Size = new Size(356, 20);
+
+                textBox.Location = new Point(15, 36);
+                textBox.Size = new Size(350, 23);
+
+                okButton.Text = "Insert";
+                okButton.DialogResult = DialogResult.OK;
+                okButton.Location = new Point(209, 80);
+                okButton.Size = new Size(75, 27);
+
+                cancelButton.Text = "Cancel";
+                cancelButton.DialogResult = DialogResult.Cancel;
+                cancelButton.Location = new Point(290, 80);
+                cancelButton.Size = new Size(75, 27);
+
+                form.Controls.Add(label);
+                form.Controls.Add(textBox);
+                form.Controls.Add(okButton);
+                form.Controls.Add(cancelButton);
+                form.AcceptButton = okButton;
+                form.CancelButton = cancelButton;
+
+                while (form.ShowDialog(owner) == DialogResult.OK)
+                {
+                    var placeholderName = textBox.Text.Trim();
+                    if (!string.IsNullOrWhiteSpace(placeholderName))
+                        return placeholderName;
+
+                    MessageBox.Show("Placeholder name cannot be empty.",
+                        "Invalid Placeholder Name", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    textBox.Focus();
+                    textBox.SelectAll();
+                }
+            }
+
+            return null;
+        }
+
+        public static void InsertPlaceholderAtCaret(RichTextBox textBox, string placeholderName)
+        {
+            if (textBox == null || string.IsNullOrWhiteSpace(placeholderName))
+                return;
+
+            textBox.SelectedText = "{{" + placeholderName + "}}";
+            textBox.Focus();
         }
 
         private void buttonSave_Click(object sender, EventArgs e)

@@ -64,6 +64,7 @@ namespace NppDB.Core
             this.panelMetaRight = new System.Windows.Forms.Panel();
             this.editingModeCheckbox = new System.Windows.Forms.CheckBox();
             this.lblEditingBadge = new System.Windows.Forms.Label();
+            this.buttonInsertPlaceholder = new System.Windows.Forms.Button();
             this.buttonAiStudio = new System.Windows.Forms.Button();
             this.buttonTogglePreview = new System.Windows.Forms.Button();
             this.lblPromptCapabilities = new System.Windows.Forms.Label();
@@ -477,6 +478,17 @@ namespace NppDB.Core
             this.lblEditingBadge.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblEditingBadge.ForeColorChanged += new System.EventHandler(this.lblEditingBadge_forceWhiteText);
             // 
+            // buttonInsertPlaceholder
+            // 
+            this.buttonInsertPlaceholder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonInsertPlaceholder.Location = new System.Drawing.Point(732, 0);
+            this.buttonInsertPlaceholder.Name = "buttonInsertPlaceholder";
+            this.buttonInsertPlaceholder.Size = new System.Drawing.Size(120, 22);
+            this.buttonInsertPlaceholder.TabIndex = 5;
+            this.buttonInsertPlaceholder.Text = "Prompt Input";
+            this.buttonInsertPlaceholder.UseVisualStyleBackColor = true;
+            this.buttonInsertPlaceholder.Click += new System.EventHandler(this.buttonInsertPlaceholder_Click);
+            // 
             // buttonAiStudio
             // 
             this.buttonAiStudio.Dock = System.Windows.Forms.DockStyle.Right;
@@ -539,6 +551,7 @@ namespace NppDB.Core
             // 
             // panelPreviewBottom
             // 
+            this.panelPreviewBottom.Controls.Add(this.buttonInsertPlaceholder);
             this.panelPreviewBottom.Controls.Add(this.flowLayoutPanelPlaceholders);
             this.panelPreviewBottom.Controls.Add(this.lblPlaceholders);
             this.panelPreviewBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -658,6 +671,7 @@ namespace NppDB.Core
         private System.Windows.Forms.Panel panelPromptMeta;
         private System.Windows.Forms.Panel panelWorkflowHint;
         private System.Windows.Forms.Panel panelMetaRight;
+        private System.Windows.Forms.Button buttonInsertPlaceholder;
         private System.Windows.Forms.Button buttonAiStudio;
         private System.Windows.Forms.Button buttonTogglePreview;
         private System.Windows.Forms.CheckBox editingModeCheckbox;
