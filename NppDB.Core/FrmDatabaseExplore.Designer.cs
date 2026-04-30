@@ -41,6 +41,7 @@ namespace NppDB.Core
             this.btnRefresh = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.shortcuts = new System.Windows.Forms.ToolStripButton();
+            this.btnPromptLibrary = new System.Windows.Forms.ToolStripButton();
             this.trvDBList = new System.Windows.Forms.TreeView();
             this.lblTreeTip = new System.Windows.Forms.Label();
             this.lblCurrentTabConnection = new System.Windows.Forms.Label();
@@ -50,7 +51,7 @@ namespace NppDB.Core
             // toolStrip1
             // 
             this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.btnRegister, this.btnUnregister, this.toolStripSeparator2, this.btnConnect, this.btnDisconnect, this.toolStripSeparator1, this.btnRefresh, this.toolStripSeparator3, this.shortcuts });
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.btnRegister, this.btnUnregister, this.toolStripSeparator2, this.btnConnect, this.btnDisconnect, this.toolStripSeparator1, this.btnRefresh, this.toolStripSeparator3, this.btnPromptLibrary, this.shortcuts });
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(415, 25);
@@ -135,6 +136,15 @@ namespace NppDB.Core
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
             // 
+            // btnPromptLibrary
+            // 
+            this.btnPromptLibrary.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnPromptLibrary.Name = "btnPromptLibrary";
+            this.btnPromptLibrary.Size = new System.Drawing.Size(84, 22);
+            this.btnPromptLibrary.Text = "Prompt Library";
+            this.btnPromptLibrary.ToolTipText = "Open Prompt Library (Ctrl+F10)";
+            this.btnPromptLibrary.Click += new System.EventHandler(this.btnPromptLibrary_Click);
+            // 
             // shortcuts
             // 
             this.shortcuts.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -197,6 +207,7 @@ namespace NppDB.Core
         private System.Windows.Forms.ToolStripButton btnDisconnect;
         private ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripButton btnRefresh;
+        private System.Windows.Forms.ToolStripButton btnPromptLibrary;
         private TreeView trvDBList;
         private System.Windows.Forms.ToolStripButton btnRegister;
         private System.Windows.Forms.ToolStripButton btnUnregister;

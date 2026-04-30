@@ -37,6 +37,7 @@ namespace NppDB.Core
             var id = lblIdValue.Text.Trim();
             var description = txtDescription.Text.Trim();
             var tagsRaw = txtTags.Text;
+            var category = txtCategory.Text.Trim();
             var promptText = txtPrompt.Text.Trim();
 
             if (string.IsNullOrEmpty(promptText))
@@ -65,6 +66,7 @@ namespace NppDB.Core
                 Description = description,
                 Tags = ParseTags(tagsRaw),
                 Text = promptText,
+                Category = string.IsNullOrWhiteSpace(category) ? "Custom" : category,
                 Placeholders = placeholders.ToArray()
             };
         }
@@ -253,6 +255,24 @@ namespace NppDB.Core
                 }
                 
                 prompt.Attribute("type")?.Remove();
+
+                var metadata = prompt.Element("Metadata");
+                if (string.IsNullOrWhiteSpace(promptItem.Category))
+                {
+                    metadata?.Element("Category")?.Remove();
+                    if (metadata != null && !metadata.HasElements)
+                        metadata.Remove();
+                }
+                else
+                {
+                    if (metadata == null)
+                    {
+                        metadata = new XElement("Metadata");
+                        prompt.Add(metadata);
+                    }
+
+                    metadata.SetElementValue("Category", promptItem.Category.Trim());
+                }
                 
                 var existingPlaceholders = prompt.Element("Placeholders");
                 // check whether existing placeholders are editable
@@ -312,7 +332,8 @@ namespace NppDB.Core
                                 new XElement("Placeholder", new XAttribute("name", p.Name), new XAttribute("editable", "true"))
                             )
                         )
-                    )
+                    ),
+                    new XElement("Metadata", new XElement("Category", string.IsNullOrWhiteSpace(promptItem.Category) ? "Custom" : promptItem.Category))
                 );
                 root.Add(promptElement);
                 doc.Save(promptLibraryPath);

@@ -41,6 +41,8 @@ namespace NppDB.Core
             this.txtName = new System.Windows.Forms.TextBox();
             this.lblDescription = new System.Windows.Forms.Label();
             this.txtDescription = new System.Windows.Forms.TextBox();
+            this.lblCategory = new System.Windows.Forms.Label();
+            this.txtCategory = new System.Windows.Forms.TextBox();
             this.lblTags = new System.Windows.Forms.Label();
             this.txtTags = new System.Windows.Forms.TextBox();
             this.lblPrompt = new System.Windows.Forms.Label();
@@ -143,10 +145,27 @@ namespace NppDB.Core
             this.txtDescription.Size = new System.Drawing.Size(657, 50);
             this.txtDescription.TabIndex = 1;
             // 
+            // lblCategory
+            // 
+            this.lblCategory.AutoSize = true;
+            this.lblCategory.Location = new System.Drawing.Point(12, 142);
+            this.lblCategory.Name = "lblCategory";
+            this.lblCategory.Size = new System.Drawing.Size(58, 15);
+            this.lblCategory.TabIndex = 10;
+            this.lblCategory.Text = "Category:";
+            // 
+            // txtCategory
+            // 
+            this.txtCategory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtCategory.Location = new System.Drawing.Point(15, 160);
+            this.txtCategory.Name = "txtCategory";
+            this.txtCategory.Size = new System.Drawing.Size(657, 23);
+            this.txtCategory.TabIndex = 2;
+            // 
             // lblTags
             // 
             this.lblTags.AutoSize = true;
-            this.lblTags.Location = new System.Drawing.Point(12, 142);
+            this.lblTags.Location = new System.Drawing.Point(12, 192);
             this.lblTags.Name = "lblTags";
             this.lblTags.Size = new System.Drawing.Size(142, 15);
             this.lblTags.TabIndex = 10;
@@ -155,7 +174,7 @@ namespace NppDB.Core
             // txtTags
             // 
             this.txtTags.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtTags.Location = new System.Drawing.Point(15, 160);
+            this.txtTags.Location = new System.Drawing.Point(15, 210);
             this.txtTags.Name = "txtTags";
             this.txtTags.Size = new System.Drawing.Size(657, 23);
             this.txtTags.TabIndex = 2;
@@ -164,7 +183,7 @@ namespace NppDB.Core
             // 
             this.lblPrompt.AutoSize = true;
             this.lblPrompt.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblPrompt.Location = new System.Drawing.Point(12, 192);
+            this.lblPrompt.Location = new System.Drawing.Point(12, 242);
             this.lblPrompt.Name = "lblPrompt";
             this.lblPrompt.Size = new System.Drawing.Size(52, 15);
             this.lblPrompt.TabIndex = 4;
@@ -173,7 +192,7 @@ namespace NppDB.Core
             // buttonInsertPlaceholder
             // 
             this.buttonInsertPlaceholder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonInsertPlaceholder.Location = new System.Drawing.Point(547, 187);
+            this.buttonInsertPlaceholder.Location = new System.Drawing.Point(547, 237);
             this.buttonInsertPlaceholder.Name = "buttonInsertPlaceholder";
             this.buttonInsertPlaceholder.Size = new System.Drawing.Size(125, 25);
             this.buttonInsertPlaceholder.TabIndex = 11;
@@ -187,9 +206,9 @@ namespace NppDB.Core
             this.txtPrompt.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.txtPrompt.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtPrompt.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtPrompt.Location = new System.Drawing.Point(15, 210);
+            this.txtPrompt.Location = new System.Drawing.Point(15, 260);
             this.txtPrompt.Name = "txtPrompt";
-            this.txtPrompt.Size = new System.Drawing.Size(657, 227);
+            this.txtPrompt.Size = new System.Drawing.Size(657, 217);
             this.txtPrompt.TabIndex = 3;
             this.txtPrompt.Text = "";
             // 
@@ -197,7 +216,7 @@ namespace NppDB.Core
             // 
             this.lblPlaceholderInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.lblPlaceholderInfo.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.lblPlaceholderInfo.Location = new System.Drawing.Point(15, 450);
+            this.lblPlaceholderInfo.Location = new System.Drawing.Point(15, 490);
             this.lblPlaceholderInfo.Name = "lblPlaceholderInfo";
             this.lblPlaceholderInfo.Size = new System.Drawing.Size(657, 20);
             this.lblPlaceholderInfo.TabIndex = 12;
@@ -208,7 +227,7 @@ namespace NppDB.Core
             this.lblPlaceholders.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.lblPlaceholders.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblPlaceholders.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.lblPlaceholders.Location = new System.Drawing.Point(15, 473);
+            this.lblPlaceholders.Location = new System.Drawing.Point(15, 513);
             this.lblPlaceholders.Name = "lblPlaceholders";
             this.lblPlaceholders.Padding = new System.Windows.Forms.Padding(6);
             this.lblPlaceholders.Size = new System.Drawing.Size(657, 96);
@@ -220,7 +239,7 @@ namespace NppDB.Core
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.buttonDiscard;
-            this.ClientSize = new System.Drawing.Size(684, 620);
+            this.ClientSize = new System.Drawing.Size(684, 660);
             this.Controls.Add(this.lblPlaceholders);
             this.Controls.Add(this.lblPlaceholderInfo);
             this.Controls.Add(this.txtPrompt);
@@ -228,6 +247,8 @@ namespace NppDB.Core
             this.Controls.Add(this.lblPrompt);
             this.Controls.Add(this.txtTags);
             this.Controls.Add(this.lblTags);
+            this.Controls.Add(this.txtCategory);
+            this.Controls.Add(this.lblCategory);
             this.Controls.Add(this.txtDescription);
             this.Controls.Add(this.lblDescription);
             this.Controls.Add(this.txtName);
@@ -235,7 +256,7 @@ namespace NppDB.Core
             this.Controls.Add(this.panelBottom);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(560, 500);
+            this.MinimumSize = new System.Drawing.Size(560, 540);
             this.Name = "FrmPromptEditor";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
@@ -259,6 +280,9 @@ namespace NppDB.Core
         
         private System.Windows.Forms.Label lblDescription;
         private System.Windows.Forms.TextBox txtDescription;
+
+        private System.Windows.Forms.Label lblCategory;
+        private System.Windows.Forms.TextBox txtCategory;
 
         private System.Windows.Forms.Label lblTags;
         private System.Windows.Forms.TextBox txtTags;

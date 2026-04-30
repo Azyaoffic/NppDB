@@ -72,7 +72,7 @@ namespace NppDB
                 },
                 new List<string> {
                     "Database Connect Manager",
-                    "Show Prompt Library",
+                    "Prompt Library",
                 },
                 new List<string> {
                     "Settings"

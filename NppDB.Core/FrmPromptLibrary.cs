@@ -23,6 +23,7 @@ namespace NppDB.Core
         public string Description;
         public string[] Tags;
         public string Text;
+        public string Category;
         public PromptPlaceholder[] Placeholders;
     }
 
@@ -85,6 +86,7 @@ namespace NppDB.Core
         private bool _restoreCollapsedAfterEditing;
         private int _lastExpandedPlaceholdersHeight = BaseLegacyDefaultPlaceholdersHeight;
         private bool _isSearchClearHover;
+        private bool _suppressCategoryFilterChanged;
 
         private const int TemplateAutoSaveDebounceMs = 650;
 
@@ -120,6 +122,8 @@ namespace NppDB.Core
             txtTags.TextChanged += txtTags_TextChanged;
             txtPromptName.TextChanged += txtPromptName_TextChanged;
             txtPromptDescription.TextChanged += txtPromptDescription_TextChanged;
+            txtPromptCategory.Leave += txtPromptCategory_Leave;
+            panelSearch.Resize += panelSearch_Resize;
             promptsGridView.CellEndEdit += promptsGridView_CellEndEdit;
             promptsGridView.EditingControlShowing += promptsGridView_EditingControlShowing;
 
@@ -136,19 +140,23 @@ namespace NppDB.Core
             _actionToolTip.SetToolTip(buttonInsertPlaceholder, "Enable Edit, then insert a {{placeholder_name}} token at the caret.");
 
             ApplyScaledLayoutMetrics();
+            UpdateSearchPanelLayout();
             SetEditingMode(false);
-            ConfigureSourceFilter();
+            ConfigureCategoryFilter();
             ApplyScaledGridMetrics();
             RefreshPromptList();
         }
 
-        private void ConfigureSourceFilter()
+        private void ConfigureCategoryFilter()
         {
-            cmbPromptSource.Visible = false;
-            lblSource.Visible = false;
-            panelSearch.Height = ScaleUi(BaseSearchPanelHeight);
+            cmbPromptSource.Visible = true;
+            lblSource.Visible = true;
+            lblSource.Text = "Category:";
+            panelSearch.Height = ScaleUi(70);
+            UpdateSearchPanelLayout();
 
-            colPromptType.Visible = false;
+            colPromptType.Visible = true;
+            colPromptType.HeaderText = "Category ↕";
 
             lblPromptType.Visible = true;
             lblPromptCapabilities.Visible = true;
@@ -157,7 +165,59 @@ namespace NppDB.Core
             lblPromptCapabilities.Text = "No table selected";
             lblPromptType.Width = ScaleUi(BasePromptTypeWidth);
 
+            RefreshCategoryFilter();
+
+            _actionToolTip.SetToolTip(txtSearch, "Search by prompt name, description, or tags. Use tag:... for tag filtering.");
+            _actionToolTip.SetToolTip(cmbPromptSource, "Filter prompts by category.");
             _actionToolTip.SetToolTip(buttonDuplicate, "Select a prompt to duplicate.");
+            _actionToolTip.SetToolTip(txtTags, "Tip: add the tag 'favorite' to pin a prompt near the top.");
+            _actionToolTip.SetToolTip(txtPromptCategory, "Edit the prompt category. Leave the field empty to use 'Custom'.");
+        }
+
+        private void UpdateSearchPanelLayout()
+        {
+            if (txtSearch == null || cmbPromptSource == null)
+                return;
+
+            cmbPromptSource.Left = txtSearch.Left;
+            cmbPromptSource.Width = txtSearch.Width;
+        }
+
+        private void panelSearch_Resize(object sender, EventArgs e)
+        {
+            UpdateSearchPanelLayout();
+        }
+
+        private void RefreshCategoryFilter()
+        {
+            var previousSelection = cmbPromptSource.SelectedItem as string;
+            var categories = (_prompts ?? new List<PromptItem>())
+                .Select(GetDisplayCategory)
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(c => c, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            categories.Insert(0, "All categories");
+
+            _suppressCategoryFilterChanged = true;
+            cmbPromptSource.BeginUpdate();
+            try
+            {
+                cmbPromptSource.Items.Clear();
+                foreach (var category in categories)
+                    cmbPromptSource.Items.Add(category);
+
+                if (!string.IsNullOrWhiteSpace(previousSelection) && categories.Any(c => string.Equals(c, previousSelection, StringComparison.OrdinalIgnoreCase)))
+                    cmbPromptSource.SelectedItem = categories.First(c => string.Equals(c, previousSelection, StringComparison.OrdinalIgnoreCase));
+                else if (cmbPromptSource.Items.Count > 0)
+                    cmbPromptSource.SelectedIndex = 0;
+            }
+            finally
+            {
+                cmbPromptSource.EndUpdate();
+                _suppressCategoryFilterChanged = false;
+            }
         }
 
         private void ApplyScaledGridMetrics()
@@ -224,9 +284,27 @@ namespace NppDB.Core
             txtTags.Height = tagsHeight;
 
             var editFieldHeight = MeasureSingleLineHeight(txtPromptName.Font, ScaleUi(10));
-            panelEditFields.Height = editFieldHeight * 2 + ScaleUi(18);
+            var editFieldLabelLeft = 0;
+            var editFieldValueLeft = ScaleUi(78);
+            var editFieldTop = ScaleUi(3);
+            var editFieldRowGap = ScaleUi(6);
+            var editFieldLabelOffset = Math.Max(0, (editFieldHeight - lblPromptName.Height) / 2);
+
+            lblPromptName.Location = new Point(editFieldLabelLeft, editFieldTop + editFieldLabelOffset);
+            txtPromptName.Location = new Point(editFieldValueLeft, editFieldTop);
             txtPromptName.Height = editFieldHeight;
+
+            var descriptionTop = txtPromptName.Bottom + editFieldRowGap;
+            lblPromptDescription.Location = new Point(editFieldLabelLeft, descriptionTop + editFieldLabelOffset);
+            txtPromptDescription.Location = new Point(editFieldValueLeft, descriptionTop);
             txtPromptDescription.Height = editFieldHeight;
+
+            var categoryTop = txtPromptDescription.Bottom + editFieldRowGap;
+            lblPromptCategory.Location = new Point(editFieldLabelLeft, categoryTop + editFieldLabelOffset);
+            txtPromptCategory.Location = new Point(editFieldValueLeft, categoryTop);
+            txtPromptCategory.Height = editFieldHeight;
+
+            panelEditFields.Height = txtPromptCategory.Bottom + ScaleUi(7);
 
             panelLeftActions.Padding = new Padding(0, ScaleUi(8), 0, 0);
             panelLeftActions.Height = actionButtonHeight + panelLeftActions.Padding.Top + ScaleUi(10);
@@ -719,6 +797,55 @@ namespace NppDB.Core
             return haystack.IndexOf(needle, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
+        private static string GetDisplayCategory(PromptItem prompt)
+        {
+            var category = (prompt.Category ?? string.Empty).Trim();
+            return string.IsNullOrWhiteSpace(category) ? "General" : category;
+        }
+
+        private static bool IsFavoritePrompt(PromptItem prompt)
+        {
+            var tags = prompt.Tags ?? Array.Empty<string>();
+            return tags.Any(t =>
+                string.Equals((t ?? string.Empty).Trim(), "favorite", StringComparison.OrdinalIgnoreCase)
+                || string.Equals((t ?? string.Empty).Trim(), "favourite", StringComparison.OrdinalIgnoreCase)
+                || string.Equals((t ?? string.Empty).Trim(), "pinned", StringComparison.OrdinalIgnoreCase)
+                || string.Equals((t ?? string.Empty).Trim(), "starred", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static string GetPromptDisplayTitle(PromptItem prompt)
+        {
+            var title = (prompt.Title ?? string.Empty).Trim();
+            return IsFavoritePrompt(prompt) ? "★ " + title : title;
+        }
+
+        private static string NormalizePromptTitle(string title)
+        {
+            return (title ?? string.Empty).Trim().ToLowerInvariant();
+        }
+
+        private static int GetDefaultPriorityRank(PromptItem prompt)
+        {
+            switch (NormalizePromptTitle(prompt.Title))
+            {
+                case "generate sql query from description":
+                    return 0;
+                case "generate table from description":
+                    return 1;
+                case "explain selected query":
+                    return 2;
+                case "diagnose sql issue / wrong result":
+                case "diagnose wrong / unexpected result":
+                    return 3;
+                case "convert sql dialect":
+                    return 4;
+                case "generate insert test data":
+                    return 5;
+                default:
+                    return 1000;
+            }
+        }
+
         private static bool PromptMatchesSearch(PromptItem prompt, string rawSearchText)
         {
             var searchText = (rawSearchText ?? string.Empty).Trim();
@@ -778,13 +905,23 @@ namespace NppDB.Core
 
             query = query.Where(p => PromptMatchesSearch(p, rawSearchText));
 
+            var selectedCategory = cmbPromptSource.SelectedItem as string;
+            if (!string.IsNullOrWhiteSpace(selectedCategory)
+                && !string.Equals(selectedCategory, "All categories", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(p => string.Equals(GetDisplayCategory(p), selectedCategory, StringComparison.OrdinalIgnoreCase));
+            }
+
             return query
-                .OrderBy(p => (p.Title ?? string.Empty).Trim(), StringComparer.OrdinalIgnoreCase)
+                .OrderByDescending(IsFavoritePrompt)
+                .ThenBy(GetDefaultPriorityRank)
+                .ThenBy(p => (p.Title ?? string.Empty).Trim(), StringComparer.OrdinalIgnoreCase)
                 .ToList();
         }
 
         private void RefreshPromptList()
         {
+            RefreshCategoryFilter();
             _filteredPrompts = GetFilteredPrompts(txtSearch.Text);
             PopulatePromptList();
         }
@@ -833,7 +970,7 @@ namespace NppDB.Core
 
                 foreach (var prompt in _filteredPrompts)
                 {
-                    var rowIndex = promptsGridView.Rows.Add(prompt.Title, prompt.Description, string.Empty);
+                    var rowIndex = promptsGridView.Rows.Add(GetPromptDisplayTitle(prompt), prompt.Description, GetDisplayCategory(prompt));
                     var row = promptsGridView.Rows[rowIndex];
                     row.Tag = prompt;
                     row.DividerHeight = GetVisibleTags(prompt.Tags).Length > 0 ? ScaleUi(28) : ScaleUi(10);
@@ -1111,6 +1248,9 @@ namespace NppDB.Core
 
         private void cmbPromptSource_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (_suppressCategoryFilterChanged)
+                return;
+
             FlushPendingAutoSave();
             RefreshPromptList();
         }
@@ -1238,11 +1378,13 @@ namespace NppDB.Core
                 {
                     txtPromptName.Text = string.Empty;
                     txtPromptDescription.Text = string.Empty;
+                    txtPromptCategory.Text = string.Empty;
                     return;
                 }
 
                 txtPromptName.Text = prompt.Value.Title ?? string.Empty;
                 txtPromptDescription.Text = prompt.Value.Description ?? string.Empty;
+                txtPromptCategory.Text = GetDisplayCategory(prompt.Value);
             }
             finally
             {
@@ -1264,18 +1406,21 @@ namespace NppDB.Core
 
             var beforeTitle = prompt.Title ?? string.Empty;
             var beforeDescription = prompt.Description ?? string.Empty;
+            var beforeCategory = GetDisplayCategory(prompt);
 
             prompt = updateAction(prompt);
 
             var afterTitle = prompt.Title ?? string.Empty;
             var afterDescription = prompt.Description ?? string.Empty;
+            var afterCategory = GetDisplayCategory(prompt);
 
-            if (beforeTitle == afterTitle && beforeDescription == afterDescription)
+            if (beforeTitle == afterTitle && beforeDescription == afterDescription && beforeCategory == afterCategory)
                 return;
 
             selectedRow.Tag = prompt;
             selectedRow.Cells[colPromptName.Index].Value = prompt.Title;
             selectedRow.Cells[colPromptDesc.Index].Value = prompt.Description;
+            selectedRow.Cells[colPromptType.Index].Value = afterCategory;
             ReplacePromptInCollections(prompt);
             UpdatePreviewTitle(prompt);
 
@@ -1302,6 +1447,26 @@ namespace NppDB.Core
                 prompt.Description = (txtPromptDescription.Text ?? string.Empty).Trim();
                 return prompt;
             });
+        }
+
+        private void txtPromptCategory_Leave(object sender, EventArgs e)
+        {
+            var selectedPromptId = promptsGridView.SelectedRows.Count > 0 && promptsGridView.SelectedRows[0].Tag is PromptItem selectedPrompt
+                ? selectedPrompt.Id
+                : null;
+
+            SaveSelectedPromptMetadata(prompt =>
+            {
+                var value = (txtPromptCategory.Text ?? string.Empty).Trim();
+                prompt.Category = string.IsNullOrWhiteSpace(value) ? "Custom" : value;
+                return prompt;
+            });
+
+            RefreshCategoryFilter();
+            RefreshPromptList();
+
+            if (!string.IsNullOrWhiteSpace(selectedPromptId))
+                SelectPromptById(selectedPromptId);
         }
         
         private bool HasMeaningfulPlaceholderValue(string placeholderName, string value)
@@ -1691,17 +1856,20 @@ namespace NppDB.Core
             txtTags.ReadOnly = !isEditing;
             txtPromptName.ReadOnly = !isEditing;
             txtPromptDescription.ReadOnly = !isEditing;
+            txtPromptCategory.ReadOnly = !isEditing;
             promptsGridView.ReadOnly = true;
             buttonTogglePreview.Enabled = !isEditing;
             promptTextBox.TabStop = isEditing;
             txtTags.TabStop = isEditing;
             txtPromptName.TabStop = isEditing;
             txtPromptDescription.TabStop = isEditing;
+            txtPromptCategory.TabStop = isEditing;
             
             promptTextBox.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
             txtTags.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
             txtPromptName.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
             txtPromptDescription.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
+            txtPromptCategory.Cursor = isEditing ? Cursors.IBeam : Cursors.Default;
 
             editingModeCheckbox.Text = _isEditingTemplate ? "Done" : "Edit";
             lblEditingBadge.Text = _isEditingTemplate ? "Edit mode" : "Preview";
@@ -1720,6 +1888,7 @@ namespace NppDB.Core
                 txtTags.BackColor = isEditing ? pal.HotBackground : pal.SofterBackground;
                 txtPromptName.BackColor = isEditing ? pal.HotBackground : pal.SofterBackground;
                 txtPromptDescription.BackColor = isEditing ? pal.HotBackground : pal.SofterBackground;
+                txtPromptCategory.BackColor = isEditing ? pal.HotBackground : pal.SofterBackground;
             }
             else
             {
@@ -1727,6 +1896,7 @@ namespace NppDB.Core
                 txtTags.BackColor = isEditing ? Color.White : SystemColors.ControlLight;
                 txtPromptName.BackColor = isEditing ? Color.White : SystemColors.ControlLight;
                 txtPromptDescription.BackColor = isEditing ? Color.White : SystemColors.ControlLight;
+                txtPromptCategory.BackColor = isEditing ? Color.White : SystemColors.ControlLight;
             }
 
             _actionToolTip.SetToolTip(buttonTogglePreview,

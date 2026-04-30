@@ -353,7 +353,7 @@ namespace NppDB
              SetCommand(4, "Clear analysis", ClearAnalysis, new ShortcutKey(true, false, true, Keys.F9));
              SetCommand(5, "Open console", OpenConsole);
              SetCommand(6, "About", ShowAbout);
-             SetCommand(7, "Show Prompt Library", ShowPromptLibrary, new ShortcutKey(true, false, false, Keys.F10));
+             SetCommand(7, "Prompt Library", ShowPromptLibrary, new ShortcutKey(true, false, false, Keys.F10));
              SetCommand(8, "Settings", ShowSettings);
              SetCommand(9, "Analyze and Create Prompt (query at text cursor)", AnalyzeAndCreatePromptForIssueAtCaret, new ShortcutKey(false, true, false, Keys.F9));
              SetCommand(10, "Show Tutorial", ShowTutorial, new ShortcutKey(true, false, false, Keys.F11));
@@ -1676,6 +1676,9 @@ namespace NppDB
                         }
                         ShowSettingsInternal(tab);
                         break;
+                    case NppDbCommandType.SHOW_PROMPT_LIBRARY:
+                        ShowPromptLibrary();
+                        break;
                     case NppDbCommandType.CLONE_DB_TREE_STATE_TO_BUFFER:
                         if (parameters != null &&
                             parameters.Length >= 2 &&
@@ -2224,6 +2227,7 @@ namespace NppDB
                     var description = promptNode.SelectSingleNode("Description")?.InnerText.Trim() ?? string.Empty;
                     var tagsRaw = promptNode.SelectSingleNode("Tags")?.InnerText ?? string.Empty;
                     var text = promptNode.SelectSingleNode("Text")?.InnerText ?? string.Empty;
+                    var category = promptNode.SelectSingleNode("Metadata/Category")?.InnerText.Trim() ?? string.Empty;
 
                     string[] ParseTags(string raw)
                     {
@@ -2266,6 +2270,7 @@ namespace NppDB
                         Description = description,
                         Tags = ParseTags(tagsRaw),
                         Text = text,
+                        Category = category,
                         Placeholders = placeholderList.ToArray()
                     };
 

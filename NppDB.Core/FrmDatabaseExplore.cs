@@ -833,6 +833,11 @@ namespace NppDB.Core
             }
         }
 
+        private void btnPromptLibrary_Click(object sender, EventArgs e)
+        {
+            _commandHostInstance?.Execute(NppDbCommandType.SHOW_PROMPT_LIBRARY, null);
+        }
+
         private void shortcuts_Click(object sender, EventArgs e)
         {
             var rows = new[]
@@ -843,7 +848,7 @@ namespace NppDB.Core
                 new[] { "Create analysis prompt (for issue at text cursor)", "Alt+F9" },
                 new[] { "Clear Analysis", "Ctrl+Shift+F9" },
                 new[] { "DB Connect Manager", "F10" },
-                new[] { "Show Prompt Library", "Ctrl+F10" },
+                new[] { "Prompt Library", "Ctrl+F10" },
                 new[] { "Show Tutorial", "Ctrl+F11" }
             };
 

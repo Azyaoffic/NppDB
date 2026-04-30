@@ -53,6 +53,8 @@ namespace NppDB.Core
             this.panelEditFields = new System.Windows.Forms.Panel();
             this.txtPromptDescription = new System.Windows.Forms.TextBox();
             this.lblPromptDescription = new System.Windows.Forms.Label();
+            this.txtPromptCategory = new System.Windows.Forms.TextBox();
+            this.lblPromptCategory = new System.Windows.Forms.Label();
             this.txtPromptName = new System.Windows.Forms.TextBox();
             this.lblPromptName = new System.Windows.Forms.Label();
             this.panelPromptTags = new System.Windows.Forms.Panel();
@@ -191,6 +193,9 @@ namespace NppDB.Core
             // 
             this.cmbPromptSource.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbPromptSource.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbPromptSource.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbPromptSource.IntegralHeight = false;
+            this.cmbPromptSource.MaxDropDownItems = 14;
             this.cmbPromptSource.FormattingEnabled = true;
             this.cmbPromptSource.Location = new System.Drawing.Point(60, 40);
             this.cmbPromptSource.Name = "cmbPromptSource";
@@ -324,6 +329,8 @@ namespace NppDB.Core
             // 
             // panelEditFields
             // 
+            this.panelEditFields.Controls.Add(this.txtPromptCategory);
+            this.panelEditFields.Controls.Add(this.lblPromptCategory);
             this.panelEditFields.Controls.Add(this.txtPromptDescription);
             this.panelEditFields.Controls.Add(this.lblPromptDescription);
             this.panelEditFields.Controls.Add(this.txtPromptName);
@@ -332,7 +339,7 @@ namespace NppDB.Core
             this.panelEditFields.Location = new System.Drawing.Point(3, 66);
             this.panelEditFields.Name = "panelEditFields";
             this.panelEditFields.Padding = new System.Windows.Forms.Padding(0, 4, 0, 4);
-            this.panelEditFields.Size = new System.Drawing.Size(855, 58);
+            this.panelEditFields.Size = new System.Drawing.Size(855, 112);
             this.panelEditFields.TabIndex = 7;
             this.panelEditFields.Visible = false;
             // 
@@ -354,6 +361,25 @@ namespace NppDB.Core
             this.lblPromptDescription.Size = new System.Drawing.Size(63, 13);
             this.lblPromptDescription.TabIndex = 2;
             this.lblPromptDescription.Text = "Description";
+            // 
+            // txtPromptCategory
+            // 
+            this.txtPromptCategory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtPromptCategory.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.txtPromptCategory.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtPromptCategory.Location = new System.Drawing.Point(78, 59);
+            this.txtPromptCategory.Name = "txtPromptCategory";
+            this.txtPromptCategory.Size = new System.Drawing.Size(777, 22);
+            this.txtPromptCategory.TabIndex = 5;
+            // 
+            // lblPromptCategory
+            // 
+            this.lblPromptCategory.AutoSize = true;
+            this.lblPromptCategory.Location = new System.Drawing.Point(0, 62);
+            this.lblPromptCategory.Name = "lblPromptCategory";
+            this.lblPromptCategory.Size = new System.Drawing.Size(52, 13);
+            this.lblPromptCategory.TabIndex = 4;
+            this.lblPromptCategory.Text = "Category";
             // 
             // txtPromptName
             // 
@@ -704,5 +730,8 @@ namespace NppDB.Core
         private System.Windows.Forms.PictureBox buttonClearSearch;
         private System.Windows.Forms.TextBox txtSearch;
         private System.Windows.Forms.Label lblSearch;
+        
+        private System.Windows.Forms.TextBox txtPromptCategory;
+        private System.Windows.Forms.Label lblPromptCategory;
     }
 }
