@@ -143,8 +143,10 @@ namespace NppDB.Core
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show($@"err FilePath: {filePath}
-Error: {e}");
+                    DiagnosticMessageBox.Show(null,
+                        DependencyDiagnostics.BuildPluginAssemblyLoadErrorMessage(filePath, e),
+                        @"NppDB startup diagnostics",
+                        MessageBoxIcon.Warning);
                     continue;
                 }
 

@@ -471,7 +471,7 @@ namespace NppDB.Core
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message + (ex.InnerException != null ? " : " + ex.InnerException.Message : ""));
+                DiagnosticMessageBox.Show(this, ex.Message, @"Connection error", MessageBoxIcon.Error);
             }
         }
 
@@ -489,7 +489,7 @@ namespace NppDB.Core
             }
             catch (Exception exCheckLogin)
             {
-                MessageBox.Show($"RegisterConnect: UNEXPECTED ERROR during CheckLogin call: {exCheckLogin.Message}", @"Debug RegisterConnect Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                DiagnosticMessageBox.Show(this, exCheckLogin.Message, @"Connection error", MessageBoxIcon.Error);
                 checkLoginResult = false;
             }
 
@@ -523,7 +523,7 @@ namespace NppDB.Core
             }
             catch (Exception exConnect)
             {
-                MessageBox.Show($"RegisterConnect: ERROR during Connect/Attach/Refresh: {exConnect.Message}" + (exConnect.InnerException != null ? " Inner: " + exConnect.InnerException.Message : ""), @"Debug RegisterConnect Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                DiagnosticMessageBox.Show(this, exConnect.Message, @"Connection error", MessageBoxIcon.Error);
             }
         }
 
@@ -546,7 +546,7 @@ namespace NppDB.Core
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message + (ex.InnerException != null ? " : " + ex.InnerException.Message: ""));
+                DiagnosticMessageBox.Show(this, ex.Message, @"Connection error", MessageBoxIcon.Error);
             }
         }
         
@@ -751,17 +751,24 @@ namespace NppDB.Core
             IRefreshable r;
             if (e.Button != MouseButtons.Left || (r = e.Node as IRefreshable) == null) return;
             var dbConnection = GetRootParent(e.Node) as IDbConnect;
-            if ( e.Node.Nodes.Count == 0)
+            try
             {
-                if (dbConnection != null)
+                if (e.Node.Nodes.Count == 0)
                 {
-                    var result = dbConnection.ConnectAndAttach();
-                    if (result != "CONTINUE") { return;  }
-                }
+                    if (dbConnection != null)
+                    {
+                        var result = dbConnection.ConnectAndAttach();
+                        if (result != "CONTINUE") { return; }
+                    }
 
-                r.Refresh();
+                    r.Refresh();
+                }
+                e.Node.Expand();
             }
-            e.Node.Expand();
+            catch (Exception ex)
+            {
+                DiagnosticMessageBox.Show(this, ex.Message, @"Connection error", MessageBoxIcon.Error);
+            }
         }
 
         private ContextMenuStrip CreateMenu(TreeNode node)

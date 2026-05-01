@@ -72,6 +72,7 @@ namespace NppDB
         private bool _lastAnalysisInputWasEmpty;
         private readonly DbPluginMenuBuilder _menuBuilder = new DbPluginMenuBuilder(PLUGIN_NAME);
         private IntPtr _lastActivatedBufferId = IntPtr.Zero;
+        private bool _shownDependencyDiagnosticsThisSession;
         
         private bool _showRecreationNotificationsToUsers = false; // TODO: might be good to turn off to confuse users less?
 
@@ -1990,6 +1991,23 @@ namespace NppDB
             }
         }
 
+
+        private void ShowDependencyDiagnosticsOnce()
+        {
+            if (_shownDependencyDiagnosticsThisSession)
+            {
+                return;
+            }
+
+            _shownDependencyDiagnosticsThisSession = true;
+
+            var message = DependencyDiagnostics.BuildMsAccessStartupWarningMessage();
+            if (!string.IsNullOrWhiteSpace(message))
+            {
+                DiagnosticMessageBox.Show(null, message, PLUGIN_NAME + " - startup diagnostics", MessageBoxIcon.Warning);
+            }
+        }
+
          private void ToggleDbManager()
         {
             try
@@ -2052,6 +2070,7 @@ namespace NppDB
                     Win32.SendMessage(nppData._nppHandle, (uint)NppMsg.NPPM_SETMENUITEMCHECK, _funcItems.Items[_cmdFrmDbExplorerIdx]._cmdID, 1);
                     Marshal.FreeHGlobal(ptrNppTbData);
                     
+                    ShowDependencyDiagnosticsOnce();
                     SaveAndRestoreDbTreeForCurrentTab();
                     SyncDbManagerToCurrentTab();
                 }

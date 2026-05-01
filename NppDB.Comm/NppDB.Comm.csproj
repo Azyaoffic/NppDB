@@ -96,6 +96,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="ConnectAttr.cs" />
+        <Compile Include="DependencyDiagnostics.cs" />
         <Compile Include="IIconProvider.cs" />
         <Compile Include="NppDBCommandType.cs" />
         <Compile Include="INppDBCommandClient.cs" />
