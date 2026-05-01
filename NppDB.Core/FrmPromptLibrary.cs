@@ -2710,6 +2710,8 @@ namespace NppDB.Core
                     _actionToolTip.Show(_copyDisabledReason, buttonAiStudio, buttonAiStudio.Width / 2, -18, 2400);
                 return;
             }
+            
+            buttonCopy_Click(sender, e);
 
             try
             {
