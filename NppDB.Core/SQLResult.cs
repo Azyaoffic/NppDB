@@ -94,12 +94,46 @@ namespace NppDB.Core
 
                 for (var i = tclSqlResult.TabPages.Count - 1; i > 0; i--)
                 {
-                    tclSqlResult.TabPages.RemoveAt(i);
+                    CloseResultTab(i, false);
                 }
+
+                _selectedTabIndex = tclSqlResult.SelectedIndex;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($@"An error occurred while closing result tabs in this view: {ex.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void CloseOtherResultTabs(int tabIndex)
+        {
+            if (tclSqlResult == null || tabIndex <= 0 || tabIndex >= tclSqlResult.TabPages.Count) return;
+
+            try
+            {
+                var selectedTab = tclSqlResult.SelectedTab;
+                var tabToKeep = tclSqlResult.TabPages[tabIndex];
+
+                for (var i = tclSqlResult.TabPages.Count - 1; i > 0; i--)
+                {
+                    if (tclSqlResult.TabPages[i] == tabToKeep) continue;
+                    CloseResultTab(i, false);
+                }
+
+                if (selectedTab != null && tclSqlResult.TabPages.Contains(selectedTab))
+                {
+                    tclSqlResult.SelectTab(selectedTab);
+                }
+                else
+                {
+                    tclSqlResult.SelectTab(tabToKeep);
+                }
+
+                _selectedTabIndex = tclSqlResult.SelectedIndex;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($@"An error occurred while closing other result tabs in this view: {ex.Message}", @"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -214,6 +248,17 @@ namespace NppDB.Core
 
             tclSqlResult.MouseUp += (s, e) =>
             {
+                if (e.Button == MouseButtons.Middle)
+                {
+                    var tabIndex = GetTabIndexAt(e.Location);
+                    if (tabIndex > 0)
+                    {
+                        CloseResultTab(tabIndex);
+                    }
+
+                    return;
+                }
+
                 if (e.Button != MouseButtons.Left)
                     return;
 
@@ -243,18 +288,34 @@ namespace NppDB.Core
             tclSqlResult.MouseClick += (s, e) =>
             {
                 if (e.Button != MouseButtons.Right) return;
-                var tr = tclSqlResult.GetTabRect(0);
-                if (!tr.Contains(e.Location)) return;
+
+                var tabIndex = GetTabIndexAt(e.Location);
+                if (tabIndex < 0) return;
+
                 var menu = new ContextMenu();
-                menu.MenuItems.Add("Clear messages", (ss, ee) =>
+
+                if (tabIndex == 0)
                 {
-                    btnCloseAllResultWindows?.Clear();
-                });
-                menu.MenuItems.Add("Close result tabs", (ss, ee) =>
+                    menu.MenuItems.Add("Clear messages", (ss, ee) =>
+                    {
+                        btnCloseAllResultWindows?.Clear();
+                    });
+                }
+                else
                 {
-                    tclSqlResult.SelectTab(0);
-                    for (var i = tclSqlResult.TabPages.Count - 1; i > 0; --i)
-                        tclSqlResult.TabPages.RemoveAt(i);
+                    menu.MenuItems.Add("Close this result tab", (ss, ee) =>
+                    {
+                        CloseResultTab(tabIndex);
+                    });
+                    menu.MenuItems.Add("Close other result tabs", (ss, ee) =>
+                    {
+                        CloseOtherResultTabs(tabIndex);
+                    });
+                }
+
+                menu.MenuItems.Add("Close all result tabs", (ss, ee) =>
+                {
+                    CloseAllResultTabs();
                 });
                 menu.Show(tclSqlResult, e.Location);
             };
@@ -275,20 +336,53 @@ namespace NppDB.Core
             return new Rectangle(buttonX, buttonY, drawnIconWidth, drawnIconHeight);
         }
 
+        private int GetTabIndexAt(Point location)
+        {
+            for (var i = 0; i < tclSqlResult.TabPages.Count; i++)
+            {
+                if (tclSqlResult.GetTabRect(i).Contains(location))
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
         private void CloseResultTab(int tabIndex)
+        {
+            CloseResultTab(tabIndex, true);
+        }
+
+        private void CloseResultTab(int tabIndex, bool selectNextTab)
         {
             if (tabIndex <= 0 || tabIndex >= tclSqlResult.TabPages.Count)
                 return;
 
+            var selectedTab = tclSqlResult.SelectedTab;
+            var tabPage = tclSqlResult.TabPages[tabIndex];
+            var selectedTabWasClosed = selectedTab == tabPage;
+
             tclSqlResult.TabPages.RemoveAt(tabIndex);
+            tabPage.Dispose();
 
-            var nextIndexToSelect = Math.Max(0, Math.Min(tabIndex - 1, tclSqlResult.TabPages.Count - 1));
-            if (tclSqlResult.TabPages.Count > 0)
+            if (selectNextTab)
             {
-                tclSqlResult.SelectedIndex = nextIndexToSelect;
-            }
+                if (!selectedTabWasClosed && selectedTab != null && tclSqlResult.TabPages.Contains(selectedTab))
+                {
+                    tclSqlResult.SelectTab(selectedTab);
+                }
+                else
+                {
+                    var nextIndexToSelect = Math.Max(0, Math.Min(tabIndex - 1, tclSqlResult.TabPages.Count - 1));
+                    if (tclSqlResult.TabPages.Count > 0)
+                    {
+                        tclSqlResult.SelectedIndex = nextIndexToSelect;
+                    }
+                }
 
-            _selectedTabIndex = tclSqlResult.SelectedIndex;
+                _selectedTabIndex = tclSqlResult.SelectedIndex;
+            }
         }
         
         private void InitResizeGrip()
