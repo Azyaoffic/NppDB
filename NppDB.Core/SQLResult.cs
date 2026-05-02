@@ -17,6 +17,8 @@ namespace NppDB.Core
         private static readonly object ListLock = new object();
         
         public event Action<SqlResult, int> UserResizeRequested;
+        public event Action<IDbConnect> DatabaseTreeRefreshRequested;
+        private ToolStripButton _btnRefreshDatabaseTree;
         private Panel _resizeGrip;
         private bool _isResizing;
         private int _resizeStartScreenY;
@@ -142,6 +144,8 @@ namespace NppDB.Core
 
         private void Init()
         {
+            InitRefreshDatabaseTreeButton();
+
             btnStop.Click += (s, e) =>
             {
                 btnStop.Enabled = false;
@@ -430,6 +434,144 @@ namespace NppDB.Core
         }
 
         
+        private void InitRefreshDatabaseTreeButton()
+        {
+            if (_btnRefreshDatabaseTree != null) return;
+
+            _btnRefreshDatabaseTree = new ToolStripButton("Refresh database tree")
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Text,
+                Visible = false,
+                ToolTipText = "Refresh database tree"
+            };
+
+            _btnRefreshDatabaseTree.Click += (s, e) =>
+            {
+                RefreshDatabaseTree(showSuccessMessage: true);
+            };
+
+            var insertIndex = Math.Min(tspMain.Items.Count, 2);
+            tspMain.Items.Insert(insertIndex, _btnRefreshDatabaseTree);
+        }
+
+        private bool RefreshDatabaseTree(bool showSuccessMessage)
+        {
+            try
+            {
+                if (LinkedDbConnect == null)
+                {
+                    return false;
+                }
+
+                if (DatabaseTreeRefreshRequested != null)
+                {
+                    DatabaseTreeRefreshRequested(LinkedDbConnect);
+                }
+                else
+                {
+                    LinkedDbConnect.Refresh();
+                }
+
+                if (_btnRefreshDatabaseTree != null)
+                {
+                    _btnRefreshDatabaseTree.Visible = false;
+                }
+
+                if (showSuccessMessage)
+                {
+                    AppendMessage($"[{DateTime.Now:dd/MM/yyyy HH:mm:ss}] Database tree refreshed.\r\n\r\n");
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (_btnRefreshDatabaseTree != null)
+                {
+                    _btnRefreshDatabaseTree.Visible = true;
+                }
+
+                AppendMessage($"[{DateTime.Now:dd/MM/yyyy HH:mm:ss}] Database schema changed, but the database tree could not be refreshed automatically. Use the \"Refresh database tree\" button in the result toolbar.\r\n{ex.Message}\r\n\r\n");
+                return false;
+            }
+        }
+
+        private void RefreshDatabaseTreeAfterSchemaChange()
+        {
+            if (RefreshDatabaseTree(showSuccessMessage: false))
+            {
+                AppendMessage($"[{DateTime.Now:dd/MM/yyyy HH:mm:ss}] Database tree refreshed after schema-changing statement.\r\n\r\n");
+            }
+        }
+
+        private void AppendMessage(string message)
+        {
+            btnCloseAllResultWindows.AppendText(message);
+        }
+
+        private static bool IsSchemaChangingStatement(string commandText)
+        {
+            var sql = TrimLeadingSqlComments(commandText);
+            if (string.IsNullOrWhiteSpace(sql)) return false;
+
+            var words = sql.Split(new[] { ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            if (words.Length < 2) return false;
+
+            var first = words[0].Trim().ToUpperInvariant();
+            var second = words[1].Trim().ToUpperInvariant();
+
+            if (first == "DROP" && second == "TABLE") return true;
+            if (first == "ALTER" && second == "TABLE") return true;
+
+            if (first != "CREATE") return false;
+            if (second == "TABLE") return true;
+
+            if ((second == "TEMP" || second == "TEMPORARY" || second == "UNLOGGED") && words.Length > 2)
+            {
+                return string.Equals(words[2].Trim(), "TABLE", StringComparison.OrdinalIgnoreCase);
+            }
+
+            return false;
+        }
+
+        private static string TrimLeadingSqlComments(string sql)
+        {
+            if (sql == null) return string.Empty;
+
+            var pos = 0;
+            while (pos < sql.Length)
+            {
+                while (pos < sql.Length && (char.IsWhiteSpace(sql[pos]) || sql[pos] == '\ufeff'))
+                {
+                    pos++;
+                }
+
+                if (pos + 1 >= sql.Length) break;
+
+                if (sql[pos] == '-' && sql[pos + 1] == '-')
+                {
+                    pos += 2;
+                    while (pos < sql.Length && sql[pos] != '\n')
+                    {
+                        pos++;
+                    }
+                    continue;
+                }
+
+                if (sql[pos] == '/' && sql[pos + 1] == '*')
+                {
+                    var end = sql.IndexOf("*/", pos + 2, StringComparison.Ordinal);
+                    if (end < 0) return sql.Substring(pos);
+                    pos = end + 2;
+                    continue;
+                }
+
+                break;
+            }
+
+            return pos >= sql.Length ? string.Empty : sql.Substring(pos);
+        }
+
         private static void Numbering(DataGridView dgv)
         {
             var idx = 1;
@@ -806,9 +948,15 @@ namespace NppDB.Core
                     try
                     {
                         _selectedTabIndex = 0;
+                        var refreshDatabaseTree = false;
                         if (tclSqlResult.TabPages.Count == 1) _tabCounter = 1;
                         foreach (var result in results)
                         {
+                            if (result.Error == null && IsSchemaChangingStatement(result.CommandText))
+                            {
+                                refreshDatabaseTree = true;
+                            }
+
                             if (result.Error != null)
                             {
                                 var additionalMessage = result.CommandText == null ? "" : $"\r\nThis error occurred while executing statement:\r\n{result.CommandText}";
@@ -842,6 +990,11 @@ namespace NppDB.Core
                                 AddResultTabPage(tabIndex, result.QueryResult, title, tooltip);
                                 _selectedTabIndex = tclSqlResult.TabPages.Count - 1;
                             }
+                        }
+
+                        if (refreshDatabaseTree)
+                        {
+                            RefreshDatabaseTreeAfterSchemaChange();
                         }
                     }
                     catch (Exception ex1)

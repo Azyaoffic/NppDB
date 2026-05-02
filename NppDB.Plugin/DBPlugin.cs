@@ -2481,11 +2481,28 @@ namespace NppDB
             {
                 sqlResult.UserResizeRequested -= SqlResult_UserResizeRequested;
                 sqlResult.UserResizeRequested += SqlResult_UserResizeRequested;
+                sqlResult.DatabaseTreeRefreshRequested -= SqlResult_DatabaseTreeRefreshRequested;
+                sqlResult.DatabaseTreeRefreshRequested += SqlResult_DatabaseTreeRefreshRequested;
             }
 
             return ctr;
         }
         
+        private void SqlResult_DatabaseTreeRefreshRequested(IDbConnect connection)
+        {
+            if (connection == null) return;
+
+            SqlAutocompleteService.Invalidate(connection);
+
+            if (_frmDbExplorer != null && !_frmDbExplorer.IsDisposed)
+            {
+                _frmDbExplorer.RefreshConnectionTree(connection);
+                return;
+            }
+
+            connection.Refresh();
+        }
+
         private void SqlResult_UserResizeRequested(SqlResult sender, int requestedHeight)
         {
             if (requestedHeight <= 0) return;

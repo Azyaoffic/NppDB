@@ -694,6 +694,56 @@ namespace NppDB.Core
             refreshable.Refresh();
         }
 
+        public void RefreshConnectionTree(IDbConnect connection)
+        {
+            if (connection == null) return;
+
+            if (InvokeRequired)
+            {
+                Invoke(new Action<IDbConnect>(RefreshConnectionTree), connection);
+                return;
+            }
+
+            Cursor = Cursors.WaitCursor;
+            trvDBList.Cursor = Cursors.WaitCursor;
+            trvDBList.BeginUpdate();
+
+            try
+            {
+                var state = CaptureCurrentTreeState();
+                connection.Refresh();
+
+                var node = FindConnectionNode(connection);
+                node?.Expand();
+
+                foreach (var expandedPath in state.ExpandedPaths
+                             .OrderBy(x => x.Count(c => c == '\u001F')))
+                {
+                    var expandedNode = FindNodeByStatePath(expandedPath, true);
+                    expandedNode?.Expand();
+                }
+
+                if (!string.IsNullOrWhiteSpace(state.SelectedPath))
+                {
+                    var selectedNode = FindNodeByStatePath(state.SelectedPath, true);
+                    if (selectedNode != null)
+                    {
+                        trvDBList.SelectedNode = selectedNode;
+                    }
+                }
+
+                RestoreExplicitTableSelection(state.MultiSelectedTablePaths);
+                trvDBList.Refresh();
+                UpdateToolbarState(trvDBList.SelectedNode);
+            }
+            finally
+            {
+                trvDBList.EndUpdate();
+                Cursor = Cursors.Default;
+                trvDBList.Cursor = Cursors.Default;
+            }
+        }
+
         private void trvDBList_AfterSelect(object sender, TreeViewEventArgs e)
         {
             RememberLastSelectedTable(e.Node);
