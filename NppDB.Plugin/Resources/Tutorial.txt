@@ -1,223 +1,102 @@
-﻿# NppDB Tutorial
+﻿# NppDB Task Guide
 
-## Part 1 - Quick tutorial
+Use this as a click-by-click guide. Open it again with `Show Tutorial` or `Ctrl+F11`.
 
-## What NppDB does
-- Connect to MS Access or PostgreSQL inside Notepad++
-- Run SQL from the editor and view results
-- Analyze SQL (warnings/errors + highlights)
-- Create copy-paste analysis prompts from analysis
-- Use reusable prompts from Prompt Library
+## First setup: connect a database
+1. Open `Database Connect Manager` (`F10`).
+2. Click `Add a new database`.
+3. Choose `MS Access` or `PostgreSQL` and fill the connection fields.
+4. Click `Connect to the selected database`.
+5. Expand the connection and tables in the tree.
 
-## Most useful shortcuts
-- `Ctrl + F11` - Open this tutorial again
-- `F10` - Database Connect Manager
-- `F9` - Execute SQL
-- `Shift + F9` - Analyze SQL
-- `Ctrl + Shift + F9` - Clear analysis highlights/messages
-- `Ctrl + F9` - Create analysis prompt (for all queries in editor)
-- `Alt + F9` - Create analysis prompt (for issue at text cursor)
-- `Ctrl + F10` - Prompt Library
+## Generate SQL query from description
+1. Open `Database Connect Manager` (`F10`) and select the relevant table or tables.
+2. Open `Prompt Library` (`Ctrl+F10`).
+3. Select `Generate SQL query from description`.
+4. Fill the required `Prompt Inputs`.
+5. Click `Copy Prompt` or `Open AI Chat`.
 
-You can also find toolbar buttons for:
-- Executing SQL (green triangle)
-- Analyzing SQL (blue magnifying glass)
-- Opening Prompt Library (book stack)
-- Opening DB Manager (database icon)
+## Generate prompt from selected table
+1. Open `Database Connect Manager` (`F10`).
+2. Expand the table once so NppDB loads its columns.
+3. Select the table. Use `Ctrl + Click` to select multiple tables.
+4. Open `Prompt Library` (`Ctrl+F10`) and select a table prompt, for example `Explain table in plain language`.
+5. Click `Copy Prompt` or `Open AI Chat`.
 
-## First launch setup
-0. Switch into a different tab (as connections are per-tab)
-1. Open Database Connect Manager (`F10`)
-2. Add connection
-   - MS Access: choose `.accdb` / `.mdb`
-   - PostgreSQL: enter host / port / database / user / password
-3. Connect and expand nodes to browse schemas, tables, views, and columns
-4. Important: try right-clicking tables and columns in DB Manager. Many useful actions are there. You can also Ctrl + Click to select multiple tables
+## Run selected SQL
+1. Select the SQL text you want to run.
+2. Click `Execute SQL` or press `F9`.
+3. Read the result tab in the NppDB result panel.
+4. If the database tree changed, click `Refresh database tree` in the result panel or `Refresh the selected database connection` in `Database Connect Manager`.
 
-## Fast workflow
-1. Connect with `F10`
-2. Browse tables in DB Manager
-3. Select the table you want to work with (or multiple tables with Ctrl + Click)
-4. Write or paste SQL in the editor
-5. Open Prompt Library with `Ctrl + F10`
-6. Pick a prompt, fill any extra placeholders, then copy it
+## Run one SQL statement without selecting it
+1. Put the text cursor inside the statement.
+2. Click `Execute SQL` or press `F9`.
+3. Read the result tab in the NppDB result panel.
 
-To run an SQL query, do steps 1-4, then:
-5. Press `F9` to execute
-6. Press `Shift + F9` to analyze if needed
+## Run multiple SQL statements
+1. Select the whole block of SQL statements.
+2. Click `Execute SQL` or press `F9`.
+3. Check each result/message tab in the NppDB result panel.
+4. Use result-tab right-click actions such as `Close all result tabs` or `Close other result tabs` if the panel gets cluttered.
 
-## Run SQL (`F9`)
-- If text is selected: executes statements inside the selection
-- If nothing is selected: executes the statement your caret is currently inside
-- If you want to run multiple statements, select all of them first
+## Analyze SQL
+1. Select the SQL to analyze, or leave nothing selected to analyze the whole document.
+2. Click `Analyze SQL` or press `Shift+F9`.
+3. Read the highlighted issues and analysis messages.
+4. Click `Clear analysis` or press `Ctrl+Shift+F9` when finished.
 
-Results appear in NppDB's result/messages panel at the bottom of Notepad++.
+## Create an analysis prompt from SQL issues
+1. Write or select the SQL you want checked.
+2. Use `Analyze and Create Prompt (all queries)` (`Ctrl+F9`) for the whole editor.
+3. Use `Analyze and Create Prompt (query at text cursor)` (`Alt+F9`) for only the issue under the cursor.
+4. In the `Analysis Prompt` window, click `Copy to Clipboard` or `Open AI Chat`.
 
-## Analyze SQL (`Shift + F9`)
-- If text is selected: analyzes the selection
-- If nothing is selected: analyzes the whole document
-- If the editor is empty: NppDB shows a message asking you to type an SQL query first
-- Issues show as highlights as well as in the analysis output
+## Read table data
+1. Open `Database Connect Manager` (`F10`).
+2. Right-click a table.
+3. Click `Select all rows`.
+4. For MS Access, use `Select top 100 rows` if you only need a sample.
+5. For PostgreSQL, use `Select random 100 rows` if you only need a sample.
 
-Clear analysis with `Ctrl + Shift + F9` or with a button in toolbar.
+## Export/read table as JSON or CSV
+1. Open `Database Connect Manager` (`F10`).
+2. Right-click a table.
+3. Click `Select all as JSON` or `Select all as CSV`.
+4. NppDB opens the output in a new tab.
+5. The output is also copied to the clipboard.
 
-## Prompt Library
-- Open via plugin menu or `Ctrl + F10`
-- Pick a prompt, fill missing placeholders, then press copy
-- Tags help describe prompts and make them easier to find
-- You can also use the `Open AI Chat` button
+## Generate CREATE TABLE SQL from a table
+1. Open `Database Connect Manager` (`F10`).
+2. Right-click a table.
+3. Click `Generate CREATE TABLE statement`.
+4. NppDB opens the generated SQL in a new tab and copies it to the clipboard.
 
-## Part 2 - Detailed tutorial
-
-## Settings / Preferences
-There are three tabs for settings:
-
-- `Behavior`, which controls specific aspects of plugin behavior, such as:
-  - Opening a new tab on query append and other contextual actions
-  - Enabling destructive `SELECT INTO` statements for MS Access
-  - Setting scale of text in Database Manager
-  - Picking the color theme
-
-- `LLM Response Preferences`, which contains settings for how AI responses are formatted and what info they include. This includes:
-  - Response language
-  - Custom instructions for a model (appended at the end of every prompt)
-  - Option to change the URL pointed to by the `Open AI Chat` button
-
-- `Analysis Prompt Template`, where you can modify the template used by analysis prompt creation
-
-## DB Manager right-click actions
-Do not treat DB Manager as only a tree view.
-
-Right-click is important on:
-- Connections
-- Schemas
-- Tables
-- Columns
-
-Depending on context, the right-click menu can contain things like:
-- Viewing rows
-- Selecting random rows
-- Table-level quick actions
-- Connection actions
-
-If you are not sure whether something has a menu, try right-clicking it.
-
-## SQL execution behavior
-When you press `F9`:
-- If text is selected: NppDB runs the selected text
-- If nothing is selected: NppDB runs the statement at the caret
-
-Important:
-- If you want to run multiple statements, select the whole block first
-
-## SQL analysis behavior
-When you press `Shift + F9`:
-- If text is selected: NppDB analyzes the selection
-- If nothing is selected: NppDB analyzes the whole current document
-- If the editor is empty: NppDB shows a message asking you to type an SQL query first
-
-Useful related shortcuts:
-- `Ctrl + Shift + F9`: clear analysis highlights and messages
-- `Ctrl + F9`: create analysis prompt for all queries in the current editor
-- `Alt + F9`: create analysis prompt for the issue at the text cursor
-
-Analysis prompt creation first runs analysis.
-If a database connection is attached, NppDB uses that dialect automatically.
-If no database connection is attached, NppDB asks you to choose a dialect first.
-If you cancel the dialect dialog, nothing happens.
-
-Generated analysis prompts are copied to the clipboard automatically and shown in an editable prompt window.
-From that window you can:
-- copy again
-- open `Open AI Chat`
-- close the window
-- jump to `Settings -> Analysis Prompt Template`
-
-## Prompt Library - what it is for
-Prompt Library contains reusable prompts such as:
-- Explaining a query
-- Optimizing a query
-- Debugging wrong results
-- Converting SQL dialects
-- Generating documentation
-
-Prompt Library prompts can use:
-- selected SQL from the editor
-- table metadata from DB Manager
-- additional user-filled placeholders
-
-## Prompt Library - basic use
-1. Open Prompt Library with `Ctrl + F10`
-2. Select a prompt from the list
-3. Read the description and tags
-4. Fill required fields marked with `*`
-5. Press the copy button
-6. Paste the result into your preferred LLM
-
-Important behavior:
-- If no SQL is selected, prompts using selected SQL use the whole current editor text
-- Some fields may be auto-filled and read-only
-- `{{table_name}}` is filled from the selected table in DB Manager, or multiple selected table names separated by commas
-- `{{table}}` is filled from table metadata; expand the table once in DB Manager first
-- Copy stays disabled until required fields are filled
-
-## Prompt Library - tags and search
-Tags are keywords attached to prompts.
-
-They are useful because:
-- They describe what a prompt is for
-- They make prompts easier to find
-- They are shown under prompts in the list
-
-Search checks:
-- Prompt name
-- Description
-- Tags
-
-You can search with:
-- Normal words, for example `performance` or `documentation`
-- Tag search, for example `#performance` or `tag:analytics`
-
-Good tag examples:
-- `performance, optimization, indexing`
-- `schema, explain, onboarding`
-- `api, rest, specification`
-
-## Prompt Library - editing
-Prompt Library also supports editing.
-
-You can:
-- Add a new prompt
-- Duplicate an existing prompt
-- Delete a prompt
-- Edit prompt name
-- Edit prompt description
-- Edit prompt tags
-- Edit prompt text/template
-
-Notes:
-- Turn on editing mode to modify prompts
-- Changes are auto-saved
-- Placeholders use `{{placeholder_name}}` syntax
-- Useful built-in placeholders:
-  - `{{selected_sql}}` - selected SQL, or the whole current file if nothing is selected
-  - `{{dialect}}` - current database dialect
-  - `{{table_name}}` - selected table name from DB Manager, or multiple selected table names separated by commas
-  - `{{table}}` - selected table metadata, or multiple selected table definitions
-- Tags should be short keywords separated by commas
+## Useful shortcuts
+- `F10` - `Database Connect Manager`
+- `F9` - `Execute SQL`
+- `Shift+F9` - `Analyze SQL`
+- `Ctrl+Shift+F9` - `Clear analysis`
+- `Ctrl+F9` - `Analyze and Create Prompt (all queries)`
+- `Alt+F9` - `Analyze and Create Prompt (query at text cursor)`
+- `Ctrl+F10` - `Prompt Library`
+- `Ctrl+F11` - `Show Tutorial`
 
 ## Common problems
-- "No database connection attached"
-  - Open `F10`, connect to a database, then retry `F9`
 
-- "To use analysis, please type an SQL query first."
-  - Type or paste an SQL query into the editor, then retry analysis or prompt creation
+### `Copy Prompt` is disabled
+1. Select a prompt in `Prompt Library`.
+2. Fill all required `Prompt Inputs`.
+3. Select or expand the needed table if the prompt needs table metadata.
 
-- Copy button in Prompt Library looks unavailable
-  - Usually no prompt is selected, an editable placeholder like `{{user_request}}` is empty, or required auto-filled context is missing
+### Multiple statements did not run
+1. Select the whole SQL block.
+2. Click `Execute SQL` or press `F9`.
 
-- Several statements did not all run
-  - Select the whole block first, then press `F9`
+### Analysis messages are still visible
+1. Click `Clear analysis`.
+2. Or press `Ctrl+Shift+F9`.
 
-- Tab colors are all messed up! I can't read tutorial like this!
-  - Connecting to a database or performing analysis changes tab language to SQL. Change it back in Notepad++ in `Language -> Markdown`
+### The tutorial tab is hard to read after SQL highlighting
+1. In Notepad++, open `Language`.
+2. Select `Markdown`.

@@ -617,7 +617,7 @@ You are a data analyst.
             <Placeholder name="table"/>
         </Placeholders>
         <Metadata>
-            <Category>Analyze</Category>
+            <Category>Visualize</Category>
         </Metadata>
     </Prompt>
     <Prompt>
@@ -806,6 +806,162 @@ You are a data analyst.
         </Placeholders>
         <Metadata>
             <Category>Analyze</Category>
+        </Metadata>
+    </Prompt>
+
+    <Prompt>
+        <Id>GraphPrompt1</Id>
+        <Title>Create visualization in PlantUML</Title>
+        <Description>Create visualization of tables in PlantUML format</Description>
+        <Tags>DDL, PlantUML, visualization</Tags>
+        <Text>**Role**
+Database designer and PlantUML expert.
+
+**Task**
+Generate visual depiction of table structure in PlantUML format. Use class diagram as the basis of the depiction.
+
+The database is created by using a database management system {{dialect}}.
+
+The diagram must show the details of tables {{table}}.
+The details must include:
+* **Columns:** `[&lt;&lt;PK>> or &lt;&lt;FK>> or &lt;&lt;PK, FK>>] column_name : column_type [NOT NULL] [DEFAULT ...]`
+* **General Constraints &amp; Indexes:** `Type name (columns)` (where Type is PK, UNIQUE, CHECK, or INDEX).
+* **Foreign Key Constraints:** `FK name (columns) => referenced_table (referenced_columns) [ON UPDATE ...] [ON DELETE ...]`
+
+**Column Formatting Rule:**
+* You must prefix all Primary Key columns with exactly `&lt;&lt;PK>>`.
+* You must prefix all Foreign Key columns with exactly `&lt;&lt;FK>>`.
+
+In case of tables {{tables without details}} show relationships with the tables with details but do not show their details. Show only a box with the table name. **Do not use empty brackets (e.g., `class Hotel {}`) which generate empty attribute/operation compartments. Instead, use the PlantUML command `hide empty members` at the beginning of the diagram to ensure tables without defined columns appear only as simple boxes.**
+
+**Technical requirements for PlantUML:**
+* Generate code following the latest PlantUML syntax standards.
+* Ensure all entities are defined before establishing relationships between them.
+* Avoid any syntax that triggers "Syntax Error? (Assumed diagram type: class)".
+* **LAYOUT &amp; ROUTING:** Optimize the diagram layout for a portrait (vertical) format, which is suitable for a large number of tables. Ensure default top-to-bottom layout (do NOT use `left to right direction`). To minimize crossing relationship lines, logically order the table definitions (define core/parent tables first). Furthermore, include the command `skinparam linetype ortho` at the beginning of the diagram to force clean, right-angled lines, which significantly reduces visual clutter and crossing overlaps.
+
+**Relationship Syntax Constraints:**
+* **FORBIDDEN:** Do not use empty double quotes (`""`) under any circumstances.
+* **MANDATORY:** If the source or target cardinality is not explicitly provided, you must either:
+1. Omit the quotes and the cardinality entirely (e.g., `TableA -- TableB`).
+2. Use a default cardinality of `"1"` or `"0..*"` if the relationship logic implies it.
+* **SPACING:** Ensure exactly one space between the entity name, the cardinality string, and the connection line (e.g., `TableA "1" -- "*" TableB`).
+* **NO LINE LABELS:** To prevent text overlapping and visual clutter, **do not add any text labels or constraint names to the relationship lines itself** (e.g., do not use the `:` syntax at the end of a relationship). The relationship line must only show the connection and cardinalities (e.g., `TableA "1" -- "0..*" TableB`). The detailed foreign key information is already strictly required inside the table definition box.
+
+**Cardinality Deduction Rule:** When determining relationship multiplicites/cardinalities (e.g., `"1"`, `"0..1"`, `"0..*"`), you must accurately deduce them by analyzing the constraints applied to the Foreign Key columns in the input:
+* If the FK column has a `NOT NULL` constraint, the parent side is exactly `"1"`.
+* If the FK column allows NULL values, the parent side is `"0..1"`.
+* If the FK column has a `UNIQUE` constraint or is strictly a 1-to-1 mapping, the child side is `"0..1"`.
+* Otherwise, assume the child side is `"0..*"`.
+
+**Response**
+Carefully crafted PlantUML code with no syntax errors and nothing else.
+**CRITICAL RULE: Do not translate any table names, column names, index names, or constraint names. They must remain exactly in their original language and spelling as provided in the input.**</Text>
+        <Placeholders>
+            <Placeholder name="dialect"/>
+            <Placeholder name="table without details"/>
+            <Placeholder name="table"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Visualize</Category>
+        </Metadata>
+    </Prompt>
+    <Prompt>
+        <Id>GraphPrompt2</Id>
+        <Title>Create visualization in Mermaid</Title>
+        <Description>Create visualization of tables in Mermaid format</Description>
+        <Tags>DDL, Mermaid, visualization</Tags>
+        <Text>**Role**
+Database designer and Mermaid.js expert.
+
+**Task**
+Generate a visual depiction of the table structure in Mermaid.js format. Use the **`erDiagram`** type as the basis of the depiction.
+
+The database is created by using a database management system {{dialect}}.
+
+The diagram must show the details of tables {{table}}.
+The details inside the entity definitions must follow the strict Mermaid `erDiagram` syntax (`type name PK/FK "comments"`). Include the following details:
+* **Columns:** `column_type column_name [PK] [FK] "Constraints"`
+* **Constraints &amp; Defaults:** Place `NOT NULL`, `DEFAULT`, `CHECK`, and `UNIQUE` constraints inside the string comment at the end of the column line. (e.g., `int age "NOT NULL DEFAULT 18"`).
+* **Indexes:** If a column is indexed, add `INDEX idx_name` inside the string comment.
+* **Foreign Key Rules:** Add `ON UPDATE...` or `ON DELETE...` inside the string comment of the FK column.
+
+**Column Formatting Rule:**
+* Use Mermaid's native `PK` and `FK` tags immediately after the column name.
+* If a column is both, use `PK, FK`.
+* *Example:* `integer user_id PK, FK "NOT NULL ON DELETE CASCADE"`
+
+In case of tables {{tables without details}} show relationships with the tables with details but do not show their details. Show only an empty entity block. **In Mermaid, achieve this by declaring the entity with empty brackets: `TableName {}`.**
+
+**Technical requirements for Mermaid.js:**
+* Start the code block exactly with `erDiagram`.
+* Ensure all entities are defined before establishing relationships between them.
+* **LAYOUT:** Mermaid auto-routes ER diagrams. To help it create a clean top-to-bottom layout, define your core/parent tables first in the code, followed by child/junction tables.
+
+**Relationship Syntax Constraints:**
+* **MANDATORY SYNTAX:** You must use Mermaid's exact ER diagram relationship syntax: `ENTITY_1 cardinality--cardinality ENTITY_2 : "label"`
+* **LABELS:** Mermaid *requires* a label at the end of a relationship. To minimize visual clutter, use a simple space `" "` or a very short, generic word like `"has"` or `"references"`. Do not leave the label out, as it will cause a syntax error.
+* Valid cardinalities in Mermaid:
+* Exactly one: `||`
+* Zero or one: `|o`
+* Zero or more: `}o`
+* One or more: `}|`
+
+**Cardinality Deduction Rule:** When determining relationship lines between a Parent table (1) and a Child table (0..*), you must accurately deduce them by analyzing the constraints applied to the Foreign Key columns in the input:
+* If the FK column has a `NOT NULL` constraint, the parent side is exactly one (`||`).
+* If the FK column allows NULL values, the parent side is zero or one (`|o`).
+* If the FK column has a `UNIQUE` constraint or is strictly a 1-to-1 mapping, the child side is zero or one (`|o`) or exactly one (`||`).
+* Otherwise, assume the child side is zero or more (`}o`).
+* *Example of 1 to 0..* relationship:* `ParentTable ||--o{ ChildTable : " "`
+
+**Response**
+Carefully crafted Mermaid.js code with no syntax errors and nothing else. Wrap the code in a standard markdown mermaid block (` ```mermaid `).
+**CRITICAL RULE: Do not translate any table names, column names, index names, or constraint names. They must remain exactly in their original language and spelling as provided in the input.**</Text>
+        <Placeholders>
+            <Placeholder name="dialect"/>
+            <Placeholder name="table without details"/>
+            <Placeholder name="table"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Visualize</Category>
+        </Metadata>
+    </Prompt>
+    <Prompt>
+        <Id>GraphPrompt3</Id>
+        <Title>Create dependency graph in Mermaid</Title>
+        <Description>Create visualization of dependencies between tables in Mermaid format</Description>
+        <Tags>DDL, Mermaid, visualization</Tags>
+        <Text>**Role**
+Database designer and Mermaid.js expert.
+
+**Task**
+Generate a visual dependency graph of the database table structure in Mermaid.js format. Use the **`flowchart TD`** diagram type to depict the hierarchy and dependencies.
+
+The database is created by using a database management system {{dialect}}.
+
+The diagram must consider dependencies between tables {{table}}.
+
+The diagram must only show the high-level dependencies between the tables based on foreign key constraints.
+* **Nodes:** Represent each table as a simple node containing only the table name. **Do not include any columns, data types, primary keys, or constraints inside the nodes.**
+* **Edges (Relationships):** Represent foreign key constraints as directed solid arrows (`-->`).
+* **Edge Direction (CRITICAL):** The arrow must point from the table that contains the foreign key (the child/dependent table) **towards** the referenced table (the parent/target table).
+* *Example:* If table `Reservation` contains a foreign key referencing table `Guest`, the syntax must be: `Reservation --> Guest`.
+
+**Technical requirements for Mermaid.js:**
+* Start the code block exactly with `flowchart TD` (Top-Down layout provides the best visual hierarchy for dependencies).
+* Use simple node definitions (e.g., just `TableName` or `NodeID[TableName]`).
+* **NO LINE LABELS:** Do not add any text labels to the relationship arrows to keep the graph visually clean and minimize clutter.
+* If a table has multiple foreign keys referencing the exact same target table, draw only one combined dependency arrow between them to keep the graph readable.
+
+**Response**
+Carefully crafted Mermaid.js code with no syntax errors and nothing else. Wrap the code in a standard markdown mermaid block (` ```mermaid `).
+**CRITICAL RULE: Do not translate any table names or constraints. They must remain exactly in their original language and spelling as provided in the input.**</Text>
+        <Placeholders>
+            <Placeholder name="dialect"/>
+            <Placeholder name="table"/>
+        </Placeholders>
+        <Metadata>
+            <Category>Visualize</Category>
         </Metadata>
     </Prompt>
 </Prompts>
